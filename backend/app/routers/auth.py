@@ -1,0 +1,1 @@
+"""Auth routes belong here."""

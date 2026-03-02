@@ -1,0 +1,12 @@
+{
+  "name": "legalos",
+  "private": true,
+  "packageManager": "pnpm@10.0.0",
+  "scripts": {
+    "dev": "pnpm --filter frontend dev",
+    "build": "pnpm --filter frontend build",
+    "lint": "pnpm --filter frontend lint",
+    "test": "echo \"Add workspace tests\""
+  }
+}
+
