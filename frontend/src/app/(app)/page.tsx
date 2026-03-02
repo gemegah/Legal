@@ -1,3 +1,5 @@
+import { DashboardHome } from "@/components/dashboard/DashboardHome";
+
 export default function Page() {
-  return <div>Placeholder.</div>;
+  return <DashboardHome />;
 }
