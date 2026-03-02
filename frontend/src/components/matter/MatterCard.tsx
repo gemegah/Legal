@@ -1,7 +1,7 @@
 import Link from "next/link";
 
+import type { MatterListItem } from "@/features/matters/types";
 import { formatDate, formatGHS } from "@/lib/utils";
-import type { MatterListItem } from "@/types/matter";
 
 import { StatusBadge } from "./StatusBadge";
 

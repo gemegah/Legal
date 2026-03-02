@@ -55,13 +55,6 @@ export interface MatterWorkspaceStats {
   outstandingBalanceGhs: number;
 }
 
-export interface UseMattersResult {
-  matters: MatterListItem[];
-  stats: MatterWorkspaceStats;
-  isLoading: boolean;
-  isError: boolean;
-}
-
 export interface MatterDetail {
   id: string;
   reference: string;

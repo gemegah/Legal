@@ -1,5 +1,5 @@
+import type { MatterStatus } from "@/features/matters/types";
 import { cn } from "@/lib/utils";
-import type { MatterStatus } from "@/types/matter";
 
 export interface StatusBadgeProps {
   status: MatterStatus;

@@ -1,4 +1,4 @@
-import { useMatter } from "@/hooks/useMatter";
+import { getMatterById } from "@/features/matters/server/queries";
 import { formatDate, formatDateTime, formatGHS } from "@/lib/utils";
 
 interface PageProps {
@@ -7,8 +7,8 @@ interface PageProps {
   };
 }
 
-export default function Page({ params }: PageProps) {
-  const { matter } = useMatter(params.id);
+export default async function Page({ params }: PageProps) {
+  const matter = await getMatterById(params.id);
 
   if (!matter) {
     return (

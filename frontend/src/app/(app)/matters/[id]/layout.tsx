@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 
 import { MatterShell } from "@/components/matter/MatterShell";
+import { getMatterById } from "@/features/matters/server/queries";
 
 interface LayoutProps {
   children: ReactNode;
@@ -9,6 +10,12 @@ interface LayoutProps {
   };
 }
 
-export default function Layout({ children, params }: LayoutProps) {
-  return <MatterShell matterId={params.id}>{children}</MatterShell>;
+export default async function Layout({ children, params }: LayoutProps) {
+  const matter = await getMatterById(params.id);
+
+  return (
+    <MatterShell matter={matter} matterId={params.id}>
+      {children}
+    </MatterShell>
+  );
 }

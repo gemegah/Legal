@@ -4,18 +4,18 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { useMatter } from "@/hooks/useMatter";
-import { cn, formatDate, formatGHS } from "@/lib/utils";
 import type {
   MatterDetail,
   MatterKpi,
   MatterStatus,
   MatterTabKey,
   PractitionerRole,
-} from "@/types/matter";
+} from "@/features/matters/types";
+import { cn, formatDate, formatGHS } from "@/lib/utils";
 
 export interface MatterShellProps {
   matterId: string;
+  matter: MatterDetail | null;
   children: ReactNode;
   showOverviewKpis?: boolean;
 }
@@ -73,31 +73,17 @@ const roleActions: Record<PractitionerRole, ActionConfig[]> = {
 
 export function MatterShell({
   matterId,
+  matter,
   children,
   showOverviewKpis,
 }: MatterShellProps) {
   const pathname = usePathname();
-  const { matter, isLoading, isError } = useMatter(matterId);
 
   const tabs = buildTabs(matterId);
   const activeTab = getActiveTab(pathname, matterId);
   const shouldShowOverviewKpis = showOverviewKpis ?? activeTab === "overview";
 
-  if (isLoading) {
-    return (
-      <section className="matter-shell">
-        <div className="surface-card matter-feedback-card">
-          <p className="eyebrow-label">Matter Workspace</p>
-          <h2 className="section-title">Loading matter context...</h2>
-          <p className="placeholder-copy">
-            The matter shell is preparing summary details, actions, and tab content.
-          </p>
-        </div>
-      </section>
-    );
-  }
-
-  if (isError || !matter) {
+  if (!matter) {
     return (
       <section className="matter-shell">
         <div className="surface-card matter-feedback-card">
