@@ -163,7 +163,7 @@ export function DashboardHome() {
 function ActiveMattersTable({ items }: { items: DashboardMatterRow[] }) {
   return (
     <section className="surface-card table-card">
-      <div className="panel-header">
+      <div className="panel-header table-card-header">
         <h2 className="section-title">Active Matters</h2>
         <div className="inline-actions">
           <button className="btn btn-ghost" type="button">
