@@ -14,6 +14,11 @@ const routeMeta = [
     subtitle: "Track case activity, deadlines, and matter-level work.",
   },
   {
+    match: (pathname: string) => pathname.startsWith("/tasks"),
+    title: "Tasks",
+    subtitle: "Manage personal and matter-linked work across the firm.",
+  },
+  {
     match: (pathname: string) => pathname.startsWith("/calendar"),
     title: "Calendar",
     subtitle: "Keep hearings, filings, and meetings visible across the firm.",

@@ -9,12 +9,12 @@ Execution order:
 
 ## 1. Practitioner Dashboard (start here)
 
-- [ ] `SPE-8` Build authenticated practitioner app shell
+- [x] `SPE-8` Build authenticated practitioner app shell
 - [ ] `SPE-9` Wire dashboard home to live practitioner data
-- [ ] `SPE-10` Implement matter list workspace
-- [ ] `SPE-11` Implement matter detail shell and summary header
-- [ ] `SPE-12` Build task management views for matter and personal work
-- [ ] `SPE-13` Build shared calendar and deadline management UI
+- [x] `SPE-10` Implement matter list workspace
+- [x] `SPE-11` Implement matter detail shell and summary header
+- [x] `SPE-12` Build task management views for matter and personal work
+- [x] `SPE-13` Build shared calendar and deadline management UI
 - [ ] `SPE-14` Implement document center and matter document workflows
 - [ ] `SPE-15` Implement billing workspace for time, expenses, invoices, and payments
 - [ ] `SPE-16` Build notes, audit, and internal messaging interfaces

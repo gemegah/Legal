@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 import { MatterShell } from "@/components/matter/MatterShell";
 import { getMatterById } from "@/features/matters/server/queries";
 
+export const dynamic = "force-dynamic";
+
 interface LayoutProps {
   children: ReactNode;
   params: {

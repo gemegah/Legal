@@ -1,6 +1,8 @@
 import { getMatterById } from "@/features/matters/server/queries";
 import { formatDate, formatDateTime, formatGHS } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 interface PageProps {
   params: {
     id: string;
