@@ -1,15 +1,36 @@
-export default function Page() {
+import { MatterTasksClient } from "@/features/tasks/components/TaskWorkspace";
+import { getTasksByMatter } from "@/features/tasks/server/queries";
+import type { TaskViewMode } from "@/features/tasks/types";
+import { getMatterById } from "@/features/matters/server/queries";
+
+export const dynamic = "force-dynamic";
+
+interface PageProps {
+  params: {
+    id: string;
+  };
+  searchParams?: {
+    view?: string;
+  };
+}
+
+export default async function Page({ params, searchParams }: PageProps) {
+  const [{ tasks }, matter] = await Promise.all([
+    getTasksByMatter(params.id),
+    getMatterById(params.id),
+  ]);
+
   return (
-    <section className="matter-tab-panel">
-      <div className="surface-card matter-tab-card">
-        <h2 className="section-title">Matter Tasks</h2>
-        <p className="matter-tab-copy">
-          Assignees, due dates, and checklist progress for this matter will be managed here.
-        </p>
-        <div className="empty-state matter-tab-empty">
-          Task lists, owner filters, and matter checklists will be added in the task management pass.
-        </div>
-      </div>
-    </section>
+    <MatterTasksClient
+      initialMatterId={params.id}
+      initialScope="matter"
+      initialTasks={tasks}
+      initialViewMode={getInitialViewMode(searchParams?.view)}
+      matterTitle={matter?.title}
+    />
   );
+}
+
+function getInitialViewMode(value?: string): TaskViewMode {
+  return value === "kanban" ? "kanban" : "list";
 }

@@ -13,6 +13,7 @@ interface NavItem {
 const navItems: NavItem[] = [
   { href: "/", label: "Dashboard", icon: DashboardIcon },
   { href: "/matters", label: "Matters", icon: MattersIcon },
+  { href: "/tasks", label: "Tasks", icon: TaskIcon },
   { href: "/calendar", label: "Calendar", icon: CalendarIcon },
   { href: "/documents", label: "Documents", icon: DocumentIcon },
   { href: "/billing", label: "Billing", icon: BillingIcon },
@@ -113,6 +114,15 @@ function CalendarIcon() {
       <line x1="8" y1="2" x2="8" y2="6" />
       <line x1="16" y1="2" x2="16" y2="6" />
       <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  );
+}
+
+function TaskIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M9 11l3 3L22 4" />
+      <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
     </svg>
   );
 }

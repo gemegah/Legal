@@ -6,6 +6,11 @@ export const queryKeys = {
   matterAudit: (id: string) => ["matter", id, "audit"] as const,
   tasks: (matterId: string) => ["tasks", matterId] as const,
   myTasks: () => ["tasks", "mine"] as const,
+  tasksWorkspace: (filters?: Record<string, unknown>) => ["tasks", "workspace", filters] as const,
+  taskBoard: (filters?: Record<string, unknown>) => ["tasks", "board", filters] as const,
+  matterTasks: (matterId: string, filters?: Record<string, unknown>) =>
+    ["tasks", "matter", matterId, filters] as const,
+  task: (id: string) => ["task", id] as const,
   events: (filters?: Record<string, unknown>) => ["events", filters] as const,
   matterEvents: (matterId: string) => ["events", "matter", matterId] as const,
   documents: (matterId: string) => ["documents", matterId] as const,

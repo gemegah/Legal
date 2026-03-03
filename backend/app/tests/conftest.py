@@ -1,1 +1,1 @@
-"""pytest fixtures belong here."""
+"""Shared pytest fixtures for backend tests."""
