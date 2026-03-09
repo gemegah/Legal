@@ -4,6 +4,8 @@ import type { ReactElement } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import { getUnreadMessageCount } from "@/features/messages/data/mock";
+
 interface NavItem {
   href: string;
   label: string;
@@ -22,6 +24,7 @@ const navItems: NavItem[] = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const unreadMessages = getUnreadMessageCount();
 
   return (
     <aside className="app-sidebar">
@@ -48,9 +51,9 @@ export function Sidebar() {
             >
               <Icon />
               <span>{item.label}</span>
-              {item.href === "/messages" ? (
-                <span className="sidebar-pill" aria-label="3 unread messages">
-                  3
+              {item.href === "/messages" && unreadMessages > 0 ? (
+                <span className="sidebar-pill" aria-label={`${unreadMessages} unread messages`}>
+                  {unreadMessages}
                 </span>
               ) : null}
             </Link>
