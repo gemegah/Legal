@@ -1,6 +1,7 @@
 # Frontend Implementation Checklist
 
 This checklist mirrors the Linear project `LegalOS Frontend MVP` and is grouped into the same three frontend tracks.
+Last synced with Linear: 2026-03-06 (`SPE-14` wireframe implementation completed in `.pen` with default + state variants).
 
 Execution order:
 1. Practitioner dashboard
@@ -9,13 +10,16 @@ Execution order:
 
 ## 1. Practitioner Dashboard (start here)
 
+UI-first sequencing note (2026-03-05): `SPE-9` is deferred to a separate thread.
+Current UI-completion order for dashboard: `SPE-14` -> `SPE-15` -> `SPE-16` -> `SPE-17` -> `SPE-18` -> `SPE-19`.
+
 - [x] `SPE-8` Build authenticated practitioner app shell
 - [ ] `SPE-9` Wire dashboard home to live practitioner data
 - [x] `SPE-10` Implement matter list workspace
 - [x] `SPE-11` Implement matter detail shell and summary header
 - [x] `SPE-12` Build task management views for matter and personal work
 - [x] `SPE-13` Build shared calendar and deadline management UI
-- [ ] `SPE-14` Implement document center and matter document workflows
+- [x] `SPE-14` Implement document center and matter document workflows
 - [ ] `SPE-15` Implement billing workspace for time, expenses, invoices, and payments
 - [ ] `SPE-16` Build notes, audit, and internal messaging interfaces
 - [ ] `SPE-17` Implement AI suggestion review flows in practitioner UI
