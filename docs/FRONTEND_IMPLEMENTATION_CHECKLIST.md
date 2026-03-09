@@ -1,7 +1,7 @@
 # Frontend Implementation Checklist
 
 This checklist mirrors the Linear project `LegalOS Frontend MVP` and is grouped into the same three frontend tracks.
-Last synced with Linear: 2026-03-06 (`SPE-14` wireframe implementation completed in `.pen` with default + state variants).
+Last cross-checked against the current frontend routes/components: 2026-03-09.
 
 Execution order:
 1. Practitioner dashboard
@@ -19,12 +19,16 @@ Current UI-completion order for dashboard: `SPE-14` -> `SPE-15` -> `SPE-16` -> `
 - [x] `SPE-11` Implement matter detail shell and summary header
 - [x] `SPE-12` Build task management views for matter and personal work
 - [x] `SPE-13` Build shared calendar and deadline management UI
-- [x] `SPE-14` Implement document center and matter document workflows
-- [ ] `SPE-15` Implement billing workspace for time, expenses, invoices, and payments
-- [ ] `SPE-16` Build notes, audit, and internal messaging interfaces
+- [ ] `SPE-14` Implement document center and matter document workflows
+- [x] `SPE-15` Implement billing workspace for time, expenses, invoices, and payments
+- [x] `SPE-16` Build notes, audit, and internal messaging interfaces
 - [ ] `SPE-17` Implement AI suggestion review flows in practitioner UI
-- [ ] `SPE-18` Build practitioner settings, team, and account screens
+- [x] `SPE-18` Build practitioner settings, team, and account screens
 - [ ] `SPE-19` Complete dashboard-wide accessibility, responsiveness, and PWA polish
+
+Current dashboard screen status:
+- Built: app shell, dashboard home, matters list/detail, tasks, calendar, billing workspace, invoice detail, matter notes, matter audit, message center.
+- Starter/placeholder only: documents, matter documents.
 
 ## 2. Customer Portal
 
@@ -34,6 +38,10 @@ Current UI-completion order for dashboard: `SPE-14` -> `SPE-15` -> `SPE-16` -> `
 - [ ] `SPE-29` Implement portal invoice views and payment initiation
 - [ ] `SPE-30` Build secure client messaging and portal notifications UI
 - [ ] `SPE-31` Complete customer portal mobile-first QA and accessibility
+
+Current portal status:
+- Starter/preview routes exist for portal home, matter detail, and invoice detail.
+- Portal auth/session wiring, uploads, messaging, and mobile/accessibility QA are not complete enough to mark done.
 
 ## 3. LegalOS Landing Page
 
