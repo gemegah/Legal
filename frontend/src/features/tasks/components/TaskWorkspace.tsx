@@ -93,7 +93,6 @@ function TaskWorkspace({
   initialScope,
   initialMatterId,
   isMatterContext = false,
-  matterTitle,
   canFilterByMatter,
   createLabel,
   emptyTitle,
@@ -243,36 +242,13 @@ function TaskWorkspace({
 
   return (
     <section className="task-workspace">
-      <div className="surface-card task-workspace-hero">
-        <div className="task-workspace-hero-copy">
-          <p className="eyebrow-label">
-            {isMatterContext ? "Matter Task Coordination" : "Practitioner Task Queue"}
-          </p>
-          <h2 className="matter-title">{isMatterContext ? "Matter Tasks" : "Tasks"}</h2>
-          <p className="task-workspace-copy">
-            {isMatterContext
-              ? `Manage assignments, due dates, and progress for ${matterTitle ?? "this matter"} without leaving the matter workspace.`
-              : "Manage matter-linked work across the firm, with a list-first queue and a board for flow management."}
-          </p>
-        </div>
-
-        <div className="task-workspace-actions">
-          {isMatterContext && initialMatterId ? (
-            <Link className="btn btn-ghost" href={`/tasks?matter_id=${initialMatterId}`}>
-              View All Tasks
-            </Link>
-          ) : null}
-          <button className="btn btn-primary" onClick={() => handleCreateTask()} type="button">
-            + {createLabel}
-          </button>
-        </div>
-      </div>
-
       <div className="surface-card task-workspace-panel">
         <TaskToolbar
           canFilterByMatter={canFilterByMatter}
           createLabel={createLabel}
           dueWindow={dueWindow}
+          initialMatterId={initialMatterId ?? null}
+          isMatterContext={isMatterContext}
           matterId={selectedMatterId || null}
           matterOptions={availableMatterOptions}
           onAssignedScope={() =>
@@ -334,6 +310,8 @@ function TaskToolbar({
   canFilterByMatter,
   createLabel,
   dueWindow,
+  initialMatterId,
+  isMatterContext,
   matterId,
   matterOptions,
   onAssignedScope,
@@ -351,6 +329,8 @@ function TaskToolbar({
   canFilterByMatter: boolean;
   createLabel: string;
   dueWindow: TaskDueWindow;
+  initialMatterId: string | null;
+  isMatterContext: boolean;
   matterId: string | null;
   matterOptions: MatterOption[];
   onAssignedScope: () => void;
@@ -367,10 +347,16 @@ function TaskToolbar({
 }) {
   return (
     <div className="task-toolbar-shell">
-      <div className="task-toolbar-top">
-        <TaskViewToggle onChange={onViewModeChange} value={viewMode} />
-
-        <div className="task-toolbar-actions">
+      <div className="task-toolbar-header">
+        <h2 className="task-toolbar-title">
+          {isMatterContext ? "Matter Tasks" : "Tasks"}
+        </h2>
+        <div className="task-toolbar-header-actions">
+          {isMatterContext && initialMatterId ? (
+            <Link className="btn btn-ghost" href={`/tasks?matter_id=${initialMatterId}`}>
+              View All Tasks
+            </Link>
+          ) : null}
           <button
             aria-pressed={scope === "mine"}
             className={cn("task-chip-button", scope === "mine" && "is-active")}
@@ -379,10 +365,33 @@ function TaskToolbar({
           >
             Assigned to Me
           </button>
-          <button className="btn btn-ghost" onClick={onCreateTask} type="button">
+          <TaskViewToggle onChange={onViewModeChange} value={viewMode} />
+          <button className="btn btn-primary" onClick={onCreateTask} type="button">
             + {createLabel}
           </button>
         </div>
+      </div>
+
+      <div className="task-status-tabs" role="tablist" aria-label="Filter by task status">
+        <button
+          aria-pressed={statusFilter === "all"}
+          className={cn("task-status-tab", statusFilter === "all" && "is-active")}
+          onClick={() => onStatusFilterChange("all")}
+          type="button"
+        >
+          All
+        </button>
+        {statusOptions.map((status) => (
+          <button
+            aria-pressed={statusFilter === status}
+            className={cn("task-status-tab", statusFilter === status && "is-active")}
+            key={status}
+            onClick={() => onStatusFilterChange(status)}
+            type="button"
+          >
+            {getStatusLabel(status)}
+          </button>
+        ))}
       </div>
 
       <div className="task-toolbar-filters">
@@ -394,21 +403,6 @@ function TaskToolbar({
             type="search"
             value={search}
           />
-        </label>
-
-        <label className="task-inline-select">
-          <span>Status</span>
-          <select
-            onChange={(event) => onStatusFilterChange(event.target.value as TaskStatus | "all")}
-            value={statusFilter}
-          >
-            <option value="all">All statuses</option>
-            {statusOptions.map((status) => (
-              <option key={status} value={status}>
-                {getStatusLabel(status)}
-              </option>
-            ))}
-          </select>
         </label>
 
         <label className="task-inline-select">
