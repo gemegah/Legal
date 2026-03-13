@@ -1,7 +1,12 @@
 # Frontend Implementation Checklist
 
 This checklist mirrors the Linear project `LegalOS Frontend MVP` and is grouped into the same three frontend tracks.
-Last cross-checked against the current frontend routes/components: 2026-03-09.
+Last cross-checked against the current frontend routes/components and `docs/DESIGN_SYSTEM.md`: 2026-03-13.
+
+Status rule:
+- `[x]` means the surface is implemented and reflected in current routes/components.
+- `[ ]` means work is still open, in review, partial, starter-only, or not implemented enough to treat as done.
+- Inline notes call out issues that are actively in review or intentionally partial.
 
 Execution order:
 1. Practitioner dashboard
@@ -19,7 +24,7 @@ Current UI-completion order for dashboard: `SPE-14` -> `SPE-15` -> `SPE-16` -> `
 - [x] `SPE-11` Implement matter detail shell and summary header
 - [x] `SPE-12` Build task management views for matter and personal work
 - [x] `SPE-13` Build shared calendar and deadline management UI
-- [ ] `SPE-14` Implement document center and matter document workflows
+- [ ] `SPE-14` Implement document center and matter document workflows (In review: routes exist but documents remain partial/placeholder in the design-system handoff)
 - [x] `SPE-15` Implement billing workspace for time, expenses, invoices, and payments
 - [x] `SPE-16` Build notes, audit, and internal messaging interfaces
 - [ ] `SPE-17` Implement AI suggestion review flows in practitioner UI
@@ -28,7 +33,7 @@ Current UI-completion order for dashboard: `SPE-14` -> `SPE-15` -> `SPE-16` -> `
 
 Current dashboard screen status:
 - Built: app shell, dashboard home, matters list/detail, tasks, calendar, billing workspace, invoice detail, matter notes, matter audit, message center.
-- Starter/placeholder only: documents, matter documents.
+- Partial or placeholder only: documents, matter documents.
 
 ## 2. Customer Portal
 
@@ -60,3 +65,7 @@ Current portal status:
 - [ ] Keyboard navigation and base accessibility checks are complete
 - [ ] API integrations replace placeholder data on implemented screens
 - [ ] Core user journeys are manually smoke-tested before closing issues
+
+Linear sync note:
+- This file should stay aligned with the issue states in `LegalOS Frontend MVP`.
+- Use the current route/component surface plus the design-system surface-status table as the completion evidence.
