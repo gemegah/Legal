@@ -21,7 +21,13 @@ import type {
 } from "@/features/tasks/types";
 import { cn, formatDate, formatRelativeDate } from "@/lib/utils";
 
-const statusOptions: TaskStatus[] = ["todo", "in_progress", "blocked", "done", "cancelled"];
+const statusOptions: TaskStatus[] = [
+  "todo",
+  "in_progress",
+  "blocked",
+  "done",
+  "cancelled",
+];
 const priorityOptions: TaskPriority[] = ["low", "medium", "high", "urgent"];
 const dueFilterOptions: Array<{ value: TaskDueWindow; label: string }> = [
   { value: "all", label: "All dates" },
@@ -59,6 +65,9 @@ export function TasksWorkspaceClient({
       createLabel="New Task"
       emptyTitle="No tasks match the current filters."
       emptyCopy="Adjust the task filters or create a new matter-linked task to refill the queue."
+      onSearchChange={function (value: string): void {
+        throw new Error("Function not implemented.");
+      }}
     />
   );
 }
@@ -83,6 +92,9 @@ export function MatterTasksClient({
       createLabel="Add Task"
       emptyTitle="No matter tasks yet."
       emptyCopy="Create the first task for this matter to start tracking assignments, due dates, and workflow status."
+      onSearchChange={function (value: string): void {
+        throw new Error("Function not implemented.");
+      }}
     />
   );
 }
@@ -94,6 +106,7 @@ function TaskWorkspace({
   initialMatterId,
   isMatterContext = false,
   matterTitle,
+  onSearchChange,
   canFilterByMatter,
   createLabel,
   emptyTitle,
@@ -103,6 +116,7 @@ function TaskWorkspace({
   createLabel: string;
   emptyTitle: string;
   emptyCopy: string;
+  onSearchChange: (value: string) => void;
 }) {
   const [tasks, setTasks] = useState(initialTasks);
   const [viewMode, setViewMode] = useState<TaskViewMode>(initialViewMode);
@@ -110,7 +124,9 @@ function TaskWorkspace({
   const [search, setSearch] = useState("");
   const [dueWindow, setDueWindow] = useState<TaskDueWindow>("all");
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
-  const [selectedMatterId, setSelectedMatterId] = useState(initialMatterId ?? "");
+  const [selectedMatterId, setSelectedMatterId] = useState(
+    initialMatterId ?? "",
+  );
   const [editorState, setEditorState] = useState<{
     mode: "create" | "edit";
     taskId: string | null;
@@ -131,7 +147,10 @@ function TaskWorkspace({
     matterId: selectedMatterId || null,
     statuses: statusFilter === "all" ? [] : [statusFilter],
   };
-  const filteredTasks = filterTasks(canFilterByMatter ? tasks : normalizedTasks, filters);
+  const filteredTasks = filterTasks(
+    canFilterByMatter ? tasks : normalizedTasks,
+    filters,
+  );
   const board = buildTaskBoard(filteredTasks);
 
   function handleCreateTask(presetStatus?: TaskStatus) {
@@ -143,7 +162,9 @@ function TaskWorkspace({
   }
 
   function handleSaveTask(values: TaskFormValues) {
-    const matterOption = availableMatterOptions.find((option) => option.id === values.matterId);
+    const matterOption = availableMatterOptions.find(
+      (option) => option.id === values.matterId,
+    );
     const nextTimestamp = new Date().toISOString();
 
     if (editorState?.mode === "edit" && editorState.taskId) {
@@ -170,7 +191,7 @@ function TaskWorkspace({
             dueAt: values.dueAt ? new Date(values.dueAt).toISOString() : null,
             completedAt:
               values.status === "done"
-                ? task.completedAt ?? nextTimestamp
+                ? (task.completedAt ?? nextTimestamp)
                 : null,
             updatedAt: nextTimestamp,
             assignedToMe: isAssignedToCurrentUser(values.assigneeName),
@@ -238,13 +259,12 @@ function TaskWorkspace({
 
   const selectedTask =
     editorState && editorState.taskId
-      ? tasks.find((task) => task.id === editorState.taskId) ?? null
+      ? (tasks.find((task) => task.id === editorState.taskId) ?? null)
       : null;
 
   return (
     <section className="task-workspace">
-      <div className="surface-card task-workspace-hero">
-        <div className="task-workspace-hero-copy">
+      {/* <div className="task-workspace-hero-copy">
           <p className="eyebrow-label">
             {isMatterContext ? "Matter Task Coordination" : "Practitioner Task Queue"}
           </p>
@@ -254,18 +274,37 @@ function TaskWorkspace({
               ? `Manage assignments, due dates, and progress for ${matterTitle ?? "this matter"} without leaving the matter workspace.`
               : "Manage matter-linked work across the firm, with a list-first queue and a board for flow management."}
           </p>
-        </div>
+        </div> */}
 
-        <div className="task-workspace-actions">
+      {/* <div className="task-workspace-actions">
           {isMatterContext && initialMatterId ? (
             <Link className="btn btn-ghost" href={`/tasks?matter_id=${initialMatterId}`}>
               View All Tasks
             </Link>
           ) : null}
-          <button className="btn btn-primary" onClick={() => handleCreateTask()} type="button">
-            + {createLabel}
-          </button>
-        </div>
+        </div> */}
+      <div style={{ display: 'flex'}}>
+        <label
+          className="matter-search-field task-search-field"
+          aria-label="Search tasks"
+        >
+          <SearchIcon />
+          <input
+          style={{backgroundColor: '#ffffff'}}
+            onChange={(event) => onSearchChange(event.target.value)}
+            placeholder="Search tasks, matters, clients, assignees"
+            type="search"
+            value={search}
+          />
+        </label>
+        <button
+          className="btn btn-primary"
+          style={{ width: "fit-content", alignSelf: "end" }}
+          onClick={() => handleCreateTask()}
+          type="button"
+        >
+          + {createLabel}
+        </button>
       </div>
 
       <div className="surface-card task-workspace-panel">
@@ -276,9 +315,14 @@ function TaskWorkspace({
           matterId={selectedMatterId || null}
           matterOptions={availableMatterOptions}
           onAssignedScope={() =>
-            setScope((current) => (current === "mine" ? (isMatterContext ? "matter" : "firm") : "mine"))
+            setScope((current) =>
+              current === "mine"
+                ? isMatterContext
+                  ? "matter"
+                  : "firm"
+                : "mine",
+            )
           }
-          onCreateTask={() => handleCreateTask()}
           onDueWindowChange={setDueWindow}
           onMatterChange={setSelectedMatterId}
           onSearchChange={setSearch}
@@ -318,7 +362,7 @@ function TaskWorkspace({
         <TaskEditorModal
           key={`${editorState.mode}-${editorState.taskId ?? "new"}-${editorState.presetStatus ?? "na"}`}
           availableMatters={availableMatterOptions}
-          lockedMatterId={isMatterContext ? initialMatterId ?? null : null}
+          lockedMatterId={isMatterContext ? (initialMatterId ?? null) : null}
           onClose={() => setEditorState(null)}
           onSave={handleSaveTask}
           preferredMatterId={selectedMatterId || initialMatterId || null}
@@ -337,7 +381,6 @@ function TaskToolbar({
   matterId,
   matterOptions,
   onAssignedScope,
-  onCreateTask,
   onDueWindowChange,
   onMatterChange,
   onSearchChange,
@@ -354,7 +397,6 @@ function TaskToolbar({
   matterId: string | null;
   matterOptions: MatterOption[];
   onAssignedScope: () => void;
-  onCreateTask: () => void;
   onDueWindowChange: (value: TaskDueWindow) => void;
   onMatterChange: (value: string) => void;
   onSearchChange: (value: string) => void;
@@ -366,7 +408,10 @@ function TaskToolbar({
   viewMode: TaskViewMode;
 }) {
   return (
-    <div className="task-toolbar-shell">
+    <div
+      className="task-toolbar-shell"
+      style={{ justifyContent: "space-between" }}
+    >
       <div className="task-toolbar-top">
         <TaskViewToggle onChange={onViewModeChange} value={viewMode} />
 
@@ -379,14 +424,14 @@ function TaskToolbar({
           >
             Assigned to Me
           </button>
-          <button className="btn btn-ghost" onClick={onCreateTask} type="button">
-            + {createLabel}
-          </button>
         </div>
       </div>
 
-      <div className="task-toolbar-filters">
-        <label className="matter-search-field task-search-field" aria-label="Search tasks">
+      <div
+        className="task-toolbar-filters"
+        style={{ gap: 8, justifyContent: "space-between" }}
+      >
+        {/* <label className="matter-search-field task-search-field" aria-label="Search tasks">
           <SearchIcon />
           <input
             onChange={(event) => onSearchChange(event.target.value)}
@@ -394,12 +439,14 @@ function TaskToolbar({
             type="search"
             value={search}
           />
-        </label>
+        </label> */}
 
         <label className="task-inline-select">
           <span>Status</span>
           <select
-            onChange={(event) => onStatusFilterChange(event.target.value as TaskStatus | "all")}
+            onChange={(event) =>
+              onStatusFilterChange(event.target.value as TaskStatus | "all")
+            }
             value={statusFilter}
           >
             <option value="all">All statuses</option>
@@ -410,11 +457,12 @@ function TaskToolbar({
             ))}
           </select>
         </label>
-
         <label className="task-inline-select">
           <span>Due</span>
           <select
-            onChange={(event) => onDueWindowChange(event.target.value as TaskDueWindow)}
+            onChange={(event) =>
+              onDueWindowChange(event.target.value as TaskDueWindow)
+            }
             value={dueWindow}
           >
             {dueFilterOptions.map((option) => (
@@ -424,11 +472,13 @@ function TaskToolbar({
             ))}
           </select>
         </label>
-
         {canFilterByMatter ? (
           <label className="task-inline-select">
             <span>Matter</span>
-            <select onChange={(event) => onMatterChange(event.target.value)} value={matterId ?? ""}>
+            <select
+              onChange={(event) => onMatterChange(event.target.value)}
+              value={matterId ?? ""}
+            >
               <option value="">All matters</option>
               {matterOptions.map((option) => (
                 <option key={option.id} value={option.id}>
@@ -451,7 +501,11 @@ function TaskViewToggle({
   value: TaskViewMode;
 }) {
   return (
-    <div className="task-view-toggle" role="tablist" aria-label="Task view mode">
+    <div
+      className="task-view-toggle"
+      role="tablist"
+      aria-label="Task view mode"
+    >
       {(["list", "kanban"] as TaskViewMode[]).map((mode) => (
         <button
           aria-pressed={value === mode}
@@ -519,7 +573,12 @@ function TaskListTable({
 
       <div className="task-card-stack">
         {tasks.map((task) => (
-          <TaskCardListItem key={task.id} onEdit={onEdit} onStatusChange={onStatusChange} task={task} />
+          <TaskCardListItem
+            key={task.id}
+            onEdit={onEdit}
+            onStatusChange={onStatusChange}
+            task={task}
+          />
         ))}
       </div>
     </>
@@ -538,9 +597,18 @@ function TaskListRow({
   task: TaskItem;
 }) {
   return (
-    <div className={cn("task-table-row", canShowMatter ? "is-global" : "is-matter")}>
+    <div
+      className={cn(
+        "task-table-row",
+        canShowMatter ? "is-global" : "is-matter",
+      )}
+    >
       <div className="task-table-primary">
-        <button className="task-inline-link" onClick={() => onEdit(task.id)} type="button">
+        <button
+          className="task-inline-link"
+          onClick={() => onEdit(task.id)}
+          type="button"
+        >
           {task.title}
         </button>
         <p className="row-meta">{task.description}</p>
@@ -553,9 +621,16 @@ function TaskListRow({
         </Link>
       ) : null}
       <span className="table-copy">{task.assigneeName ?? "Unassigned"}</span>
-      <TaskStatusSelect onChange={(status) => onStatusChange(task.id, status)} value={task.status} />
+      <TaskStatusSelect
+        onChange={(status) => onStatusChange(task.id, status)}
+        value={task.status}
+      />
       <TaskPriorityBadge priority={task.priority} />
-      <button className="task-action-link" onClick={() => onEdit(task.id)} type="button">
+      <button
+        className="task-action-link"
+        onClick={() => onEdit(task.id)}
+        type="button"
+      >
         Edit
       </button>
     </div>
@@ -576,7 +651,11 @@ function TaskCardListItem({
       <div className="task-mobile-card-head">
         <div>
           <p className="table-ref">{task.matterReference}</p>
-          <button className="task-inline-link" onClick={() => onEdit(task.id)} type="button">
+          <button
+            className="task-inline-link"
+            onClick={() => onEdit(task.id)}
+            type="button"
+          >
             {task.title}
           </button>
         </div>
@@ -587,14 +666,24 @@ function TaskCardListItem({
 
       <div className="task-mobile-card-grid">
         <TaskCardMeta label="Due" value={getDueLabel(task)} />
-        <TaskCardMeta label="Assignee" value={task.assigneeName ?? "Unassigned"} />
+        <TaskCardMeta
+          label="Assignee"
+          value={task.assigneeName ?? "Unassigned"}
+        />
         <TaskCardMeta label="Matter" value={task.matterTitle} />
         <TaskCardMeta label="Client" value={task.clientName} />
       </div>
 
       <div className="task-mobile-card-actions">
-        <TaskStatusSelect onChange={(status) => onStatusChange(task.id, status)} value={task.status} />
-        <button className="btn btn-ghost" onClick={() => onEdit(task.id)} type="button">
+        <TaskStatusSelect
+          onChange={(status) => onStatusChange(task.id, status)}
+          value={task.status}
+        />
+        <button
+          className="btn btn-ghost"
+          onClick={() => onEdit(task.id)}
+          type="button"
+        >
           Edit
         </button>
       </div>
@@ -643,7 +732,11 @@ function TaskBoard({
               <p className="task-board-column-title">{column.label}</p>
               <p className="row-meta">{column.items.length} task(s)</p>
             </div>
-            <button className="task-column-add" onClick={() => onAddTask(column.status)} type="button">
+            <button
+              className="task-column-add"
+              onClick={() => onAddTask(column.status)}
+              type="button"
+            >
               + Add Task
             </button>
           </div>
@@ -660,17 +753,28 @@ function TaskBoard({
                 >
                   <div className="task-board-card-head">
                     <TaskPriorityBadge priority={task.priority} />
-                    <button className="task-action-link" onClick={() => onEdit(task.id)} type="button">
+                    <button
+                      className="task-action-link"
+                      onClick={() => onEdit(task.id)}
+                      type="button"
+                    >
                       Edit
                     </button>
                   </div>
 
-                  <button className="task-inline-link task-board-card-title" onClick={() => onEdit(task.id)} type="button">
+                  <button
+                    className="task-inline-link task-board-card-title"
+                    onClick={() => onEdit(task.id)}
+                    type="button"
+                  >
                     {task.title}
                   </button>
                   <p className="row-meta">{task.description}</p>
 
-                  <Link className="task-board-matter-link" href={`/matters/${task.matterId}`}>
+                  <Link
+                    className="task-board-matter-link"
+                    href={`/matters/${task.matterId}`}
+                  >
                     {task.matterReference} · {task.matterTitle}
                   </Link>
 
@@ -679,11 +783,16 @@ function TaskBoard({
                     <span>{getDueLabel(task)}</span>
                   </div>
 
-                  <TaskStatusSelect onChange={(status) => onStatusChange(task.id, status)} value={task.status} />
+                  <TaskStatusSelect
+                    onChange={(status) => onStatusChange(task.id, status)}
+                    value={task.status}
+                  />
                 </div>
               ))
             ) : (
-              <div className="task-board-empty">Drop tasks here or add a new one in this lane.</div>
+              <div className="task-board-empty">
+                Drop tasks here or add a new one in this lane.
+              </div>
             )}
           </div>
         </div>
@@ -702,7 +811,10 @@ function TaskStatusSelect({
   return (
     <label className={cn("task-status-select", `is-${value}`)}>
       <span className="sr-only">Update task status</span>
-      <select onChange={(event) => onChange(event.target.value as TaskStatus)} value={value}>
+      <select
+        onChange={(event) => onChange(event.target.value as TaskStatus)}
+        value={value}
+      >
         {statusOptions.map((status) => (
           <option key={status} value={status}>
             {getStatusLabel(status)}
@@ -714,7 +826,11 @@ function TaskStatusSelect({
 }
 
 function TaskPriorityBadge({ priority }: { priority: TaskPriority }) {
-  return <span className={cn("task-priority-badge", `is-${priority}`)}>{priority}</span>;
+  return (
+    <span className={cn("task-priority-badge", `is-${priority}`)}>
+      {priority}
+    </span>
+  );
 }
 
 function TaskEmptyState({ copy, title }: { copy: string; title: string }) {
@@ -746,7 +862,12 @@ function TaskEditorModal({
   const initialValues: TaskFormValues = {
     title: task?.title ?? "",
     description: task?.description ?? "",
-    matterId: lockedMatterId ?? task?.matterId ?? preferredMatterId ?? availableMatters[0]?.id ?? "",
+    matterId:
+      lockedMatterId ??
+      task?.matterId ??
+      preferredMatterId ??
+      availableMatters[0]?.id ??
+      "",
     assigneeName: task?.assigneeName ?? "",
     status: task?.status ?? presetStatus ?? "todo",
     priority: task?.priority ?? "medium",
@@ -754,7 +875,10 @@ function TaskEditorModal({
   };
   const [values, setValues] = useState<TaskFormValues>(initialValues);
 
-  function update<K extends keyof TaskFormValues>(key: K, value: TaskFormValues[K]) {
+  function update<K extends keyof TaskFormValues>(
+    key: K,
+    value: TaskFormValues[K],
+  ) {
     setValues((current) => ({ ...current, [key]: value }));
   }
 
@@ -775,15 +899,30 @@ function TaskEditorModal({
 
   return (
     <div className="task-modal-backdrop" role="presentation">
-      <div aria-modal="true" className="task-modal" role="dialog" aria-labelledby="task-editor-title">
+      <div
+        aria-modal="true"
+        className="task-modal"
+        role="dialog"
+        aria-labelledby="task-editor-title"
+      >
         <div className="task-modal-head">
           <div>
-            <p className="eyebrow-label">{task ? "Edit task" : "Create task"}</p>
-            <h3 className="matter-title task-modal-title" id="task-editor-title">
+            <p className="eyebrow-label">
+              {task ? "Edit task" : "Create task"}
+            </p>
+            <h3
+              className="matter-title task-modal-title"
+              id="task-editor-title"
+            >
               {task ? task.title : "Task Editor"}
             </h3>
           </div>
-          <button className="task-modal-close" onClick={onClose} type="button" aria-label="Close">
+          <button
+            className="task-modal-close"
+            onClick={onClose}
+            type="button"
+            aria-label="Close"
+          >
             x
           </button>
         </div>
@@ -812,13 +951,18 @@ function TaskEditorModal({
             <div className="task-form-field">
               <span>Matter</span>
               <div className="task-form-readonly">
-                {availableMatters.find((option) => option.id === values.matterId)?.title ?? "Current matter"}
+                {availableMatters.find(
+                  (option) => option.id === values.matterId,
+                )?.title ?? "Current matter"}
               </div>
             </div>
           ) : (
             <label className="task-form-field">
               <span>Matter</span>
-              <select onChange={(event) => update("matterId", event.target.value)} value={values.matterId}>
+              <select
+                onChange={(event) => update("matterId", event.target.value)}
+                value={values.matterId}
+              >
                 {availableMatters.map((option) => (
                   <option key={option.id} value={option.id}>
                     {option.reference} · {option.title}
@@ -851,7 +995,12 @@ function TaskEditorModal({
           <div className="task-form-grid">
             <label className="task-form-field">
               <span>Status</span>
-              <select onChange={(event) => update("status", event.target.value as TaskStatus)} value={values.status}>
+              <select
+                onChange={(event) =>
+                  update("status", event.target.value as TaskStatus)
+                }
+                value={values.status}
+              >
                 {statusOptions.map((status) => (
                   <option key={status} value={status}>
                     {getStatusLabel(status)}
@@ -863,7 +1012,9 @@ function TaskEditorModal({
             <label className="task-form-field">
               <span>Priority</span>
               <select
-                onChange={(event) => update("priority", event.target.value as TaskPriority)}
+                onChange={(event) =>
+                  update("priority", event.target.value as TaskPriority)
+                }
                 value={values.priority}
               >
                 {priorityOptions.map((priority) => (
@@ -894,8 +1045,12 @@ function TaskDueMeta({ task }: { task: TaskItem }) {
 
   return (
     <div className="task-due-meta">
-      <span className={cn("task-due-label", `is-${tone}`)}>{getDueLabel(task)}</span>
-      <span className="row-meta">{task.dueAt ? formatDate(task.dueAt) : "No due date"}</span>
+      <span className={cn("task-due-label", `is-${tone}`)}>
+        {getDueLabel(task)}
+      </span>
+      <span className="row-meta">
+        {task.dueAt ? formatDate(task.dueAt) : "No due date"}
+      </span>
     </div>
   );
 }
@@ -921,7 +1076,9 @@ function getDueLabel(task: TaskItem): string {
   return formatRelativeDate(task.dueAt);
 }
 
-function getDueTone(task: TaskItem): "default" | "warning" | "danger" | "success" {
+function getDueTone(
+  task: TaskItem,
+): "default" | "warning" | "danger" | "success" {
   if (!task.dueAt) {
     return "default";
   }
@@ -963,7 +1120,10 @@ function getMatterOptions(tasks: TaskItem[]): MatterOption[] {
 }
 
 function slugify(value: string): string {
-  return value.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  return value
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
 }
 
 function isAssignedToCurrentUser(assigneeName: string): boolean {

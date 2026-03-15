@@ -57,23 +57,22 @@ export function MattersWorkspaceClient({
 
   return (
     <section className="matter-workspace">
-      <div className="surface-card matter-workspace-hero">
-        <div className="matter-workspace-hero-copy">
+  
+        {/* <div className="matter-workspace-hero-copy">
           <p className="eyebrow-label">Practitioner Workspace</p>
           <h2 className="matter-title">Matter Workspace</h2>
           <p className="matter-workspace-copy">
             Track matter status, upcoming deadlines, and billing exposure from one shared queue.
           </p>
-        </div>
+        </div> */}
 
-        <div className="matter-workspace-actions">
+        <div className="matter-workspace-actions" style={{alignSelf: 'end'}}>
           <button className="btn btn-ghost" type="button">
             Export
           </button>
           <button className="btn btn-primary" type="button">
             + New Matter
           </button>
-        </div>
       </div>
 
       <div className="matter-workspace-stats">

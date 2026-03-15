@@ -218,9 +218,9 @@ export function DocumentsWorkspaceClient({
   }
 
   return (
-    <section className={cn("documents-workspace", matter && "is-matter")}>
-      <div className="surface-card documents-hero">
-        <div className="documents-hero-copy">
+    <section className={cn("documents-workspace", matter && "is-matter")} style={{alignSelf: 'end'}}>
+
+        {/* <div className="documents-hero-copy">
           <p className="eyebrow-label">{matter ? "Matter Documents" : "Document Center"}</p>
           <h2 className="matter-title">{matter ? `${matter.reference} document workflow` : "Search-first document operations"}</h2>
           <p className="documents-hero-text">
@@ -228,23 +228,23 @@ export function DocumentsWorkspaceClient({
               ? "Upload, classify, generate, and share matter documents with provider-aware authoring."
               : "Search, upload, classify, and share documents across active matters with OCR, AI review, and template automation."}
           </p>
-        </div>
-        <div className="documents-hero-actions">
+        </div> */}
+        <div className="documents-hero-actions" style={{width: '100%' ,alignSelf: 'end', display: 'mflex', justifyContent: 'flex-end'}}>
           <Button onClick={() => setIsUploadOpen(true)} variant="ghost">Upload</Button>
           <Button onClick={() => setIsGenerateOpen(true)}>Create from Template</Button>
           <Button onClick={() => handleProvider("word")} variant="ghost">Open in Word</Button>
           <Button onClick={() => handleProvider("google_docs")} variant="ghost">Open in Google Docs</Button>
-        </div>
+
       </div>
 
       <div className="documents-kpi-grid">
-        <KpiCard label="Needs OCR" value={String(kpis.needsOcr)} subtext="Uploads waiting for searchable text or OCR recovery." tone="warning" />
+        <KpiCard label="Needs OCR" value={String(kpis.needsOcr)} subtext="Uploads waiting for searchable text or OCR recovery." tone="default" />
         <KpiCard label="Needs Metadata" value={String(kpis.needsMetadata)} subtext="Documents missing stronger tags or document typing." tone="default" />
-        <KpiCard label="AI Review" value={String(kpis.aiReview)} subtext="Files with extracted flags or failed analysis." tone="danger" />
-        <KpiCard label="Open Client Requests" value={String(kpis.requests)} subtext="Practitioner-side requests visible ahead of portal delivery." tone="success" />
+        <KpiCard label="AI Review" value={String(kpis.aiReview)} subtext="Files with extracted flags or failed analysis." tone="default" />
+        <KpiCard label="Open Client Requests" value={String(kpis.requests)} subtext="Practitioner-side requests visible ahead of portal delivery." tone="default" />
       </div>
 
-      <div className="documents-provider-grid">
+      {/* <div className="documents-provider-grid">
         {providers.map((provider) => (
           <div className="surface-card provider-card" key={provider.provider}>
             <div>
@@ -264,7 +264,7 @@ export function DocumentsWorkspaceClient({
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
 
       {message ? <div className="documents-inline-alert">{message}</div> : null}
 
@@ -280,7 +280,7 @@ export function DocumentsWorkspaceClient({
           <TemplateLibrary matter={matter} onGenerate={() => setIsGenerateOpen(true)} onNewTemplate={() => setIsTemplateOpen(true)} templates={templates} />
         ) : (
           <>
-            <div className="documents-filter-grid">
+            <div className="documents-filter-grid" style={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center'}}>
               <label className="matter-search-field documents-search-field" aria-label="Search documents">
                 <SearchIcon />
                 <input
@@ -290,15 +290,17 @@ export function DocumentsWorkspaceClient({
                   value={filters.query}
                 />
               </label>
-              {!matter ? (
+              {/* {!matter ? (
                 <FilterSelect label="Matter" onChange={(value) => updateFilter("matterId", value)} options={matterOptions} value={filters.matterId} />
-              ) : null}
-              <FilterSelect label="Type" onChange={(value) => updateFilter("documentType", value)} options={facetValues(documents, "documentType")} value={filters.documentType} />
-              <FilterSelect label="Source" onChange={(value) => updateFilter("sourceKind", value)} options={facetValues(documents, "sourceKind")} value={filters.sourceKind} />
-              <FilterSelect label="AI" onChange={(value) => updateFilter("aiStatus", value)} options={facetValues(documents, "aiStatus")} value={filters.aiStatus} />
-              <FilterSelect label="OCR" onChange={(value) => updateFilter("ocrStatus", value)} options={facetValues(documents, "ocrStatus")} value={filters.ocrStatus} />
-              <FilterSelect label="Share" onChange={(value) => updateFilter("sharedState", value)} options={[{ value: "shared", label: "Shared" }, { value: "internal", label: "Internal only" }]} value={filters.sharedState} />
-              <FilterSelect label="Requests" onChange={(value) => updateFilter("requestState", value)} options={facetValues(documents, "requestStatus").filter((item) => item.value !== "none")} value={filters.requestState} />
+              ) : null} */}
+              <div style={{display: 'flex', flexDirection: 'row', gap: '1rem', alignItems: 'center'}}>
+                <FilterSelect label="Type" onChange={(value) => updateFilter("documentType", value)} options={facetValues(documents, "documentType")} value={filters.documentType} />
+                <FilterSelect label="Source" onChange={(value) => updateFilter("sourceKind", value)} options={facetValues(documents, "sourceKind")} value={filters.sourceKind} />
+                {/* <FilterSelect label="AI" onChange={(value) => updateFilter("aiStatus", value)} options={facetValues(documents, "aiStatus")} value={filters.aiStatus} /> */}
+                {/* <FilterSelect label="OCR" onChange={(value) => updateFilter("ocrStatus", value)} options={facetValues(documents, "ocrStatus")} value={filters.ocrStatus} /> */}
+                {/* <FilterSelect label="Share" onChange={(value) => updateFilter("sharedState", value)} options={[{ value: "shared", label: "Shared" }, { value: "internal", label: "Internal only" }]} value={filters.sharedState} /> */}
+                <FilterSelect label="Requests" onChange={(value) => updateFilter("requestState", value)} options={facetValues(documents, "requestStatus").filter((item) => item.value !== "none")} value={filters.requestState} />
+              </div>
             </div>
 
             <div className="documents-main-grid">
@@ -403,7 +405,7 @@ function FilterSelect({
   value: string;
 }) {
   return (
-    <label className="documents-filter-field">
+    <label className="documents-filter-field" style={{flexDirection: 'row', alignItems: 'center'}}>
       <span>{label}</span>
       <select onChange={(event) => onChange(event.target.value)} value={value}>
         <option value="">All</option>

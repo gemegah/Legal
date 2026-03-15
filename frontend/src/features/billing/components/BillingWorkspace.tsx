@@ -112,15 +112,8 @@ export function BillingWorkspaceClient({
 
   return (
     <section className="billing-workspace">
-      <div className="surface-card billing-hero">
-        <div className="billing-hero-copy">
-          <p className="eyebrow-label">Billing Operations</p>
-          <h2 className="matter-title">Billing</h2>
-          <p className="billing-hero-sub">
-            Manage invoices, AR, and payment collection workflows.
-          </p>
-        </div>
-        <div className="billing-hero-actions">
+
+        <div className="billing-hero-actions" style={{alignSelf: 'end'}}>
           <button
             className="btn btn-primary"
             onClick={() => setCreatingInvoice(true)}
@@ -129,7 +122,6 @@ export function BillingWorkspaceClient({
             + New Invoice
           </button>
         </div>
-      </div>
 
       <div className="billing-stats-row">
         <BillingStat
@@ -140,12 +132,14 @@ export function BillingWorkspaceClient({
         <BillingStat
           label="Overdue Balance"
           value={formatGHS(overdueTotal)}
-          tone={overdueTotal > 0 ? "danger" : "default"}
+          // tone={overdueTotal > 0 ? "danger" : "default"}
+          tone="default"
         />
         <BillingStat
           label="Collected This Month"
           value={formatGHS(collectedThisMonth)}
-          tone="success"
+          // tone="success"
+          tone="default"
         />
       </div>
 

@@ -225,21 +225,21 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
 
   return (
     <section className="messages-workspace">
-      <div className="surface-card messages-hero">
-        <div className="messages-hero-copy">
+
+        {/* <div className="messages-hero-copy">
           <p className="eyebrow-label">Message Center</p>
           <h2 className="matter-title">Internal and client-facing communication in one queue</h2>
           <p className="placeholder-copy">
             Keep internal coordination separate from portal-safe updates while preserving matter context, assignee ownership, and unread routing.
           </p>
-        </div>
-        <div className="messages-hero-actions">
+        </div> */}
+        <div className="messages-hero-actions" style={{alignSelf: 'end'}}>
           <Button onClick={() => openNewThread("internal")} variant="ghost">
             New Internal Thread
           </Button>
           <Button onClick={() => openNewThread("client")}>New Client Update</Button>
         </div>
-      </div>
+
 
       {feedback ? <div className="messages-feedback">{feedback}</div> : null}
 

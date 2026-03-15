@@ -142,6 +142,13 @@ function CalendarWorkspace({
 
   return (
     <section className="calendar-workspace">
+      <button style={{width: 'fit-content', alignSelf: 'end'}}
+                className="btn btn-primary" 
+                type="button"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                New Event
+              </button>
       <div className="surface-card calendar-workspace-panel">
         <div className="calendar-toolbar">
           <div className="calendar-toolbar-copy">
@@ -210,13 +217,13 @@ function CalendarWorkspace({
                   </button>
                 ))}
               </div>
-              <button 
+              {/* <button 
                 className="btn btn-primary" 
                 type="button"
                 onClick={() => setIsCreateModalOpen(true)}
               >
                 New Event
-              </button>
+              </button> */}
             </div>
             <button 
               className={cn("btn-toggle-side", !showSidePanel && "is-collapsed")} 
