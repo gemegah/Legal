@@ -19,10 +19,10 @@
 8. Secrets never in code. Use environment variables only.
 
 ## 3. Domain Map
-- Work: Matter, Task, Event, Note, Contact
+- Work: Case, Task, Event, Note, Contact
 - Evidence: Document, DocVersion, OCR, Search
 - Money: TimeEntry, Expense, Invoice, InvoiceLine, Payment
-- Communication: Message, NotificationQueue, ClientPortal
+- Communication: NotificationQueue, ClientPortalTimeline, ClientPortal
 
 ## 4. Role Hierarchy
 `admin > lawyer > staff > client`

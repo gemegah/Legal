@@ -20,12 +20,12 @@ export const getTaskWorkspace = cache(async (): Promise<{ tasks: TaskItem[] }> =
   return { tasks };
 });
 
-export const getTasksByMatter = cache(async (matterId: string): Promise<{ tasks: TaskItem[] }> => {
-  if (!matterId) {
+export const getTasksByCase = cache(async (caseId: string): Promise<{ tasks: TaskItem[] }> => {
+  if (!caseId) {
     return { tasks: [] };
   }
 
-  const tasks = await taskRepository.listTasksByMatter(matterId);
+  const tasks = await taskRepository.listTasksByCase(caseId);
 
   return { tasks };
 });

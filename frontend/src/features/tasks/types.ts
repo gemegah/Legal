@@ -4,7 +4,7 @@ export type TaskPriority = "low" | "medium" | "high" | "urgent";
 
 export type TaskViewMode = "list" | "kanban";
 
-export type TaskScope = "firm" | "mine" | "matter";
+export type TaskScope = "firm" | "mine" | "case";
 
 export type TaskDueWindow = "all" | "overdue" | "today" | "this_week" | "future" | "none";
 
@@ -12,9 +12,9 @@ export interface TaskItem {
   id: string;
   title: string;
   description: string;
-  matterId: string;
-  matterReference: string;
-  matterTitle: string;
+  caseId: string;
+  caseReference: string;
+  caseTitle: string;
   clientName: string;
   assigneeId: string | null;
   assigneeName: string | null;
@@ -32,7 +32,7 @@ export interface TaskListFilters {
   statuses: TaskStatus[];
   priorities: TaskPriority[];
   assigneeId: string | null;
-  matterId: string | null;
+  caseId: string | null;
   dueWindow: TaskDueWindow;
   assignedToMeOnly: boolean;
 }
@@ -52,15 +52,15 @@ export interface TaskWorkspaceState {
 export interface TaskWorkspaceContext {
   tasks: TaskItem[];
   scope: TaskScope;
-  matterId?: string;
-  matterTitle?: string;
-  canFilterByMatter: boolean;
+  caseId?: string;
+  caseTitle?: string;
+  canFilterByCase: boolean;
 }
 
 export interface TaskFormValues {
   title: string;
   description: string;
-  matterId: string;
+  caseId: string;
   assigneeName: string;
   status: TaskStatus;
   priority: TaskPriority;

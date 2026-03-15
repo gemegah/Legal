@@ -19,14 +19,14 @@ export interface PracticeSettings {
   reminderCadence: string;
   paymentReminderMode: string;
   invoiceFooter: string;
-  defaultMatterVisibility: string;
+  defaultCaseVisibility: string;
 }
 
 export interface PracticeSettingsData {
   viewer: SettingsViewer;
   firmName: string;
   seatCount: number;
-  activeMatters: number;
+  activeCases: number;
   monthlyCollectionsTargetGhs: number;
   practice: PracticeSettings;
 }
@@ -42,7 +42,7 @@ export interface TeamMember {
   isActive: boolean;
   inviteStatus: InviteStatus;
   lastLoginAt: string | null;
-  matterAccessSummary: string;
+  caseAccessSummary: string;
   billingAccess: "full" | "limited" | "none";
 }
 

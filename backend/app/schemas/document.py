@@ -44,9 +44,9 @@ class DocumentProviderLink(BaseModel):
 
 class DocumentRecord(BaseModel):
     id: str
-    matterId: str
-    matterReference: str
-    matterTitle: str
+    caseId: str
+    caseReference: str
+    caseTitle: str
     clientName: str
     title: str
     documentType: str
@@ -81,7 +81,7 @@ class DocumentTemplate(BaseModel):
     sourceKind: str
     status: str
     ownerName: str
-    matterTypes: list[str]
+    caseTypes: list[str]
     practiceAreas: list[str]
     updatedAt: str
     defaultDocumentType: str
@@ -161,7 +161,7 @@ class DocumentTemplateCreateRequest(BaseModel):
 
 
 class DocumentTemplateGenerateRequest(BaseModel):
-    matterId: str
+    caseId: str
     title: str
     outputTarget: str
 

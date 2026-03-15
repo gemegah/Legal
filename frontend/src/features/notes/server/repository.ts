@@ -1,18 +1,18 @@
 import "server-only";
 
-import { createMockNote, listMockNotesByMatter, toggleMockNotePin, updateMockNote } from "@/features/notes/data/mock";
-import type { MatterNote } from "@/features/notes/types";
+import { createMockNote, listMockNotesByCase, toggleMockNotePin, updateMockNote } from "@/features/notes/data/mock";
+import type { CaseNote } from "@/features/notes/types";
 
 export interface NotesRepository {
-  listByMatter(matterId: string): Promise<MatterNote[]>;
-  create(input: Omit<MatterNote, "id" | "createdAt" | "updatedAt">): Promise<MatterNote>;
-  update(id: string, input: Partial<Omit<MatterNote, "id" | "matterId" | "createdAt">>): Promise<MatterNote | null>;
-  togglePin(id: string): Promise<MatterNote | null>;
+  listByCase(caseId: string): Promise<CaseNote[]>;
+  create(input: Omit<CaseNote, "id" | "createdAt" | "updatedAt">): Promise<CaseNote>;
+  update(id: string, input: Partial<Omit<CaseNote, "id" | "caseId" | "createdAt">>): Promise<CaseNote | null>;
+  togglePin(id: string): Promise<CaseNote | null>;
 }
 
 const mockNotesRepository: NotesRepository = {
-  async listByMatter(matterId) {
-    return listMockNotesByMatter(matterId);
+  async listByCase(caseId) {
+    return listMockNotesByCase(caseId);
   },
   async create(input) {
     return createMockNote(input);

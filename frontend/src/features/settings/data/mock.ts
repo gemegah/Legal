@@ -29,7 +29,7 @@ const teamMembers: TeamMember[] = [
     isActive: true,
     inviteStatus: "accepted",
     lastLoginAt: "2026-03-09T08:42:00Z",
-    matterAccessSummary: "All matters",
+    caseAccessSummary: "All cases",
     billingAccess: "full",
   },
   {
@@ -41,7 +41,7 @@ const teamMembers: TeamMember[] = [
     isActive: true,
     inviteStatus: "accepted",
     lastLoginAt: "2026-03-09T07:15:00Z",
-    matterAccessSummary: "Lead on 12 matters",
+    caseAccessSummary: "Lead on 12 cases",
     billingAccess: "limited",
   },
   {
@@ -53,7 +53,7 @@ const teamMembers: TeamMember[] = [
     isActive: true,
     inviteStatus: "accepted",
     lastLoginAt: "2026-03-08T18:05:00Z",
-    matterAccessSummary: "Assigned matters only",
+    caseAccessSummary: "Assigned cases only",
     billingAccess: "limited",
   },
   {
@@ -65,7 +65,7 @@ const teamMembers: TeamMember[] = [
     isActive: true,
     inviteStatus: "accepted",
     lastLoginAt: "2026-03-09T06:58:00Z",
-    matterAccessSummary: "Operations and filing support",
+    caseAccessSummary: "Operations and filing support",
     billingAccess: "full",
   },
   {
@@ -77,7 +77,7 @@ const teamMembers: TeamMember[] = [
     isActive: true,
     inviteStatus: "accepted",
     lastLoginAt: "2026-03-08T16:44:00Z",
-    matterAccessSummary: "Assigned matters only",
+    caseAccessSummary: "Assigned cases only",
     billingAccess: "none",
   },
   {
@@ -89,7 +89,7 @@ const teamMembers: TeamMember[] = [
     isActive: false,
     inviteStatus: "accepted",
     lastLoginAt: "2026-02-22T10:10:00Z",
-    matterAccessSummary: "Portal coordination only",
+    caseAccessSummary: "Portal coordination only",
     billingAccess: "none",
   },
   {
@@ -101,7 +101,7 @@ const teamMembers: TeamMember[] = [
     isActive: true,
     inviteStatus: "pending",
     lastLoginAt: null,
-    matterAccessSummary: "Billing workspace only",
+    caseAccessSummary: "Billing workspace only",
     billingAccess: "full",
   },
 ];
@@ -178,7 +178,7 @@ export function getMockPracticeSettingsData(): PracticeSettingsData {
     viewer,
     firmName: "Boateng & Associates",
     seatCount: 8,
-    activeMatters: 34,
+    activeCases: 34,
     monthlyCollectionsTargetGhs: 180000,
     practice: {
       workspaceName: "Boateng & Associates",
@@ -189,7 +189,7 @@ export function getMockPracticeSettingsData(): PracticeSettingsData {
       reminderCadence: "7d, 3d, 1d, same day",
       paymentReminderMode: "7d before due date and 3d after due date",
       invoiceFooter: "Payments accepted in GHS through Hubtel Mobile Money and Paystack card checkout.",
-      defaultMatterVisibility: "Assigned team members plus admin oversight",
+      defaultCaseVisibility: "Assigned team members plus admin oversight",
     },
   };
 }

@@ -33,7 +33,7 @@ export const defaultTaskFilters: TaskListFilters = {
   statuses: [],
   priorities: [],
   assigneeId: null,
-  matterId: null,
+  caseId: null,
   dueWindow: "all",
   assignedToMeOnly: false,
 };
@@ -47,7 +47,7 @@ export function filterTasks(tasks: TaskItem[], filters: TaskListFilters): TaskIt
         return false;
       }
 
-      if (filters.matterId && task.matterId !== filters.matterId) {
+      if (filters.caseId && task.caseId !== filters.caseId) {
         return false;
       }
 
@@ -74,8 +74,8 @@ export function filterTasks(tasks: TaskItem[], filters: TaskListFilters): TaskIt
       return [
         task.title,
         task.description,
-        task.matterReference,
-        task.matterTitle,
+        task.caseReference,
+        task.caseTitle,
         task.clientName,
         task.assigneeName ?? "",
       ].some((value) => value.toLowerCase().includes(normalizedSearch));

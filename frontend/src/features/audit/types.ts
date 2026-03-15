@@ -22,7 +22,7 @@ export interface AuditRelatedItem {
 
 export interface AuditEvent {
   id: number;
-  matterId: string;
+  caseId: string;
   entityType: string;
   entityId: string;
   action: string;

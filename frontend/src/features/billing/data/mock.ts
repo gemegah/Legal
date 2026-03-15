@@ -4,9 +4,9 @@ const mockInvoices: Invoice[] = [
   {
     id: "inv-2026-001",
     reference: "INV-2026-001",
-    matterId: "mat-2026-014",
-    matterReference: "MAT-2026-014",
-    matterTitle: "Asante v. Mensah Industries Ltd",
+    caseId: "case-2026-014",
+    caseReference: "CAS-2026-014",
+    caseTitle: "Asante v. Mensah Industries Ltd",
     clientName: "Asante Holdings Ltd",
     status: "partially_paid",
     total: 42500,
@@ -19,7 +19,7 @@ const mockInvoices: Invoice[] = [
       {
         id: "li-001-1",
         type: "time",
-        description: "Court hearing preparation and attendance — Commercial Division",
+        description: "Court hearing preparation and attendance -- Commercial Division",
         quantity: 8,
         rate: 2500,
         amount: 20000,
@@ -41,7 +41,7 @@ const mockInvoices: Invoice[] = [
       {
         id: "li-001-3",
         type: "expense",
-        description: "Court filing fees — High Court registry",
+        description: "Court filing fees -- High Court registry",
         quantity: 1,
         rate: 4500,
         amount: 4500,
@@ -52,7 +52,7 @@ const mockInvoices: Invoice[] = [
       {
         id: "li-001-4",
         type: "expense",
-        description: "Service of process — process server fees",
+        description: "Service of process -- process server fees",
         quantity: 1,
         rate: 3000,
         amount: 3000,
@@ -78,9 +78,9 @@ const mockInvoices: Invoice[] = [
   {
     id: "inv-2026-002",
     reference: "INV-2026-002",
-    matterId: "mat-2026-011",
-    matterReference: "MAT-2026-011",
-    matterTitle: "Darko Family Estate Administration",
+    caseId: "case-2026-011",
+    caseReference: "CAS-2026-011",
+    caseTitle: "Darko Family Estate Administration",
     clientName: "Esi Darko",
     status: "paid",
     total: 18750,
@@ -93,7 +93,7 @@ const mockInvoices: Invoice[] = [
       {
         id: "li-002-1",
         type: "flat_fee",
-        description: "Estate administration — retainer for probate filing phase",
+        description: "Estate administration -- retainer for probate filing phase",
         quantity: 1,
         rate: 15000,
         amount: 15000,
@@ -130,9 +130,9 @@ const mockInvoices: Invoice[] = [
   {
     id: "inv-2026-003",
     reference: "INV-2026-003",
-    matterId: "mat-2026-009",
-    matterReference: "MAT-2026-009",
-    matterTitle: "Volta Ridge Land Transfer",
+    caseId: "case-2026-009",
+    caseReference: "CAS-2026-009",
+    caseTitle: "Volta Ridge Land Transfer",
     clientName: "Volta Ridge Developers",
     status: "reviewed",
     total: 31200,
@@ -145,7 +145,7 @@ const mockInvoices: Invoice[] = [
       {
         id: "li-003-1",
         type: "time",
-        description: "Title verification — Lands Commission search and report",
+        description: "Title verification -- Lands Commission search and report",
         quantity: 5,
         rate: 2800,
         amount: 14000,
@@ -181,9 +181,9 @@ const mockInvoices: Invoice[] = [
   {
     id: "inv-2026-004",
     reference: "INV-2026-004",
-    matterId: "mat-2026-007",
-    matterReference: "MAT-2026-007",
-    matterTitle: "Ayitey Employment Dispute",
+    caseId: "case-2026-007",
+    caseReference: "CAS-2026-007",
+    caseTitle: "Ayitey Employment Dispute",
     clientName: "Ayitey Logistics",
     status: "draft",
     total: 8400,
@@ -210,9 +210,9 @@ const mockInvoices: Invoice[] = [
   {
     id: "inv-2026-005",
     reference: "INV-2026-005",
-    matterId: "mat-2026-006",
-    matterReference: "MAT-2026-006",
-    matterTitle: "CediCore Vendor Debt Recovery",
+    caseId: "case-2026-006",
+    caseReference: "CAS-2026-006",
+    caseTitle: "CediCore Vendor Debt Recovery",
     clientName: "CediCore Systems",
     status: "overdue",
     total: 55000,
@@ -225,7 +225,7 @@ const mockInvoices: Invoice[] = [
       {
         id: "li-005-1",
         type: "flat_fee",
-        description: "Debt recovery — success fee (10% of recovered amount)",
+        description: "Debt recovery -- success fee (10% of recovered amount)",
         quantity: 1,
         rate: 50000,
         amount: 50000,
@@ -262,9 +262,9 @@ const mockInvoices: Invoice[] = [
   {
     id: "inv-2026-006",
     reference: "INV-2026-006",
-    matterId: "mat-2026-003",
-    matterReference: "MAT-2026-003",
-    matterTitle: "Tema Port Customs Appeal",
+    caseId: "case-2026-003",
+    caseReference: "CAS-2026-003",
+    caseTitle: "Tema Port Customs Appeal",
     clientName: "Harbourline Imports",
     status: "sent",
     total: 22500,
@@ -277,7 +277,7 @@ const mockInvoices: Invoice[] = [
       {
         id: "li-006-1",
         type: "time",
-        description: "Customs appeal — regulatory submissions and tribunal prep",
+        description: "Customs appeal -- regulatory submissions and tribunal prep",
         quantity: 6,
         rate: 3000,
         amount: 18000,
@@ -304,11 +304,11 @@ const mockInvoices: Invoice[] = [
 const mockTimeEntries: TimeEntry[] = [
   {
     id: "te-001",
-    matterId: "mat-2026-014",
-    matterReference: "MAT-2026-014",
-    matterTitle: "Asante v. Mensah Industries Ltd",
+    caseId: "case-2026-014",
+    caseReference: "CAS-2026-014",
+    caseTitle: "Asante v. Mensah Industries Ltd",
     clientName: "Asante Holdings Ltd",
-    description: "Court hearing preparation and attendance — Commercial Division",
+    description: "Court hearing preparation and attendance -- Commercial Division",
     hours: 8,
     rate: 2500,
     amount: 20000,
@@ -318,9 +318,9 @@ const mockTimeEntries: TimeEntry[] = [
   },
   {
     id: "te-002",
-    matterId: "mat-2026-014",
-    matterReference: "MAT-2026-014",
-    matterTitle: "Asante v. Mensah Industries Ltd",
+    caseId: "case-2026-014",
+    caseReference: "CAS-2026-014",
+    caseTitle: "Asante v. Mensah Industries Ltd",
     clientName: "Asante Holdings Ltd",
     description: "Affidavit drafting and exhibit bundle preparation",
     hours: 6,
@@ -332,11 +332,11 @@ const mockTimeEntries: TimeEntry[] = [
   },
   {
     id: "te-003",
-    matterId: "mat-2026-009",
-    matterReference: "MAT-2026-009",
-    matterTitle: "Volta Ridge Land Transfer",
+    caseId: "case-2026-009",
+    caseReference: "CAS-2026-009",
+    caseTitle: "Volta Ridge Land Transfer",
     clientName: "Volta Ridge Developers",
-    description: "Title verification — Lands Commission search and report",
+    description: "Title verification -- Lands Commission search and report",
     hours: 5,
     rate: 2800,
     amount: 14000,
@@ -346,9 +346,9 @@ const mockTimeEntries: TimeEntry[] = [
   },
   {
     id: "te-004",
-    matterId: "mat-2026-009",
-    matterReference: "MAT-2026-009",
-    matterTitle: "Volta Ridge Land Transfer",
+    caseId: "case-2026-009",
+    caseReference: "CAS-2026-009",
+    caseTitle: "Volta Ridge Land Transfer",
     clientName: "Volta Ridge Developers",
     description: "Transfer deed preparation and execution advisory",
     hours: 4,
@@ -360,9 +360,9 @@ const mockTimeEntries: TimeEntry[] = [
   },
   {
     id: "te-005",
-    matterId: "mat-2026-007",
-    matterReference: "MAT-2026-007",
-    matterTitle: "Ayitey Employment Dispute",
+    caseId: "case-2026-007",
+    caseReference: "CAS-2026-007",
+    caseTitle: "Ayitey Employment Dispute",
     clientName: "Ayitey Logistics",
     description: "Labour dispute chronology preparation and NLRC filing",
     hours: 3,
@@ -374,11 +374,11 @@ const mockTimeEntries: TimeEntry[] = [
   },
   {
     id: "te-006",
-    matterId: "mat-2026-003",
-    matterReference: "MAT-2026-003",
-    matterTitle: "Tema Port Customs Appeal",
+    caseId: "case-2026-003",
+    caseReference: "CAS-2026-003",
+    caseTitle: "Tema Port Customs Appeal",
     clientName: "Harbourline Imports",
-    description: "Customs appeal — regulatory submissions and tribunal prep",
+    description: "Customs appeal -- regulatory submissions and tribunal prep",
     hours: 6,
     rate: 3000,
     amount: 18000,
@@ -389,11 +389,11 @@ const mockTimeEntries: TimeEntry[] = [
   // Unbilled time entries
   {
     id: "te-007",
-    matterId: "mat-2026-014",
-    matterReference: "MAT-2026-014",
-    matterTitle: "Asante v. Mensah Industries Ltd",
+    caseId: "case-2026-014",
+    caseReference: "CAS-2026-014",
+    caseTitle: "Asante v. Mensah Industries Ltd",
     clientName: "Asante Holdings Ltd",
-    description: "Revised affidavit bundle — final review and service coordination",
+    description: "Revised affidavit bundle -- final review and service coordination",
     hours: 4,
     rate: 2500,
     amount: 10000,
@@ -403,9 +403,9 @@ const mockTimeEntries: TimeEntry[] = [
   },
   {
     id: "te-008",
-    matterId: "mat-2026-014",
-    matterReference: "MAT-2026-014",
-    matterTitle: "Asante v. Mensah Industries Ltd",
+    caseId: "case-2026-014",
+    caseReference: "CAS-2026-014",
+    caseTitle: "Asante v. Mensah Industries Ltd",
     clientName: "Asante Holdings Ltd",
     description: "Hearing attendance and post-hearing summary note",
     hours: 5,
@@ -417,11 +417,11 @@ const mockTimeEntries: TimeEntry[] = [
   },
   {
     id: "te-009",
-    matterId: "mat-2026-007",
-    matterReference: "MAT-2026-007",
-    matterTitle: "Ayitey Employment Dispute",
+    caseId: "case-2026-007",
+    caseReference: "CAS-2026-007",
+    caseTitle: "Ayitey Employment Dispute",
     clientName: "Ayitey Logistics",
-    description: "Partner review — escalation chronology and regulatory response",
+    description: "Partner review -- escalation chronology and regulatory response",
     hours: 2,
     rate: 2800,
     amount: 5600,
@@ -431,11 +431,11 @@ const mockTimeEntries: TimeEntry[] = [
   },
   {
     id: "te-010",
-    matterId: "mat-2026-001",
-    matterReference: "MAT-2026-001",
-    matterTitle: "Adum Market Tenancy Advisory",
+    caseId: "case-2026-001",
+    caseReference: "CAS-2026-001",
+    caseTitle: "Adum Market Tenancy Advisory",
     clientName: "Adum Market Traders Union",
-    description: "Tenancy advisory — call notes review and follow-up action plan",
+    description: "Tenancy advisory -- call notes review and follow-up action plan",
     hours: 1.5,
     rate: 2200,
     amount: 3300,
@@ -471,10 +471,10 @@ export function listMockTimeEntries(): TimeEntry[] {
   return mockTimeEntries.map((te) => ({ ...te }));
 }
 
-export function listMockTimeEntriesByMatter(matterId: string): TimeEntry[] {
-  return listMockTimeEntries().filter((te) => te.matterId === matterId);
+export function listMockTimeEntriesByCase(caseId: string): TimeEntry[] {
+  return listMockTimeEntries().filter((te) => te.caseId === caseId);
 }
 
-export function listMockInvoicesByMatter(matterId: string): Invoice[] {
-  return listMockInvoices().filter((inv) => inv.matterId === matterId);
+export function listMockInvoicesByCase(caseId: string): Invoice[] {
+  return listMockInvoices().filter((inv) => inv.caseId === caseId);
 }

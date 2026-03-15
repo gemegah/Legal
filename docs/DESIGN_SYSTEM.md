@@ -27,26 +27,25 @@ The UI should therefore feel:
 - Professional, structured, and calm rather than generic SaaS
 - Dense enough for legal operations, but not visually noisy
 - Explicit about status, urgency, and ownership
-- Trustworthy around money, audit trails, and client-facing communication
+- Trustworthy around money, audit trails, and client-facing visibility
 - Conservative with AI, always presenting it as reviewed assistance rather than autonomous output
 
 ### 1.2 Primary surface in this revision
 
-This design system is practitioner-first. It is written for the authenticated practitioner dashboard and matter operations workspace.
+This design system is practitioner-first. It is written for the authenticated practitioner dashboard and case operations workspace.
 
 Primary coverage:
 
 - App shell
 - Dashboard home
-- Matters list workspace
-- Matter detail shell
+- Cases list workspace
+- Case detail shell
 - Tasks workspace
-- Shared calendar and matter calendar
+- Shared calendar and case calendar
 - Billing workspace
 - Invoice detail
 - Notes workspace
 - Audit workspace
-- Messages workspace
 - Settings hub and child screens
 
 Secondary inheritors, not primary design targets in this revision:
@@ -55,10 +54,12 @@ Secondary inheritors, not primary design targets in this revision:
 - Auth
 - Marketing
 
+For portal work in this phase, extend toward a timeline-first self-service surface for derived significant updates, invoices, and shared documents. Do not treat any messaging surface as part of the v1 target.
+
 Partial surfaces that must be documented truthfully as incomplete:
 
 - Documents center
-- Matter documents
+- Case documents
 
 ### 1.3 Surface status as of this handoff
 
@@ -66,19 +67,19 @@ Partial surfaces that must be documented truthfully as incomplete:
 |---|---|---|
 | App shell | Implemented | Fully specified |
 | Dashboard home | Implemented | Fully specified |
-| Matters list | Implemented | Fully specified |
-| Matter detail shell | Implemented | Fully specified |
+| Cases list | Implemented | Fully specified |
+| Case detail shell | Implemented | Fully specified |
 | Tasks | Implemented | Fully specified as workspace pattern |
 | Shared calendar | Implemented | Fully specified |
 | Billing workspace | Implemented | Fully specified |
 | Invoice detail | Implemented | Fully specified |
-| Notes | Implemented | Fully specified as matter sub-workspace |
-| Audit | Implemented | Fully specified as matter sub-workspace |
-| Messages | Implemented | Fully specified |
+| Notes | Implemented | Fully specified as case sub-workspace |
+| Audit | Implemented | Fully specified as case sub-workspace |
+| Messages | Prototype only | Code exists, but this surface is deferred to V2 and is not part of MVP handoff scope |
 | Settings | Implemented | Fully specified |
 | Documents center | Placeholder | Partial pattern only |
-| Matter documents | Placeholder | Partial pattern only |
-| Portal surfaces | Starter only | Shared tokens only |
+| Case documents | Placeholder | Partial pattern only |
+| Portal surfaces | Starter only | Shared tokens plus timeline-first portal guidance; client messaging stays deferred |
 | Auth surfaces | Starter only | Shared tokens only |
 
 ## 2. Visual Language Summary
@@ -97,7 +98,7 @@ Core visual rules:
 - Gold is for emphasis, selected states, and value accents. It must not flood the interface.
 - Forest is for authority, navigation, and primary action.
 - Cream is an active working canvas, not a decorative background.
-- Display type is reserved for page titles, matter titles, invoice numbers, and KPI numbers that justify gravitas.
+- Display type is reserved for page titles, case titles, invoice numbers, and KPI numbers that justify gravitas.
 - Most workspace composition should rely on clean cards, separators, pills, tables, and muted labels rather than decorative illustration.
 
 ## 3. Source References
@@ -110,7 +111,6 @@ Use these as grounding references before introducing new UI:
 - `legalos/frontend/src/components/layout/Sidebar.tsx`
 - `legalos/frontend/src/components/dashboard/DashboardHome.tsx`
 - `legalos/frontend/src/features/calendar/components/CalendarWorkspace.tsx`
-- `legalos/frontend/src/features/messages/components/MessagesWorkspaceClient.tsx`
 - `legalos/frontend/src/features/settings/components/SettingsShell.tsx`
 
 If code and screenshots disagree, follow the code for shipped behavior and the screenshots for intended composition.
@@ -213,7 +213,7 @@ Use these roles when describing or implementing screens.
 
 | Role | Typeface | Weight | Guidance |
 |---|---|---|---|
-| `type-display` | Playfair Display | 500 to 600 | page titles, matter titles, invoice numbers, hero-level metrics |
+| `type-display` | Playfair Display | 500 to 600 | page titles, case titles, invoice numbers, hero-level metrics |
 | `type-section-title` | Playfair Display | 500 | panel titles and internal workspace headings |
 | `type-body` | DM Sans | 400 to 500 | core UI copy, rows, forms |
 | `type-label` | DM Sans | 600 to 700 | field labels, table headers, eyebrow labels |
@@ -223,7 +223,7 @@ Use these roles when describing or implementing screens.
 Sizing guidance:
 
 - Display title: clamp from `2rem` to `3.5rem` depending on surface
-- Matter or page title: `1.5rem` to `2.15rem`
+- Case or page title: `1.5rem` to `2.15rem`
 - Section title: `0.9375rem` to `1.35rem`
 - Body UI copy: `0.875rem` to `1rem`
 - Meta copy: `0.6875rem` to `0.8125rem`
@@ -336,7 +336,7 @@ LegalOS should use Tailwind default breakpoints exactly.
 | KPI grids | 4-up or 3-up | 2-up | 1-up or 2-up depending on card depth |
 | Filter bars | inline pills and search | wrap into rows | stacked controls |
 | Tables | full columns | trim non-critical columns | record cards |
-| Calendar/messages/audit/settings | multi-column | reduce to 2 then 1 | single column |
+| Calendar/audit/settings | multi-column | reduce to 2 then 1 | single column |
 
 ## 6. Component Handoff Catalog
 
@@ -426,7 +426,7 @@ The system should map toward shadcn primitives where a standard primitive exists
   - `Button`
   - `Badge`
 - Rules:
-  - use pills for compact statuses, filters, and linked matter references
+  - use pills for compact statuses, filters, and linked case references
   - do not invent custom text-link buttons where `Button` with a lightweight variant is sufficient
   - badge color meaning must remain consistent across workspaces
 
@@ -472,7 +472,7 @@ The system should map toward shadcn primitives where a standard primitive exists
   - `Tabs`
   - `Badge` for counts where needed
 - Rules:
-  - matter sub-navigation and workspace filter chips should feel related but not identical
+  - case sub-navigation and workspace filter chips should feel related but not identical
   - active state should use gold-tinted emphasis, not saturated fills
 
 ### 6.7 Tables, rows, and empty states
@@ -574,37 +574,17 @@ The system should map toward shadcn primitives where a standard primitive exists
   - the full legal scheduler board remains a custom domain layout because shadcn does not ship a complete week scheduler
   - do not custom-build date-picker primitives when `Calendar` and `Popover` are available
 
-### 6.11 Messages workspace
+### 6.11 Deferred messages workspace (V2 backlog)
 
-- Anatomy:
-  - queue rail
-  - thread list
-  - transcript panel
-  - metadata panel
-  - composer
-- States:
-  - unread
-  - internal
-  - client
-  - needs reply
-  - archived
-  - client-visible draft warning
-- Responsive:
-  - 3 columns on large desktop
-  - 2 then 1 as width collapses
-- Shadcn mapping:
-  - `Card`
-  - `Button`
-  - `Badge`
-  - `Input`
-  - `Select`
-  - `Textarea`
-  - `Dialog`
-  - `Avatar`
-  - `Separator`
-- Rules:
-  - client-safe visibility must be visually explicit
-  - internal-only communication must never visually resemble client-visible content
+This surface exists in code as prototype/backlog work only.
+
+- MVP rule:
+  - do not treat messages workspace as part of the current handoff target
+- V2 direction:
+  - if revived later, redesign it separately from the v1 portal timeline
+- Current guidance:
+  - preserve tokens and shell consistency only
+  - do not count this surface toward MVP completion
 
 ### 6.12 Settings navigation and governance panels
 
@@ -643,7 +623,7 @@ The system should map toward shadcn primitives where a standard primitive exists
 | custom input/select | `.ui-input`, `.ui-select` | `Input`, `Select` | retain label/hint/error contract |
 | custom modal | `.ui-modal` | `Dialog` or `Sheet` | use `AlertDialog` for destructive flows |
 | custom table shell | `.data-table` | `Table` | preserve mobile card fallback |
-| custom tabs/filter pills | matter tabs and filter chips | `Tabs` plus `Badge` | pills may remain styled triggers |
+| custom tabs/filter pills | case tabs and filter chips | `Tabs` plus `Badge` | pills may remain styled triggers |
 | custom calendar chrome | calendar workspace | `Tabs`, `Popover`, `Calendar`, `Card`, `Badge` | full schedule grid remains bespoke |
 | custom empty states | `.empty-state` | `Card` plus muted content, or `Empty` if added | no decorative illustration needed by default |
 | custom avatars | `.avatar-circle` | `Avatar` | preserve initials fallback |
@@ -692,7 +672,7 @@ AI output must always communicate:
 
 - source is AI-assisted
 - human review is required
-- confidence or uncertainty may matter
+- confidence or uncertainty may case
 
 Preferred treatment:
 
@@ -702,7 +682,7 @@ Preferred treatment:
 
 ### 7.5 Client-safe visibility signals
 
-Any client-visible message, note, or document-sharing state should be marked with a clearly distinct but non-alarming gold-tinted cue. Internal-only work should remain visually separated.
+Any client-visible timeline milestone or document-sharing state should be marked with a clearly distinct but non-alarming gold-tinted cue. Internal-only work should remain visually separated.
 
 ### 7.6 Payment and billing signals
 
@@ -722,7 +702,7 @@ These blueprints define composition and interaction expectations, not JSX struct
 - Layout hierarchy:
   - KPI row
   - two-column content section with deadlines on the left and AI/payments on the right
-  - active matters table
+  - active cases table
 - Persistent vs contextual:
   - shell is persistent
   - dashboard content is overview-only and should link deeper
@@ -734,13 +714,13 @@ These blueprints define composition and interaction expectations, not JSX struct
   - AI suggestions remain review-oriented
   - unpaid amounts should read as actionable, not decorative
 - Non-happy-path:
-  - empty dashboard should prompt matter creation, event entry, and invoice activity
+  - empty dashboard should prompt case creation, event entry, and invoice activity
 
-### 8.2 Matters list workspace
+### 8.2 Cases list workspace
 
 - Layout hierarchy:
   - hero block
-  - 4-up matter KPIs
+  - 4-up case KPIs
   - filter/search toolbar
   - data table
 - Persistent vs contextual:
@@ -748,7 +728,7 @@ These blueprints define composition and interaction expectations, not JSX struct
 - Data density:
   - high density, because this is a tracking screen
 - Key signals:
-  - matter status
+  - case status
   - next deadline
   - unpaid balance
   - owner / lead
@@ -756,30 +736,30 @@ These blueprints define composition and interaction expectations, not JSX struct
   - desktop table
   - mobile record cards with key facts stacked
 
-### 8.3 Matter detail shell
+### 8.3 Case detail shell
 
 - Layout hierarchy:
   - breadcrumb
   - title and action row
-  - matter metadata grid
+  - case metadata grid
   - tabbed sub-navigation
   - active sub-workspace below
 - Persistent vs contextual:
-  - matter identity block remains stable across sub-pages
+  - case identity block remains stable across sub-pages
   - tabs change content only
 - Data density:
   - high information value, moderate visual noise
 - Key signals:
   - status
-  - matter type
+  - case type
   - next deadline
   - court and suit number
-  - contextual matter actions
+  - contextual case actions
 
 ### 8.4 Tasks workspace
 
 - Pattern role:
-  - task workspace inherits matter/workspace card patterns rather than inventing a new shell
+  - task workspace inherits case/workspace card patterns rather than inventing a new shell
 - Composition:
   - task summary metrics
   - filter controls
@@ -790,7 +770,7 @@ These blueprints define composition and interaction expectations, not JSX struct
   - due soon
   - completed vs open
 
-### 8.5 Shared calendar and matter calendar
+### 8.5 Shared calendar and case calendar
 
 - Layout hierarchy:
   - hero with summary stats
@@ -799,14 +779,14 @@ These blueprints define composition and interaction expectations, not JSX struct
   - right rail for deadline watch and reminder coverage
 - Persistent vs contextual:
   - filters and date range are contextual
-  - scope label must always clarify firm vs matter calendar
+  - scope label must always clarify firm vs case calendar
 - Data density:
   - high on desktop, simplified on mobile
 - Key signals:
   - today marker
   - urgency
   - confirmed vs tentative vs AI-review state
-  - matter linkage
+  - case linkage
 - Responsive:
   - agenda view becomes the safest mobile default
 
@@ -868,23 +848,16 @@ These blueprints define composition and interaction expectations, not JSX struct
 - Tone:
   - evidentiary, precise, and low-flourish
 
-### 8.10 Messages workspace
+### 8.10 Deferred messages workspace (V2 backlog)
 
-- Layout hierarchy:
-  - queue rail
-  - thread list
-  - transcript and right-side metadata
-  - reply composer
-- Persistent vs contextual:
-  - queue logic is persistent
-  - selected thread controls are contextual
-- Data density:
-  - high, but must preserve transcript readability
-- Key signals:
-  - unread count
-  - internal vs client thread
-  - waiting on client vs waiting on firm
-  - client-safe draft warning
+This workspace is deferred to V2.
+
+- MVP expectation:
+  - do not design new product work around the messages workspace
+- Code truth:
+  - existing implementation can remain in the repo as prototype/backlog only
+- Design implication:
+  - active v1 communication guidance should focus on the derived client timeline, not conversation UI
 
 ### 8.11 Settings hub and child screens
 
@@ -900,7 +873,7 @@ These blueprints define composition and interaction expectations, not JSX struct
   - read-only boundaries
   - session and security posture
 
-### 8.12 Documents and matter documents
+### 8.12 Documents and case documents
 
 These surfaces are partial only.
 
@@ -1090,15 +1063,15 @@ Use the following JSONC shape when translating screenshots or reference boards i
   // Screen-level composition, not code
   "screens": {
     "dashboard_home": {
-      "hierarchy": ["kpis", "deadlines", "ai suggestions", "payments", "active matters table"],
+      "hierarchy": ["kpis", "deadlines", "ai suggestions", "payments", "active cases table"],
       "density": "moderate",
       "signals": ["urgent deadlines", "ai review", "unpaid balances"]
     },
-    "matters_list": {
-      "hierarchy": ["hero", "matter kpis", "filters", "table"],
+    "cases_list": {
+      "hierarchy": ["hero", "case kpis", "filters", "table"],
       "density": "high"
     },
-    "matter_detail": {
+    "case_detail": {
       "hierarchy": ["identity header", "metadata grid", "tab nav", "sub-workspace"],
       "density": "high"
     },
@@ -1124,10 +1097,6 @@ Use the following JSONC shape when translating screenshots or reference boards i
     },
     "audit_workspace": {
       "hierarchy": ["event feed", "detail panel", "diff"],
-      "density": "high"
-    },
-    "messages_workspace": {
-      "hierarchy": ["queues", "thread list", "transcript", "meta", "composer"],
       "density": "high"
     },
     "settings": {
@@ -1218,8 +1187,8 @@ The JSONC output should include:
 - implementation_prompt
 
 Screen guidance:
-- Fully describe the practitioner app shell, dashboard home, matters list, matter detail shell, tasks, shared calendar, billing workspace, invoice detail, notes, audit, messages, and settings.
-- Mark documents and matter-documents as partial if the screenshots or source material do not show a fully resolved workflow.
+- Fully describe the practitioner app shell, dashboard home, cases list, case detail shell, tasks, shared calendar, billing workspace, invoice detail, notes, audit, and settings.
+- Mark documents and case-documents as partial if the screenshots or source material do not show a fully resolved workflow.
 
 End the JSONC with an `implementation_prompt` field whose content is a short UI-only handoff for a developer. That prompt must describe what to build, how to use the token system, and how to use the approved component primitives. Do not mention broader stack details or non-UI implementation chatter.
 ```

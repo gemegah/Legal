@@ -227,7 +227,7 @@ export function AgendaBoard({
                   className="calendar-agenda-card"
                   key={event.id}
                   tabIndex={0}
-                  title={`${event.title} — ${formatTimeRange(event.startsAt, event.endsAt)}`}
+                  title={`${event.title} -- ${formatTimeRange(event.startsAt, event.endsAt)}`}
                   role="button"
                 >
                   <div className="calendar-agenda-time">
@@ -242,7 +242,7 @@ export function AgendaBoard({
                     <p className="row-title">{event.title}</p>
                     <p className="row-meta">
                       {event.location}
-                      {event.matterReference ? ` • ${event.matterReference}` : ""}
+                      {event.caseReference ? ` * ${event.caseReference}` : ""}
                     </p>
                   </div>
                 </div>

@@ -12,12 +12,12 @@ export const getCalendarWorkspace = cache(async (): Promise<{ events: CalendarEv
   return { events };
 });
 
-export const getEventsByMatter = cache(async (matterId: string): Promise<{ events: CalendarEventItem[] }> => {
-  if (!matterId) {
+export const getEventsByCase = cache(async (caseId: string): Promise<{ events: CalendarEventItem[] }> => {
+  if (!caseId) {
     return { events: [] };
   }
 
-  const events = await eventRepository.listEventsByMatter(matterId);
+  const events = await eventRepository.listEventsByCase(caseId);
 
   return { events };
 });

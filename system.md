@@ -1,7 +1,7 @@
-# Ghana Legal Practice Management SaaS — First-Principles System Map (with AI)
+# Ghana Legal Practice Management SaaS -- First-Principles System Map (with AI)
 
 This is an **irreducibly simple** map of the entire system for a **Ghana-first, AI-assisted legal practice management SaaS**.  
-It’s designed to be understandable from *first principles* and directly usable for planning and building.
+It's designed to be understandable from *first principles* and directly usable for planning and building.
 
 ---
 
@@ -16,7 +16,7 @@ A law firm transforms:
 Into:
 
 **Outputs**
-- Organized matters
+- Organized cases
 - Work completed on time
 - Drafts and documents managed correctly
 - Invoices sent and payments collected
@@ -25,7 +25,7 @@ Into:
 
 So the product has 3 core jobs:
 
-1) **Organize work** (Matter system)  
+1) **Organize work** (Case system)  
 2) **Prove work** (Documents + audit)  
 3) **Get paid** (Billing + payments)  
 
@@ -37,9 +37,9 @@ So the product has 3 core jobs:
 
 Everything revolves around one object:
 
-### ✅ Matter (the “container”)
+### âœ… Case (the "container")
 
-A **Matter** holds:
+A **Case** holds:
 
 - People (client, opposing party, counsel)
 - Tasks
@@ -51,7 +51,7 @@ A **Matter** holds:
 - Messages
 - Audit log (who did what, when)
 
-If **Matter** is designed cleanly, the whole product stays coherent.
+If **Case** is designed cleanly, the whole product stays coherent.
 
 ---
 
@@ -59,15 +59,15 @@ If **Matter** is designed cleanly, the whole product stays coherent.
 
 ```mermaid
 flowchart TD
-  U[USERS<br/>Lawyers / Staff / Admin] --> FE[FRONTEND<br/>Web/PWA: Chat-first Home, Matters, Docs, Billing, Calendar]
+  U[USERS<br/>Lawyers / Staff / Admin] --> FE[FRONTEND<br/>Web/PWA: Chat-first Home, Cases, Docs, Billing, Calendar]
   FE --> AUTH[AUTH + TENANCY<br/>Login, roles, firms]
   FE --> CPA[CLIENT PORTAL UI<br/>Client-facing limited access]
 
-  AUTH --> API[CORE BACKEND API<br/>Matters, Tasks, Calendar, Docs, Billing, Reports]
+  AUTH --> API[CORE BACKEND API<br/>Cases, Tasks, Calendar, Docs, Billing, Reports]
   CPA --> CPAPI[CLIENT PORTAL API<br/>Strict RBAC, limited endpoints]
   CPAPI --> API
 
-  API --> DB[(POSTGRES DB<br/>metadata: users, matters, invoices)]
+  API --> DB[(POSTGRES DB<br/>metadata: users, cases, invoices)]
   API --> OS[(OBJECT STORAGE<br/>PDFs/scans, versions)]
   API --> SI[(SEARCH INDEX<br/>OCR + full-text retrieval)]
 
@@ -77,13 +77,13 @@ flowchart TD
   Q --> P[PAYMENTS<br/>MoMo + Card + Bank]
 ```
 
-**Summary:** UI → API → DB/Files/Search → Workers → Notifications/Payments + AI embedded in workflow.
+**Summary:** UI -> API -> DB/Files/Search -> Workers -> Notifications/Payments + AI embedded in workflow.
 
 ---
 
 ## The AI layer (what it is)
 
-AI here is **not “legal advice.”**  
+AI here is **not "legal advice."**  
 It is a set of **assist functions** that:
 
 - Read inputs (docs, notes, activity)
@@ -94,35 +94,34 @@ It is a set of **assist functions** that:
 
 ```mermaid
 flowchart LR
-  A[Document/Notice Upload] --> B[AI: extract deadlines, parties, matter type]
+  A[Document/Notice Upload] --> B[AI: extract deadlines, parties, case type]
   B --> C[Suggest calendar entries + tasks]
   C --> D[User reviews & confirms]
-  D --> E[Saved to Matter + reminders scheduled]
+  D --> E[Saved to Case + reminders scheduled]
 
-  F[Matter activity] --> G[AI: matter status summary]
+  F[Case activity] --> G[AI: case status summary]
   H[Time + activity] --> I[AI: propose invoice line items + narrative]
-  J[Client comms] --> K[AI: draft client update message]
-  L[Intake] --> M[AI: intake → client + matter + checklist (MVP+)]
+  L[Intake] --> M[AI: intake -> client + case + checklist (MVP+)]
 ```
 
 ---
 
 ## The 4 domains of the system
 
-### 1) Work Domain — Matter Operations
-**Purpose:** Move matters forward without chaos.
+### 1) Work Domain -- Case Operations
+**Purpose:** Move cases forward without chaos.
 
-- Matter
+- Case
 - Tasks
 - Calendar events
 - Notes
 - People/contacts
 
-**Output:** Updated matter status + next actions.
+**Output:** Updated case status + next actions.
 
 ---
 
-### 2) Evidence Domain — Documents + Search + Audit
+### 2) Evidence Domain -- Documents + Search + Audit
 **Purpose:** Store, find, and prove work.
 
 - Files (PDFs/scans/docs)
@@ -132,11 +131,11 @@ flowchart LR
 - Full-text search index
 - Audit trail
 
-**Output:** “I can find the right document instantly and prove it’s the latest.”
+**Output:** "I can find the right document instantly and prove it's the latest."
 
 ---
 
-### 3) Money Domain — Time → Invoice → Payment → Reconciliation
+### 3) Money Domain -- Time -> Invoice -> Payment -> Reconciliation
 **Purpose:** Get paid faster and reduce leakage.
 
 - Time entries
@@ -151,15 +150,16 @@ flowchart LR
 
 ---
 
-### 4) Communication Domain — Client Portal + Notifications
+### 4) Communication Domain -- Client Portal + Notifications
 **Purpose:** Reduce admin load and increase trust.
 
-- Client portal (status, invoices, docs)
-- Secure messaging + file exchange
+- Client portal (timeline, invoices, docs)
+- Derived significant-activity timeline + requested file exchange in v1
+- Messaging deferred to v2 so it can be redesigned properly
 - Automated reminders (deadlines, unpaid invoices)
 - Optional WhatsApp/SMS updates (opt-in)
 
-**Output:** Fewer calls, faster responses, faster payments.
+**Output:** Fewer calls, clearer status visibility, faster payments.
 
 ---
 
@@ -192,7 +192,7 @@ erDiagram
 
 ## Key end-to-end workflows
 
-### Workflow A — Upload court notice → never miss deadlines
+### Workflow A -- Upload court notice -> never miss deadlines
 
 ```mermaid
 sequenceDiagram
@@ -218,7 +218,7 @@ sequenceDiagram
 
 ---
 
-### Workflow B — Matter work → invoice → MoMo payment
+### Workflow B -- Case work -> invoice -> MoMo payment
 
 ```mermaid
 sequenceDiagram
@@ -228,7 +228,7 @@ sequenceDiagram
   participant P as Payments (MoMo/Card)
   participant C as Client Portal
 
-  L->>API: Log time + expenses on matter
+  L->>API: Log time + expenses on case
   API->>AI: Suggest invoice lines + narrative
   AI->>API: Draft invoice proposal
   API->>L: Review/approve draft invoice
@@ -241,7 +241,7 @@ sequenceDiagram
 
 ---
 
-### Workflow C — Client portal reduces admin calls
+### Workflow C -- Client portal reduces admin calls
 
 ```mermaid
 sequenceDiagram
@@ -250,10 +250,10 @@ sequenceDiagram
   participant CP as Client Portal
   participant C as Client
 
-  L->>API: Post update / share doc / send invoice
-  API->>CP: Update portal timeline
-  C->>CP: View status, pay invoice, upload doc
-  CP->>API: Save client actions to matter
+  L->>API: Record milestone / share doc / send invoice
+  API->>CP: Derive and update portal timeline
+  C->>CP: View significant updates, pay invoice, upload doc
+  CP->>API: Save client actions to case
   API->>API: Record audit trail
 ```
 
@@ -263,10 +263,13 @@ sequenceDiagram
 
 To ship fast and reduce legal risk, keep these **out of MVP**:
 
-- AI legal advice / “what should I do?”
+- AI legal advice / "what should I do?"
 - Outcome prediction
 - Fully autonomous drafting/filing
 - Full legal research database (integrate later instead of competing first)
+- Practitioner/internal messaging workspace
+- Client portal messaging
+- AI-assisted client update drafting
 
 ---
 
@@ -278,7 +281,7 @@ To ship fast and reduce legal risk, keep these **out of MVP**:
 - **Files:** S3-compatible storage (Cloudflare R2 / AWS S3)
 - **Search:** Typesense (easy) or Elasticsearch (powerful)
 - **Workers:** Celery (Python) or BullMQ (Node)
-- **AI:** separate “AI service” returning **suggestions + references**
+- **AI:** separate "AI service" returning **suggestions + references**
 - **Payments:** MoMo gateway adapter + card adapter
 - **Notifications:** email + SMS + optional WhatsApp
 
@@ -288,7 +291,7 @@ To ship fast and reduce legal risk, keep these **out of MVP**:
 
 You are building a **Ghana-first law firm operating system** where:
 
-- **Matter** is the core container  
+- **Case** is the core container  
 - **Documents are searchable** instantly  
 - **Deadlines are hard to miss**  
 - **Invoices turn into MoMo payments** quickly  
@@ -303,4 +306,3 @@ If you want, the next artifacts to produce are:
 - A **12-week MVP build plan** (week-by-week)
 - A **Postgres schema draft** (tables + key fields)
 - An **API map** (endpoints and permissions)
-

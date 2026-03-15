@@ -52,27 +52,27 @@ import {
 interface CalendarWorkspaceProps {
   initialEvents: CalendarEventItem[];
   initialScope: CalendarScope;
-  matterTitle?: string | null;
+  caseTitle?: string | null;
 }
 
 export function SharedCalendarClient({ initialEvents }: { initialEvents: CalendarEventItem[] }) {
   return <CalendarWorkspace initialEvents={initialEvents} initialScope="firm" />;
 }
 
-export function MatterCalendarClient({
+export function CaseCalendarClient({
   initialEvents,
-  matterTitle,
+  caseTitle,
 }: {
   initialEvents: CalendarEventItem[];
-  matterTitle?: string | null;
+  caseTitle?: string | null;
 }) {
-  return <CalendarWorkspace initialEvents={initialEvents} initialScope="matter" matterTitle={matterTitle} />;
+  return <CalendarWorkspace initialEvents={initialEvents} initialScope="case" caseTitle={caseTitle} />;
 }
 
 function CalendarWorkspace({
   initialEvents,
   initialScope,
-  matterTitle,
+  caseTitle,
 }: CalendarWorkspaceProps) {
   const [events, setEvents] = useState<CalendarEventItem[]>(initialEvents);
   const [viewMode, setViewMode] = useState<CalendarViewMode>("week");
@@ -142,6 +142,13 @@ function CalendarWorkspace({
 
   return (
     <section className="calendar-workspace">
+      <button style={{width: 'fit-content', alignSelf: 'end'}}
+                className="btn btn-primary" 
+                type="button"
+                onClick={() => setIsCreateModalOpen(true)}
+              >
+                New Event
+              </button>
       <div className="surface-card calendar-workspace-panel">
         <div className="calendar-toolbar">
           <div className="calendar-toolbar-copy">
@@ -210,13 +217,13 @@ function CalendarWorkspace({
                   </button>
                 ))}
               </div>
-              <button 
+              {/* <button 
                 className="btn btn-primary" 
                 type="button"
                 onClick={() => setIsCreateModalOpen(true)}
               >
                 New Event
-              </button>
+              </button> */}
             </div>
             <button 
               className={cn("btn-toggle-side", !showSidePanel && "is-collapsed")} 

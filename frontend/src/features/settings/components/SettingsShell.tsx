@@ -32,7 +32,7 @@ export function SettingsShell({ children }: { children: ReactNode }) {
       <div className="surface-card settings-hub-hero">
         <div className="settings-hub-copy">
           <p className="eyebrow-label">Firm Governance</p>
-          <h2 className="matter-title">A quieter control room for the practice side of the firm.</h2>
+          <h2 className="case-title">A quieter control room for the practice side of the firm.</h2>
           <p className="settings-hub-text">
             Manage office defaults, staff access, and personal security posture without dropping out of the
             practitioner workflow.

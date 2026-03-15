@@ -7,7 +7,7 @@ import type {
   BillingStatusFilter,
   Invoice,
   InvoiceStatus,
-  MatterOption,
+  CaseOption,
   TimeEntry,
 } from "@/features/billing/types";
 import { cn, formatDate, formatGHS, formatRelativeDate } from "@/lib/utils";
@@ -24,46 +24,28 @@ export function BillingWorkspaceClient({
   const [invoices, setInvoices] = useState(initialInvoices);
   const [statusFilter, setStatusFilter] = useState<BillingStatusFilter>("all");
   const [search, setSearch] = useState("");
-  const [matterFilter, setMatterFilter] = useState("");
+  const [caseFilter, setCaseFilter] = useState("");
   const [creatingInvoice, setCreatingInvoice] = useState(false);
   const deferredSearch = useDeferredValue(search);
 
-  const matterOptions = getMatterOptions(invoices, initialTimeEntries);
+  const caseOptions = getCaseOptions(invoices, initialTimeEntries);
 
   const filtered = invoices.filter((inv) => {
     if (statusFilter !== "all" && inv.status !== statusFilter) return false;
-    if (matterFilter && inv.matterId !== matterFilter) return false;
+    if (caseFilter && inv.caseId !== caseFilter) return false;
     if (deferredSearch) {
       const q = deferredSearch.toLowerCase();
       if (
         !inv.reference.toLowerCase().includes(q) &&
         !inv.clientName.toLowerCase().includes(q) &&
-        !inv.matterTitle.toLowerCase().includes(q) &&
-        !inv.matterReference.toLowerCase().includes(q)
+        !inv.caseTitle.toLowerCase().includes(q) &&
+        !inv.caseReference.toLowerCase().includes(q)
       ) {
         return false;
       }
     }
     return true;
   });
-
-  const totalAR = invoices
-    .filter((inv) => inv.status !== "paid" && inv.status !== "void")
-    .reduce((sum, inv) => sum + inv.balance, 0);
-
-  const overdueTotal = invoices
-    .filter((inv) => inv.status === "overdue")
-    .reduce((sum, inv) => sum + inv.balance, 0);
-
-  const collectedThisMonth = invoices
-    .flatMap((inv) => inv.payments)
-    .filter((p) => {
-      if (p.status !== "confirmed") return false;
-      const d = new Date(p.paidAt);
-      const now = new Date();
-      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-    })
-    .reduce((sum, p) => sum + p.amount, 0);
 
   function handleAdvanceStatus(invoiceId: string) {
     setInvoices((current) =>
@@ -80,8 +62,8 @@ export function BillingWorkspaceClient({
     );
   }
 
-  function handleCreateInvoice(matterId: string, dueAt: string) {
-    const option = matterOptions.find((m) => m.id === matterId);
+  function handleCreateInvoice(caseId: string, dueAt: string) {
+    const option = caseOptions.find((m) => m.id === caseId);
     if (!option) return;
 
     const ref = `INV-${new Date().getFullYear()}-${String(invoices.length + 1).padStart(3, "0")}`;
@@ -91,9 +73,9 @@ export function BillingWorkspaceClient({
       {
         id: `inv-${Math.random().toString(36).slice(2, 10)}`,
         reference: ref,
-        matterId: option.id,
-        matterReference: option.reference,
-        matterTitle: option.title,
+        caseId: option.id,
+        caseReference: option.reference,
+        caseTitle: option.title,
         clientName: option.clientName,
         status: "draft",
         total: 0,
@@ -112,44 +94,26 @@ export function BillingWorkspaceClient({
 
   return (
     <section className="billing-workspace">
-      <div className="surface-card billing-hero">
-        <div className="billing-hero-copy">
-          <p className="eyebrow-label">Billing Operations</p>
-          <h2 className="matter-title">Billing</h2>
-          <p className="billing-hero-sub">
-            Manage invoices, AR, and payment collection workflows.
-          </p>
-        </div>
-        <div className="billing-hero-actions">
-          <button
-            className="btn btn-primary"
-            onClick={() => setCreatingInvoice(true)}
-            type="button"
-          >
-            + New Invoice
-          </button>
-        </div>
-      </div>
-
-      <div className="billing-stats-row">
-        <BillingStat
-          label="Total AR Outstanding"
-          value={formatGHS(totalAR)}
-          tone="default"
-        />
-        <BillingStat
-          label="Overdue Balance"
-          value={formatGHS(overdueTotal)}
-          tone={overdueTotal > 0 ? "danger" : "default"}
-        />
-        <BillingStat
-          label="Collected This Month"
-          value={formatGHS(collectedThisMonth)}
-          tone="success"
-        />
-      </div>
-
       <div className="surface-card billing-panel">
+        <div className="billing-panel-header">
+          <div className="billing-panel-copy">
+            <p className="eyebrow-label">Billing Operations</p>
+            <h2 className="case-title">Billing</h2>
+            <p className="billing-panel-subcopy">
+              Manage invoices, AR, and payment collection workflows.
+            </p>
+          </div>
+          <div className="billing-panel-header-actions">
+            <button
+              className="btn btn-primary"
+              onClick={() => setCreatingInvoice(true)}
+              type="button"
+            >
+              + New Invoice
+            </button>
+          </div>
+        </div>
+
         <div className="billing-toolbar-shell">
           <div className="billing-status-tabs" role="tablist" aria-label="Filter by invoice status">
             {statusTabs.map((tab) => (
@@ -166,21 +130,21 @@ export function BillingWorkspaceClient({
           </div>
 
           <div className="billing-toolbar-filters">
-            <label className="matter-search-field billing-search-field" aria-label="Search invoices">
+            <label className="case-search-field billing-search-field" aria-label="Search invoices">
               <SearchIcon />
               <input
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search invoices, clients, matters…"
+                placeholder="Search invoices, clients, cases..."
                 type="search"
                 value={search}
               />
             </label>
 
             <label className="task-inline-select">
-              <span>Matter</span>
-              <select onChange={(e) => setMatterFilter(e.target.value)} value={matterFilter}>
-                <option value="">All matters</option>
-                {matterOptions.map((m) => (
+              <span>Case</span>
+              <select onChange={(e) => setCaseFilter(e.target.value)} value={caseFilter}>
+                <option value="">All cases</option>
+                {caseOptions.map((m) => (
                   <option key={m.id} value={m.id}>
                     {m.reference}
                   </option>
@@ -204,31 +168,12 @@ export function BillingWorkspaceClient({
 
       {creatingInvoice ? (
         <NewInvoiceModal
-          matterOptions={matterOptions}
+          caseOptions={caseOptions}
           onClose={() => setCreatingInvoice(false)}
           onSave={handleCreateInvoice}
         />
       ) : null}
     </section>
-  );
-}
-
-function BillingStat({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: "default" | "danger" | "success";
-}) {
-  return (
-    <div className={cn("surface-card billing-stat-card", `is-${tone}`)}>
-      <p className="billing-stat-label">{label}</p>
-      <p className="billing-stat-value" aria-label={`${label}: ${value}`}>
-        {value}
-      </p>
-    </div>
   );
 }
 
@@ -244,7 +189,7 @@ function InvoiceTable({
       <div className="invoice-table-shell">
         <div className="invoice-table-head">
           <span>Invoice</span>
-          <span>Client / Matter</span>
+          <span>Client / Case</span>
           <span>Status</span>
           <span>Total</span>
           <span>Balance</span>
@@ -283,12 +228,12 @@ function InvoiceRow({
         <Link className="task-inline-link" href={`/billing/${invoice.id}`}>
           {invoice.reference}
         </Link>
-        <p className="row-meta">{invoice.matterReference}</p>
+        <p className="row-meta">{invoice.caseReference}</p>
       </div>
 
       <div>
         <p className="table-copy">{invoice.clientName}</p>
-        <p className="row-meta">{invoice.matterTitle}</p>
+        <p className="row-meta">{invoice.caseTitle}</p>
       </div>
 
       <InvoiceStatusBadge status={invoice.status} />
@@ -347,7 +292,7 @@ function InvoiceMobileCard({
         </div>
         <InvoiceStatusBadge status={invoice.status} />
       </div>
-      <p className="row-meta">{invoice.matterTitle}</p>
+      <p className="row-meta">{invoice.caseTitle}</p>
       <div className="invoice-mobile-card-grid">
         <div className="task-card-meta">
           <p>Total</p>
@@ -393,29 +338,29 @@ function InvoiceStatusBadge({ status }: { status: InvoiceStatus }) {
 }
 
 function NewInvoiceModal({
-  matterOptions,
+  caseOptions,
   onClose,
   onSave,
 }: {
-  matterOptions: MatterOption[];
+  caseOptions: CaseOption[];
   onClose: () => void;
-  onSave: (matterId: string, dueAt: string) => void;
+  onSave: (caseId: string, dueAt: string) => void;
 }) {
-  const [matterId, setMatterId] = useState(matterOptions[0]?.id ?? "");
+  const [caseId, setCaseId] = useState(caseOptions[0]?.id ?? "");
   const [dueAt, setDueAt] = useState("");
   const [error, setError] = useState("");
 
   function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!matterId) {
-      setError("Please select a matter.");
+    if (!caseId) {
+      setError("Please select a case.");
       return;
     }
     if (!dueAt) {
       setError("Please set a due date.");
       return;
     }
-    onSave(matterId, dueAt);
+    onSave(caseId, dueAt);
   }
 
   return (
@@ -424,22 +369,22 @@ function NewInvoiceModal({
         <div className="task-modal-head">
           <div>
             <p className="eyebrow-label">New Invoice</p>
-            <h3 className="matter-title task-modal-title" id="new-invoice-title">
+            <h3 className="case-title task-modal-title" id="new-invoice-title">
               Create Invoice
             </h3>
           </div>
           <button className="task-modal-close" onClick={onClose} type="button" aria-label="Close">
-            ×
+            x
           </button>
         </div>
 
         <form className="task-form" onSubmit={handleSubmit}>
           <label className="task-form-field">
-            <span>Matter</span>
-            <select onChange={(e) => setMatterId(e.target.value)} value={matterId}>
-              {matterOptions.map((m) => (
+            <span>Case</span>
+            <select onChange={(e) => setCaseId(e.target.value)} value={caseId}>
+              {caseOptions.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.reference} · {m.title}
+                  {m.reference}  -  {m.title}
                 </option>
               ))}
             </select>
@@ -470,7 +415,7 @@ function NewInvoiceModal({
   );
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 const statusTabs: Array<{ value: BillingStatusFilter; label: string }> = [
   { value: "all", label: "All" },
@@ -524,26 +469,26 @@ function getDueTone(invoice: Invoice): "default" | "warning" | "danger" | "succe
   return "default";
 }
 
-function getMatterOptions(invoices: Invoice[], timeEntries: TimeEntry[]): MatterOption[] {
-  const map = new Map<string, MatterOption>();
+function getCaseOptions(invoices: Invoice[], timeEntries: TimeEntry[]): CaseOption[] {
+  const map = new Map<string, CaseOption>();
 
   invoices.forEach((inv) => {
-    if (!map.has(inv.matterId)) {
-      map.set(inv.matterId, {
-        id: inv.matterId,
-        reference: inv.matterReference,
-        title: inv.matterTitle,
+    if (!map.has(inv.caseId)) {
+      map.set(inv.caseId, {
+        id: inv.caseId,
+        reference: inv.caseReference,
+        title: inv.caseTitle,
         clientName: inv.clientName,
       });
     }
   });
 
   timeEntries.forEach((te) => {
-    if (!map.has(te.matterId)) {
-      map.set(te.matterId, {
-        id: te.matterId,
-        reference: te.matterReference,
-        title: te.matterTitle,
+    if (!map.has(te.caseId)) {
+      map.set(te.caseId, {
+        id: te.caseId,
+        reference: te.caseReference,
+        title: te.caseTitle,
         clientName: te.clientName,
       });
     }

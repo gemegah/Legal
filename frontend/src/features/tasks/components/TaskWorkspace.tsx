@@ -36,53 +36,53 @@ interface BaseWorkspaceProps {
   initialTasks: TaskItem[];
   initialViewMode: TaskViewMode;
   initialScope: TaskScope;
-  initialMatterId?: string | null;
-  isMatterContext?: boolean;
-  matterTitle?: string;
+  initialCaseId?: string | null;
+  isCaseContext?: boolean;
+  caseTitle?: string;
 }
 
 export function TasksWorkspaceClient({
   initialTasks,
   initialViewMode,
   initialScope,
-  initialMatterId,
-  isMatterContext = false,
+  initialCaseId,
+  isCaseContext = false,
 }: BaseWorkspaceProps) {
   return (
     <TaskWorkspace
       initialTasks={initialTasks}
       initialViewMode={initialViewMode}
       initialScope={initialScope}
-      initialMatterId={initialMatterId ?? null}
-      isMatterContext={isMatterContext}
-      canFilterByMatter
+      initialCaseId={initialCaseId ?? null}
+      isCaseContext={isCaseContext}
+      canFilterByCase
       createLabel="New Task"
       emptyTitle="No tasks match the current filters."
-      emptyCopy="Adjust the task filters or create a new matter-linked task to refill the queue."
+      emptyCopy="Adjust the task filters or create a new case-linked task to refill the queue."
     />
   );
 }
 
-export function MatterTasksClient({
+export function CaseTasksClient({
   initialTasks,
   initialViewMode,
   initialScope,
-  initialMatterId,
-  isMatterContext = true,
-  matterTitle,
+  initialCaseId,
+  isCaseContext = true,
+  caseTitle,
 }: BaseWorkspaceProps) {
   return (
     <TaskWorkspace
       initialTasks={initialTasks}
       initialViewMode={initialViewMode}
       initialScope={initialScope}
-      initialMatterId={initialMatterId ?? null}
-      isMatterContext={isMatterContext}
-      matterTitle={matterTitle}
-      canFilterByMatter={false}
+      initialCaseId={initialCaseId ?? null}
+      isCaseContext={isCaseContext}
+      caseTitle={caseTitle}
+      canFilterByCase={false}
       createLabel="Add Task"
-      emptyTitle="No matter tasks yet."
-      emptyCopy="Create the first task for this matter to start tracking assignments, due dates, and workflow status."
+      emptyTitle="No case tasks yet."
+      emptyCopy="Create the first task for this case to start tracking assignments, due dates, and workflow status."
     />
   );
 }
@@ -91,14 +91,14 @@ function TaskWorkspace({
   initialTasks,
   initialViewMode,
   initialScope,
-  initialMatterId,
-  isMatterContext = false,
-  canFilterByMatter,
+  initialCaseId,
+  isCaseContext = false,
+  canFilterByCase,
   createLabel,
   emptyTitle,
   emptyCopy,
 }: BaseWorkspaceProps & {
-  canFilterByMatter: boolean;
+  canFilterByCase: boolean;
   createLabel: string;
   emptyTitle: string;
   emptyCopy: string;
@@ -109,7 +109,7 @@ function TaskWorkspace({
   const [search, setSearch] = useState("");
   const [dueWindow, setDueWindow] = useState<TaskDueWindow>("all");
   const [statusFilter, setStatusFilter] = useState<TaskStatus | "all">("all");
-  const [selectedMatterId, setSelectedMatterId] = useState(initialMatterId ?? "");
+  const [selectedCaseId, setSelectedCaseId] = useState(initialCaseId ?? "");
   const [editorState, setEditorState] = useState<{
     mode: "create" | "edit";
     taskId: string | null;
@@ -118,19 +118,19 @@ function TaskWorkspace({
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
   const deferredSearch = useDeferredValue(search);
 
-  const normalizedTasks = initialMatterId
-    ? tasks.filter((task) => task.matterId === initialMatterId)
+  const normalizedTasks = initialCaseId
+    ? tasks.filter((task) => task.caseId === initialCaseId)
     : tasks;
-  const availableMatterOptions = getMatterOptions(tasks);
+  const availableCaseOptions = getCaseOptions(tasks);
   const filters = {
     ...defaultTaskFilters,
     search: deferredSearch,
     dueWindow,
     assignedToMeOnly: scope === "mine",
-    matterId: selectedMatterId || null,
+    caseId: selectedCaseId || null,
     statuses: statusFilter === "all" ? [] : [statusFilter],
   };
-  const filteredTasks = filterTasks(canFilterByMatter ? tasks : normalizedTasks, filters);
+  const filteredTasks = filterTasks(canFilterByCase ? tasks : normalizedTasks, filters);
   const board = buildTaskBoard(filteredTasks);
 
   function handleCreateTask(presetStatus?: TaskStatus) {
@@ -142,7 +142,7 @@ function TaskWorkspace({
   }
 
   function handleSaveTask(values: TaskFormValues) {
-    const matterOption = availableMatterOptions.find((option) => option.id === values.matterId);
+    const caseOption = availableCaseOptions.find((option) => option.id === values.caseId);
     const nextTimestamp = new Date().toISOString();
 
     if (editorState?.mode === "edit" && editorState.taskId) {
@@ -156,10 +156,10 @@ function TaskWorkspace({
             ...task,
             title: values.title,
             description: values.description,
-            matterId: values.matterId,
-            matterReference: matterOption?.reference ?? task.matterReference,
-            matterTitle: matterOption?.title ?? task.matterTitle,
-            clientName: matterOption?.clientName ?? task.clientName,
+            caseId: values.caseId,
+            caseReference: caseOption?.reference ?? task.caseReference,
+            caseTitle: caseOption?.title ?? task.caseTitle,
+            clientName: caseOption?.clientName ?? task.clientName,
             assigneeName: values.assigneeName.trim() || null,
             assigneeId: values.assigneeName.trim()
               ? slugify(values.assigneeName.trim())
@@ -184,10 +184,10 @@ function TaskWorkspace({
           id: `task-${Math.random().toString(36).slice(2, 10)}`,
           title: values.title,
           description: values.description,
-          matterId: values.matterId,
-          matterReference: matterOption?.reference ?? "MAT-NEW",
-          matterTitle: matterOption?.title ?? "Unlinked matter",
-          clientName: matterOption?.clientName ?? "Matter client",
+          caseId: values.caseId,
+          caseReference: caseOption?.reference ?? "CAS-NEW",
+          caseTitle: caseOption?.title ?? "Unlinked case",
+          clientName: caseOption?.clientName ?? "Case client",
           assigneeName: assigneeName || null,
           assigneeId: assigneeName ? slugify(assigneeName) : null,
           status: values.status,
@@ -244,19 +244,19 @@ function TaskWorkspace({
     <section className="task-workspace">
       <div className="surface-card task-workspace-panel">
         <TaskToolbar
-          canFilterByMatter={canFilterByMatter}
+          canFilterByCase={canFilterByCase}
           createLabel={createLabel}
           dueWindow={dueWindow}
-          initialMatterId={initialMatterId ?? null}
-          isMatterContext={isMatterContext}
-          matterId={selectedMatterId || null}
-          matterOptions={availableMatterOptions}
+          initialCaseId={initialCaseId ?? null}
+          isCaseContext={isCaseContext}
+          caseId={selectedCaseId || null}
+          caseOptions={availableCaseOptions}
           onAssignedScope={() =>
-            setScope((current) => (current === "mine" ? (isMatterContext ? "matter" : "firm") : "mine"))
+            setScope((current) => (current === "mine" ? (isCaseContext ? "case" : "firm") : "mine"))
           }
           onCreateTask={() => handleCreateTask()}
           onDueWindowChange={setDueWindow}
-          onMatterChange={setSelectedMatterId}
+          onCaseChange={setSelectedCaseId}
           onSearchChange={setSearch}
           onStatusFilterChange={setStatusFilter}
           onViewModeChange={setViewMode}
@@ -268,7 +268,7 @@ function TaskWorkspace({
 
         {viewMode === "list" ? (
           <TaskListTable
-            canShowMatter={!isMatterContext}
+            canShowCase={!isCaseContext}
             emptyCopy={emptyCopy}
             emptyTitle={emptyTitle}
             onEdit={handleEditTask}
@@ -293,11 +293,11 @@ function TaskWorkspace({
       {editorState ? (
         <TaskEditorModal
           key={`${editorState.mode}-${editorState.taskId ?? "new"}-${editorState.presetStatus ?? "na"}`}
-          availableMatters={availableMatterOptions}
-          lockedMatterId={isMatterContext ? initialMatterId ?? null : null}
+          availableCases={availableCaseOptions}
+          lockedCaseId={isCaseContext ? initialCaseId ?? null : null}
           onClose={() => setEditorState(null)}
           onSave={handleSaveTask}
-          preferredMatterId={selectedMatterId || initialMatterId || null}
+          preferredCaseId={selectedCaseId || initialCaseId || null}
           presetStatus={editorState.presetStatus}
           task={selectedTask}
         />
@@ -307,17 +307,17 @@ function TaskWorkspace({
 }
 
 function TaskToolbar({
-  canFilterByMatter,
+  canFilterByCase,
   createLabel,
   dueWindow,
-  initialMatterId,
-  isMatterContext,
-  matterId,
-  matterOptions,
+  initialCaseId,
+  isCaseContext,
+  caseId,
+  caseOptions,
   onAssignedScope,
   onCreateTask,
   onDueWindowChange,
-  onMatterChange,
+  onCaseChange,
   onSearchChange,
   onStatusFilterChange,
   onViewModeChange,
@@ -326,17 +326,17 @@ function TaskToolbar({
   statusFilter,
   viewMode,
 }: {
-  canFilterByMatter: boolean;
+  canFilterByCase: boolean;
   createLabel: string;
   dueWindow: TaskDueWindow;
-  initialMatterId: string | null;
-  isMatterContext: boolean;
-  matterId: string | null;
-  matterOptions: MatterOption[];
+  initialCaseId: string | null;
+  isCaseContext: boolean;
+  caseId: string | null;
+  caseOptions: CaseOption[];
   onAssignedScope: () => void;
   onCreateTask: () => void;
   onDueWindowChange: (value: TaskDueWindow) => void;
-  onMatterChange: (value: string) => void;
+  onCaseChange: (value: string) => void;
   onSearchChange: (value: string) => void;
   onStatusFilterChange: (value: TaskStatus | "all") => void;
   onViewModeChange: (value: TaskViewMode) => void;
@@ -349,11 +349,11 @@ function TaskToolbar({
     <div className="task-toolbar-shell">
       <div className="task-toolbar-header">
         <h2 className="task-toolbar-title">
-          {isMatterContext ? "Matter Tasks" : "Tasks"}
+          {isCaseContext ? "Case Tasks" : "Tasks"}
         </h2>
         <div className="task-toolbar-header-actions">
-          {isMatterContext && initialMatterId ? (
-            <Link className="btn btn-ghost" href={`/tasks?matter_id=${initialMatterId}`}>
+          {isCaseContext && initialCaseId ? (
+            <Link className="btn btn-ghost" href={`/tasks?case_id=${initialCaseId}`}>
               View All Tasks
             </Link>
           ) : null}
@@ -395,11 +395,11 @@ function TaskToolbar({
       </div>
 
       <div className="task-toolbar-filters">
-        <label className="matter-search-field task-search-field" aria-label="Search tasks">
+        <label className="case-search-field task-search-field" aria-label="Search tasks">
           <SearchIcon />
           <input
             onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Search tasks, matters, clients, assignees"
+            placeholder="Search tasks, cases, clients, assignees"
             type="search"
             value={search}
           />
@@ -419,12 +419,12 @@ function TaskToolbar({
           </select>
         </label>
 
-        {canFilterByMatter ? (
+        {canFilterByCase ? (
           <label className="task-inline-select">
-            <span>Matter</span>
-            <select onChange={(event) => onMatterChange(event.target.value)} value={matterId ?? ""}>
-              <option value="">All matters</option>
-              {matterOptions.map((option) => (
+            <span>Case</span>
+            <select onChange={(event) => onCaseChange(event.target.value)} value={caseId ?? ""}>
+              <option value="">All cases</option>
+              {caseOptions.map((option) => (
                 <option key={option.id} value={option.id}>
                   {option.reference}
                 </option>
@@ -462,14 +462,14 @@ function TaskViewToggle({
 }
 
 function TaskListTable({
-  canShowMatter,
+  canShowCase,
   emptyCopy,
   emptyTitle,
   onEdit,
   onStatusChange,
   tasks,
 }: {
-  canShowMatter: boolean;
+  canShowCase: boolean;
   emptyCopy: string;
   emptyTitle: string;
   onEdit: (taskId: string) => void;
@@ -486,12 +486,12 @@ function TaskListTable({
         <div
           className={cn(
             "task-table-head",
-            canShowMatter ? "is-global" : "is-matter",
+            canShowCase ? "is-global" : "is-case",
           )}
         >
           <span>Task</span>
           <span>Due</span>
-          {canShowMatter ? <span>Matter</span> : null}
+          {canShowCase ? <span>Case</span> : null}
           <span>Assignee</span>
           <span>Status</span>
           <span>Priority</span>
@@ -501,7 +501,7 @@ function TaskListTable({
         <div className="task-table-body">
           {tasks.map((task) => (
             <TaskListRow
-              canShowMatter={canShowMatter}
+              canShowCase={canShowCase}
               key={task.id}
               onEdit={onEdit}
               onStatusChange={onStatusChange}
@@ -521,18 +521,18 @@ function TaskListTable({
 }
 
 function TaskListRow({
-  canShowMatter,
+  canShowCase,
   onEdit,
   onStatusChange,
   task,
 }: {
-  canShowMatter: boolean;
+  canShowCase: boolean;
   onEdit: (taskId: string) => void;
   onStatusChange: (taskId: string, status: TaskStatus) => void;
   task: TaskItem;
 }) {
   return (
-    <div className={cn("task-table-row", canShowMatter ? "is-global" : "is-matter")}>
+    <div className={cn("task-table-row", canShowCase ? "is-global" : "is-case")}>
       <div className="task-table-primary">
         <button className="task-inline-link" onClick={() => onEdit(task.id)} type="button">
           {task.title}
@@ -540,10 +540,10 @@ function TaskListRow({
         <p className="row-meta">{task.description}</p>
       </div>
       <TaskDueMeta task={task} />
-      {canShowMatter ? (
-        <Link className="task-matter-link" href={`/matters/${task.matterId}`}>
-          <span className="table-ref">{task.matterReference}</span>
-          <span className="row-meta">{task.matterTitle}</span>
+      {canShowCase ? (
+        <Link className="task-case-link" href={`/cases/${task.caseId}`}>
+          <span className="table-ref">{task.caseReference}</span>
+          <span className="row-meta">{task.caseTitle}</span>
         </Link>
       ) : null}
       <span className="table-copy">{task.assigneeName ?? "Unassigned"}</span>
@@ -569,7 +569,7 @@ function TaskCardListItem({
     <div className="surface-card task-mobile-card">
       <div className="task-mobile-card-head">
         <div>
-          <p className="table-ref">{task.matterReference}</p>
+          <p className="table-ref">{task.caseReference}</p>
           <button className="task-inline-link" onClick={() => onEdit(task.id)} type="button">
             {task.title}
           </button>
@@ -582,7 +582,7 @@ function TaskCardListItem({
       <div className="task-mobile-card-grid">
         <TaskCardMeta label="Due" value={getDueLabel(task)} />
         <TaskCardMeta label="Assignee" value={task.assigneeName ?? "Unassigned"} />
-        <TaskCardMeta label="Matter" value={task.matterTitle} />
+        <TaskCardMeta label="Case" value={task.caseTitle} />
         <TaskCardMeta label="Client" value={task.clientName} />
       </div>
 
@@ -664,8 +664,8 @@ function TaskBoard({
                   </button>
                   <p className="row-meta">{task.description}</p>
 
-                  <Link className="task-board-matter-link" href={`/matters/${task.matterId}`}>
-                    {task.matterReference} · {task.matterTitle}
+                  <Link className="task-board-case-link" href={`/cases/${task.caseId}`}>
+                    {task.caseReference}  -  {task.caseTitle}
                   </Link>
 
                   <div className="task-board-card-meta">
@@ -721,26 +721,26 @@ function TaskEmptyState({ copy, title }: { copy: string; title: string }) {
 }
 
 function TaskEditorModal({
-  availableMatters,
-  lockedMatterId,
+  availableCases,
+  lockedCaseId,
   onClose,
   onSave,
-  preferredMatterId,
+  preferredCaseId,
   presetStatus,
   task,
 }: {
-  availableMatters: MatterOption[];
-  lockedMatterId: string | null;
+  availableCases: CaseOption[];
+  lockedCaseId: string | null;
   onClose: () => void;
   onSave: (values: TaskFormValues) => void;
-  preferredMatterId: string | null;
+  preferredCaseId: string | null;
   presetStatus?: TaskStatus;
   task: TaskItem | null;
 }) {
   const initialValues: TaskFormValues = {
     title: task?.title ?? "",
     description: task?.description ?? "",
-    matterId: lockedMatterId ?? task?.matterId ?? preferredMatterId ?? availableMatters[0]?.id ?? "",
+    caseId: lockedCaseId ?? task?.caseId ?? preferredCaseId ?? availableCases[0]?.id ?? "",
     assigneeName: task?.assigneeName ?? "",
     status: task?.status ?? presetStatus ?? "todo",
     priority: task?.priority ?? "medium",
@@ -755,7 +755,7 @@ function TaskEditorModal({
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!values.title.trim() || !values.matterId) {
+    if (!values.title.trim() || !values.caseId) {
       return;
     }
 
@@ -773,7 +773,7 @@ function TaskEditorModal({
         <div className="task-modal-head">
           <div>
             <p className="eyebrow-label">{task ? "Edit task" : "Create task"}</p>
-            <h3 className="matter-title task-modal-title" id="task-editor-title">
+            <h3 className="case-title task-modal-title" id="task-editor-title">
               {task ? task.title : "Task Editor"}
             </h3>
           </div>
@@ -802,20 +802,20 @@ function TaskEditorModal({
             />
           </label>
 
-          {lockedMatterId ? (
+          {lockedCaseId ? (
             <div className="task-form-field">
-              <span>Matter</span>
+              <span>Case</span>
               <div className="task-form-readonly">
-                {availableMatters.find((option) => option.id === values.matterId)?.title ?? "Current matter"}
+                {availableCases.find((option) => option.id === values.caseId)?.title ?? "Current case"}
               </div>
             </div>
           ) : (
             <label className="task-form-field">
-              <span>Matter</span>
-              <select onChange={(event) => update("matterId", event.target.value)} value={values.matterId}>
-                {availableMatters.map((option) => (
+              <span>Case</span>
+              <select onChange={(event) => update("caseId", event.target.value)} value={values.caseId}>
+                {availableCases.map((option) => (
                   <option key={option.id} value={option.id}>
-                    {option.reference} · {option.title}
+                    {option.reference}  -  {option.title}
                   </option>
                 ))}
               </select>
@@ -939,15 +939,15 @@ function getDueTone(task: TaskItem): "default" | "warning" | "danger" | "success
   return "default";
 }
 
-function getMatterOptions(tasks: TaskItem[]): MatterOption[] {
-  const map = new Map<string, MatterOption>();
+function getCaseOptions(tasks: TaskItem[]): CaseOption[] {
+  const map = new Map<string, CaseOption>();
 
   tasks.forEach((task) => {
-    if (!map.has(task.matterId)) {
-      map.set(task.matterId, {
-        id: task.matterId,
-        reference: task.matterReference,
-        title: task.matterTitle,
+    if (!map.has(task.caseId)) {
+      map.set(task.caseId, {
+        id: task.caseId,
+        reference: task.caseReference,
+        title: task.caseTitle,
         clientName: task.clientName,
       });
     }
@@ -984,7 +984,7 @@ function SearchIcon() {
   );
 }
 
-interface MatterOption {
+interface CaseOption {
   id: string;
   reference: string;
   title: string;

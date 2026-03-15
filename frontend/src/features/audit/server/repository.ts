@@ -1,28 +1,28 @@
 import "server-only";
 
-import { listMockAuditByMatter } from "@/features/audit/data/mock";
+import { listMockAuditByCase } from "@/features/audit/data/mock";
 import type { AuditApiItem, AuditCategory, AuditEvent, AuditListFilters, AuditSource, PaginatedAuditResult } from "@/features/audit/types";
 import { apiGet } from "@/lib/api";
 import { getDataSource } from "@/lib/data-source";
 
 export interface AuditRepository {
-  listByMatter(matterId: string, filters?: AuditListFilters): Promise<PaginatedAuditResult>;
+  listByCase(caseId: string, filters?: AuditListFilters): Promise<PaginatedAuditResult>;
 }
 
 const mockAuditRepository: AuditRepository = {
-  async listByMatter(matterId) {
-    return listMockAuditByMatter(matterId);
+  async listByCase(caseId) {
+    return listMockAuditByCase(caseId);
   },
 };
 
 const apiAuditRepository: AuditRepository = {
-  async listByMatter(matterId) {
+  async listByCase(caseId) {
     try {
-      const items = await apiGet<AuditApiItem[]>(`/api/v1/matters/${matterId}/audit-log`, { allowNotFound: true });
+      const items = await apiGet<AuditApiItem[]>(`/api/v1/cases/${caseId}/audit-log`, { allowNotFound: true });
       if (!items) {
-        return listMockAuditByMatter(matterId);
+        return listMockAuditByCase(caseId);
       }
-      const normalized = items.map((item) => normalizeAuditApiItem(matterId, item));
+      const normalized = items.map((item) => normalizeAuditApiItem(caseId, item));
       return {
         items: normalized,
         page: 1,
@@ -30,7 +30,7 @@ const apiAuditRepository: AuditRepository = {
         total: normalized.length,
       };
     } catch {
-      return listMockAuditByMatter(matterId);
+      return listMockAuditByCase(caseId);
     }
   },
 };
@@ -38,14 +38,14 @@ const apiAuditRepository: AuditRepository = {
 export const auditRepository: AuditRepository =
   getDataSource() === "api" ? apiAuditRepository : mockAuditRepository;
 
-function normalizeAuditApiItem(matterId: string, item: AuditApiItem): AuditEvent {
+function normalizeAuditApiItem(caseId: string, item: AuditApiItem): AuditEvent {
   const diffEntries = buildDiffEntries(item.diff);
   const category = deriveCategory(item.action);
   const source = deriveSource(item.action);
 
   return {
     id: item.id,
-    matterId,
+    caseId,
     entityType: item.entity_type,
     entityId: item.entity_id,
     action: item.action,

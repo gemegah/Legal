@@ -16,9 +16,9 @@ from app.schemas.document import (
 _DOCUMENTS: list[DocumentRecord] = [
     DocumentRecord(
         id="api-doc-001",
-        matterId="matter-0041",
-        matterReference="M-0041",
-        matterTitle="Asante v. Mensah Industries Ltd",
+        caseId="case-0041",
+        caseReference="CAS-0041",
+        caseTitle="Asante v. Mensah Industries Ltd",
         clientName="Akosua Asante",
         title="Reply to Notice of Preliminary Objection",
         documentType="Court Filing",
@@ -41,7 +41,7 @@ _DOCUMENTS: list[DocumentRecord] = [
             "summary": "2 deadlines flagged with high confidence.",
             "flags": [
                 {"id": "api-flag-1", "label": "Reply deadline", "detail": "Reply must be filed by 11 Mar 2026.", "confidence": "high"},
-                {"id": "api-flag-2", "label": "Hearing date", "detail": "Matter is listed for 15 Mar 2026.", "confidence": "high"},
+                {"id": "api-flag-2", "label": "Hearing date", "detail": "Case is listed for 15 Mar 2026.", "confidence": "high"},
             ],
             "lastAnalyzedAt": "2026-03-09T10:05:00Z",
         },
@@ -50,9 +50,9 @@ _DOCUMENTS: list[DocumentRecord] = [
     ),
     DocumentRecord(
         id="api-doc-002",
-        matterId="matter-0039",
-        matterReference="M-0039",
-        matterTitle="Re: Accra Properties Ltd Acquisition",
+        caseId="case-0039",
+        caseReference="CAS-0039",
+        caseTitle="Re: Accra Properties Ltd Acquisition",
         clientName="Accra Properties Ltd",
         title="Executed Transfer Deed",
         documentType="Executed Deed",
@@ -83,17 +83,17 @@ _TEMPLATES: list[DocumentTemplate] = [
         sourceKind="word",
         status="active",
         ownerName="K. Boateng",
-        matterTypes=["Commercial Litigation"],
+        caseTypes=["Commercial Litigation"],
         practiceAreas=["Litigation"],
         updatedAt="2026-03-08T16:00:00Z",
         defaultDocumentType="Court Filing",
         defaultTags=["litigation", "reply"],
-        titlePattern="{{matter.reference}} - Reply Draft",
+        titlePattern="{{case.reference}} - Reply Draft",
         supportsInternalGeneration=False,
         outputTargets=["word"],
         sourceFileName="litigation-reply.dotx",
         fields=[
-            {"id": "template-field-1", "token": "{{matter.reference}}", "label": "Matter Reference", "source": "matter.reference", "required": True},
+            {"id": "template-field-1", "token": "{{case.reference}}", "label": "Case Reference", "source": "case.reference", "required": True},
             {"id": "template-field-2", "token": "{{client.name}}", "label": "Client Name", "source": "client.name", "required": True},
         ],
     )
@@ -105,6 +105,10 @@ _PROVIDERS: list[DocumentProviderStatus] = [
 ]
 
 
+def _format_case_reference(case_id: str) -> str:
+    return case_id.replace("case-", "CAS-", 1)
+
+
 def _build_facets(documents: list[DocumentRecord]) -> dict[str, list[dict[str, str | int]]]:
     def pack(values: list[str]) -> list[dict[str, str | int]]:
         counts: dict[str, int] = {}
@@ -113,7 +117,7 @@ def _build_facets(documents: list[DocumentRecord]) -> dict[str, list[dict[str, s
         return [{"value": key, "count": value} for key, value in sorted(counts.items())]
 
     return {
-        "matterOptions": pack([f"{doc.matterId}::{doc.matterReference}" for doc in documents]),
+        "caseOptions": pack([f"{doc.caseId}::{doc.caseReference}" for doc in documents]),
         "documentTypeOptions": pack([doc.documentType for doc in documents]),
         "sourceOptions": pack([doc.sourceKind for doc in documents]),
         "aiStatusOptions": pack([doc.aiStatus for doc in documents]),
@@ -121,8 +125,8 @@ def _build_facets(documents: list[DocumentRecord]) -> dict[str, list[dict[str, s
     }
 
 
-def get_workspace(matter_id: str | None = None) -> DocumentWorkspaceData:
-    documents = [doc for doc in _DOCUMENTS if not matter_id or doc.matterId == matter_id]
+def get_workspace(case_id: str | None = None) -> DocumentWorkspaceData:
+    documents = [doc for doc in _DOCUMENTS if not case_id or doc.caseId == case_id]
     return DocumentWorkspaceData(
         documents=deepcopy(documents),
         templates=deepcopy(_TEMPLATES),
@@ -208,12 +212,12 @@ def create_template(payload: DocumentTemplateCreateRequest) -> DocumentTemplate:
         sourceKind=payload.sourceKind,
         status=payload.status,
         ownerName="K. Boateng",
-        matterTypes=["Commercial Litigation", "Advisory"],
+        caseTypes=["Commercial Litigation", "Advisory"],
         practiceAreas=["Commercial"],
         updatedAt=datetime.now(UTC).isoformat().replace("+00:00", "Z"),
         defaultDocumentType="Advice Letter",
         defaultTags=["automation"],
-        titlePattern="{{matter.reference}} - Draft",
+        titlePattern="{{case.reference}} - Draft",
         supportsInternalGeneration=payload.sourceKind in {"generated", "upload"},
         outputTargets=["word"] if payload.sourceKind == "word" else ["google_docs"] if payload.sourceKind == "google_docs" else ["legalos", "word"],
         sourceFileName=f"{payload.name.lower().replace(' ', '-')}.docx",
@@ -229,9 +233,9 @@ def generate_from_template(template_id: str, payload: DocumentTemplateGenerateRe
         return None
     document = DocumentRecord(
         id=f"api-doc-{len(_DOCUMENTS) + 1:03d}",
-        matterId=payload.matterId,
-        matterReference=payload.matterId.upper(),
-        matterTitle="Generated Matter Draft",
+        caseId=payload.caseId,
+        caseReference=_format_case_reference(payload.caseId),
+        caseTitle="Generated Case Draft",
         clientName="Generated Client",
         title=payload.title,
         documentType=template.defaultDocumentType,

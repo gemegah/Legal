@@ -54,7 +54,7 @@ def test_can_create_template_and_generate_document() -> None:
     generate_response = client.post(
         f"/api/v1/document-templates/{template_id}/generate",
         json={
-            "matterId": "matter-0041",
+            "caseId": "case-0041",
             "title": "Generated Advice Draft",
             "outputTarget": "word",
         },

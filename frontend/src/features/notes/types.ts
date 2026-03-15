@@ -7,9 +7,9 @@ export interface NoteRelatedItem {
   label: string;
 }
 
-export interface MatterNote {
+export interface CaseNote {
   id: string;
-  matterId: string;
+  caseId: string;
   title: string;
   body: string;
   authorId: string;

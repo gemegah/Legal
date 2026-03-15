@@ -1,7 +1,8 @@
 # LegalOS Database Schema
 
 ## Summary
-Implementation-ready PostgreSQL 16 schema for LegalOS. This schema supports multi-tenant matter management, documents, billing, client portal access, payments, audit logging, and AI suggestions.
+Implementation-ready PostgreSQL 16 schema for LegalOS. This schema supports multi-tenant case management, documents, billing, authenticated client portal timeline access, payments, audit logging, and AI suggestions.
+Messaging tables may still exist in the codebase as retained prototype work, but they are not part of the MVP contract in this document.
 
 ## Schema Conventions
 - PostgreSQL 16 target
@@ -23,7 +24,7 @@ CREATE EXTENSION IF NOT EXISTS citext;
 ## Enum Definitions
 ```sql
 CREATE TYPE user_role AS ENUM ('admin', 'lawyer', 'staff', 'client');
-CREATE TYPE matter_status AS ENUM ('active', 'pending', 'closed', 'archived');
+CREATE TYPE case_status AS ENUM ('active', 'pending', 'closed', 'archived');
 CREATE TYPE task_status AS ENUM ('todo', 'in_progress', 'done', 'blocked', 'cancelled');
 CREATE TYPE task_priority AS ENUM ('low', 'medium', 'high', 'urgent');
 CREATE TYPE event_type AS ENUM ('hearing', 'filing_deadline', 'meeting', 'mention', 'reminder', 'other');
@@ -135,16 +136,16 @@ CREATE INDEX idx_contacts_client_id ON contacts (client_id);
 ```
 Comment: opposing parties, counsel, and other related contacts.
 
-### 6. `matters`
+### 6. `cases`
 ```sql
-CREATE TABLE matters (
+CREATE TABLE cases (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firm_id UUID NOT NULL REFERENCES firms(id) ON DELETE RESTRICT,
   client_id UUID NOT NULL REFERENCES clients(id) ON DELETE RESTRICT,
   title TEXT NOT NULL,
-  matter_type TEXT NOT NULL,
+  case_type TEXT NOT NULL,
   practice_area TEXT NOT NULL,
-  status matter_status NOT NULL DEFAULT 'active',
+  status case_status NOT NULL DEFAULT 'active',
   court TEXT,
   suit_number TEXT,
   opposing_party TEXT,
@@ -157,35 +158,35 @@ CREATE TABLE matters (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
-CREATE INDEX idx_matters_firm_id ON matters (firm_id);
-CREATE INDEX idx_matters_firm_status ON matters (firm_id, status);
-CREATE INDEX idx_matters_client_id ON matters (client_id);
-CREATE INDEX idx_matters_next_deadline_at ON matters (firm_id, next_deadline_at);
+CREATE INDEX idx_cases_firm_id ON cases (firm_id);
+CREATE INDEX idx_cases_firm_status ON cases (firm_id, status);
+CREATE INDEX idx_cases_client_id ON cases (client_id);
+CREATE INDEX idx_cases_next_deadline_at ON cases (firm_id, next_deadline_at);
 ```
 Comment: the core container object for all legal work.
 
-### 7. `matter_members`
+### 7. `case_members`
 ```sql
-CREATE TABLE matter_members (
+CREATE TABLE case_members (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firm_id UUID NOT NULL REFERENCES firms(id) ON DELETE RESTRICT,
-  matter_id UUID NOT NULL REFERENCES matters(id) ON DELETE RESTRICT,
+  case_id UUID NOT NULL REFERENCES cases(id) ON DELETE RESTRICT,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   member_role TEXT NOT NULL DEFAULT 'member',
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  CONSTRAINT matter_members_unique UNIQUE (matter_id, user_id)
+  CONSTRAINT case_members_unique UNIQUE (case_id, user_id)
 );
-CREATE INDEX idx_matter_members_firm_id ON matter_members (firm_id);
-CREATE INDEX idx_matter_members_user_id ON matter_members (user_id);
+CREATE INDEX idx_case_members_firm_id ON case_members (firm_id);
+CREATE INDEX idx_case_members_user_id ON case_members (user_id);
 ```
-Comment: matter-local access control and assignment map.
+Comment: case-local access control and assignment map.
 
 ### 8. `tasks`
 ```sql
 CREATE TABLE tasks (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firm_id UUID NOT NULL REFERENCES firms(id) ON DELETE RESTRICT,
-  matter_id UUID NOT NULL REFERENCES matters(id) ON DELETE RESTRICT,
+  case_id UUID NOT NULL REFERENCES cases(id) ON DELETE RESTRICT,
   title TEXT NOT NULL,
   description TEXT,
   assignee_id UUID REFERENCES users(id) ON DELETE SET NULL,
@@ -198,7 +199,7 @@ CREATE TABLE tasks (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_tasks_firm_id ON tasks (firm_id);
-CREATE INDEX idx_tasks_matter_id ON tasks (matter_id);
+CREATE INDEX idx_tasks_case_id ON tasks (case_id);
 CREATE INDEX idx_tasks_assignee_id ON tasks (assignee_id);
 CREATE INDEX idx_tasks_due_at ON tasks (firm_id, due_at);
 ```
@@ -209,7 +210,7 @@ Comment: `deleted_at` is a soft-delete marker retained for auditability.
 CREATE TABLE events (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firm_id UUID NOT NULL REFERENCES firms(id) ON DELETE RESTRICT,
-  matter_id UUID REFERENCES matters(id) ON DELETE SET NULL,
+  case_id UUID REFERENCES cases(id) ON DELETE SET NULL,
   title TEXT NOT NULL,
   description TEXT,
   event_type event_type NOT NULL,
@@ -224,7 +225,7 @@ CREATE TABLE events (
   CONSTRAINT events_ai_confidence_range CHECK (ai_confidence IS NULL OR (ai_confidence >= 0 AND ai_confidence <= 1))
 );
 CREATE INDEX idx_events_firm_id ON events (firm_id);
-CREATE INDEX idx_events_matter_id ON events (matter_id);
+CREATE INDEX idx_events_case_id ON events (case_id);
 CREATE INDEX idx_events_starts_at ON events (firm_id, starts_at);
 ```
 Comment: `ai_confidence` is populated only for AI-extracted events.
@@ -234,7 +235,7 @@ Comment: `ai_confidence` is populated only for AI-extracted events.
 CREATE TABLE notes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firm_id UUID NOT NULL REFERENCES firms(id) ON DELETE RESTRICT,
-  matter_id UUID NOT NULL REFERENCES matters(id) ON DELETE RESTRICT,
+  case_id UUID NOT NULL REFERENCES cases(id) ON DELETE RESTRICT,
   author_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   content TEXT NOT NULL,
   is_pinned BOOLEAN NOT NULL DEFAULT FALSE,
@@ -242,7 +243,7 @@ CREATE TABLE notes (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_notes_firm_id ON notes (firm_id);
-CREATE INDEX idx_notes_matter_id ON notes (matter_id);
+CREATE INDEX idx_notes_case_id ON notes (case_id);
 ```
 
 ### 11. `documents`
@@ -250,7 +251,7 @@ CREATE INDEX idx_notes_matter_id ON notes (matter_id);
 CREATE TABLE documents (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firm_id UUID NOT NULL REFERENCES firms(id) ON DELETE RESTRICT,
-  matter_id UUID NOT NULL REFERENCES matters(id) ON DELETE RESTRICT,
+  case_id UUID NOT NULL REFERENCES cases(id) ON DELETE RESTRICT,
   uploaded_by UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   title TEXT NOT NULL,
   document_type TEXT NOT NULL,
@@ -262,7 +263,7 @@ CREATE TABLE documents (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_documents_firm_id ON documents (firm_id);
-CREATE INDEX idx_documents_matter_id ON documents (matter_id);
+CREATE INDEX idx_documents_case_id ON documents (case_id);
 CREATE INDEX idx_documents_tags_gin ON documents USING GIN (tags);
 ```
 Comment: `storage_key` points to the latest canonical document object.
@@ -295,7 +296,7 @@ Comment: immutable document version history with OCR tracking.
 CREATE TABLE time_entries (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firm_id UUID NOT NULL REFERENCES firms(id) ON DELETE RESTRICT,
-  matter_id UUID NOT NULL REFERENCES matters(id) ON DELETE RESTRICT,
+  case_id UUID NOT NULL REFERENCES cases(id) ON DELETE RESTRICT,
   user_id UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   description TEXT NOT NULL,
   work_date DATE NOT NULL DEFAULT CURRENT_DATE,
@@ -307,7 +308,7 @@ CREATE TABLE time_entries (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_time_entries_firm_id ON time_entries (firm_id);
-CREATE INDEX idx_time_entries_matter_id ON time_entries (matter_id);
+CREATE INDEX idx_time_entries_case_id ON time_entries (case_id);
 CREATE INDEX idx_time_entries_invoice_id ON time_entries (invoice_id);
 ```
 Comment: unbilled entries remain editable; sent-invoice entries are locked by application rules.
@@ -317,7 +318,7 @@ Comment: unbilled entries remain editable; sent-invoice entries are locked by ap
 CREATE TABLE expenses (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firm_id UUID NOT NULL REFERENCES firms(id) ON DELETE RESTRICT,
-  matter_id UUID NOT NULL REFERENCES matters(id) ON DELETE RESTRICT,
+  case_id UUID NOT NULL REFERENCES cases(id) ON DELETE RESTRICT,
   created_by UUID NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
   description TEXT NOT NULL,
   amount_ghs NUMERIC(12,2) NOT NULL CHECK (amount_ghs >= 0),
@@ -328,7 +329,7 @@ CREATE TABLE expenses (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 CREATE INDEX idx_expenses_firm_id ON expenses (firm_id);
-CREATE INDEX idx_expenses_matter_id ON expenses (matter_id);
+CREATE INDEX idx_expenses_case_id ON expenses (case_id);
 CREATE INDEX idx_expenses_invoice_id ON expenses (invoice_id);
 ```
 Comment: `receipt_key` stores the object storage reference for proof of expense.
@@ -338,7 +339,7 @@ Comment: `receipt_key` stores the object storage reference for proof of expense.
 CREATE TABLE invoices (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firm_id UUID NOT NULL REFERENCES firms(id) ON DELETE RESTRICT,
-  matter_id UUID NOT NULL REFERENCES matters(id) ON DELETE RESTRICT,
+  case_id UUID NOT NULL REFERENCES cases(id) ON DELETE RESTRICT,
   client_id UUID NOT NULL REFERENCES clients(id) ON DELETE RESTRICT,
   invoice_number TEXT NOT NULL,
   status invoice_status NOT NULL DEFAULT 'draft',
@@ -407,11 +408,13 @@ CREATE INDEX idx_payments_status ON payments (firm_id, status);
 Comment: `gateway_ref` is the idempotency key for webhook reconciliation.
 
 ### 18. `messages`
+Retained in the codebase for post-MVP exploration only. It is not a required v1 schema surface, and the portal timeline should be derived from significant case activity rather than message records.
+
 ```sql
 CREATE TABLE messages (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   firm_id UUID NOT NULL REFERENCES firms(id) ON DELETE RESTRICT,
-  matter_id UUID NOT NULL REFERENCES matters(id) ON DELETE RESTRICT,
+  case_id UUID NOT NULL REFERENCES cases(id) ON DELETE RESTRICT,
   author_user_id UUID REFERENCES users(id) ON DELETE SET NULL,
   author_client_id UUID REFERENCES clients(id) ON DELETE SET NULL,
   body TEXT NOT NULL,
@@ -420,10 +423,10 @@ CREATE TABLE messages (
   CONSTRAINT messages_author_check CHECK (author_user_id IS NOT NULL OR author_client_id IS NOT NULL)
 );
 CREATE INDEX idx_messages_firm_id ON messages (firm_id);
-CREATE INDEX idx_messages_matter_id ON messages (matter_id);
-CREATE INDEX idx_messages_client_visible ON messages (matter_id, is_client_visible);
+CREATE INDEX idx_messages_case_id ON messages (case_id);
+CREATE INDEX idx_messages_client_visible ON messages (case_id, is_client_visible);
 ```
-Comment: `is_client_visible` controls what the portal can see.
+Comment: retained for future v2 messaging design work; not used by the MVP portal timeline contract.
 
 ### 19. `notification_queue`
 ```sql
@@ -519,7 +522,7 @@ ALTER TABLE expenses
   "fields": [
     { "name": "id", "type": "string" },
     { "name": "firm_id", "type": "string", "facet": true },
-    { "name": "matter_id", "type": "string", "facet": true },
+    { "name": "case_id", "type": "string", "facet": true },
     { "name": "title", "type": "string" },
     { "name": "document_type", "type": "string", "facet": true },
     { "name": "tags", "type": "string[]", "facet": true },
@@ -535,7 +538,7 @@ ALTER TABLE expenses
 - `citext` is used for case-insensitive email uniqueness
 - `task_status`, `task_priority`, `invoice_status`, and `payment_status` values beyond the prompt were inferred from the PRD and workflows
 - `tasks` uses soft delete via `deleted_at`
-- `events.matter_id` is nullable so firm-wide reminders can exist
+- `events.case_id` is nullable so firm-wide reminders can exist
 - `notification_queue.status` stays `TEXT` instead of a strict enum to keep worker states flexible at MVP
 - `ai_suggestions` includes `suggestion_type` and optional `confidence` because the workflows imply multiple AI draft types and confidence-based review
 - `updated_at` is omitted from append-only or immutable records like `audit_log`, `refresh_tokens`, and `doc_versions`

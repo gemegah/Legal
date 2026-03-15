@@ -2,7 +2,7 @@ import "server-only";
 
 import { cache } from "react";
 
-import type { BillingWorkspaceData, Invoice, MatterBillingData } from "@/features/billing/types";
+import type { BillingWorkspaceData, Invoice, CaseBillingData } from "@/features/billing/types";
 
 import { billingRepository } from "./repository";
 
@@ -23,14 +23,14 @@ export const getBillingWorkspace = cache(async (): Promise<BillingWorkspaceData>
   return { invoices, timeEntries };
 });
 
-export const getMatterBilling = cache(async (matterId: string): Promise<MatterBillingData> => {
-  if (!matterId) {
+export const getCaseBilling = cache(async (caseId: string): Promise<CaseBillingData> => {
+  if (!caseId) {
     return { invoices: [], timeEntries: [] };
   }
 
   const [invoices, timeEntries] = await Promise.all([
-    billingRepository.listInvoicesByMatter(matterId),
-    billingRepository.listTimeEntriesByMatter(matterId),
+    billingRepository.listInvoicesByCase(caseId),
+    billingRepository.listTimeEntriesByCase(caseId),
   ]);
 
   return { invoices, timeEntries };

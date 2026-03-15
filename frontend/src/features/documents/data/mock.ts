@@ -26,9 +26,9 @@ const providers: DocumentProviderStatus[] = [
 const documents: DocumentRecord[] = [
   {
     id: "doc-001",
-    matterId: "mat-2026-014",
-    matterReference: "MAT-2026-014",
-    matterTitle: "Asante v. Mensah Industries Ltd",
+    caseId: "case-2026-014",
+    caseReference: "CAS-2026-014",
+    caseTitle: "Asante v. Mensah Industries Ltd",
     clientName: "Asante Holdings Ltd",
     title: "Reply to Notice of Preliminary Objection",
     documentType: "Court Filing",
@@ -88,7 +88,7 @@ const documents: DocumentRecord[] = [
         {
           id: "ai-002",
           label: "Hearing date",
-          detail: "Matter is listed for 15 Mar 2026 at 9:00 AM.",
+          detail: "Case is listed for 15 Mar 2026 at 9:00 AM.",
           confidence: "high",
         },
       ],
@@ -118,9 +118,9 @@ const documents: DocumentRecord[] = [
   },
   {
     id: "doc-002",
-    matterId: "mat-2026-014",
-    matterReference: "MAT-2026-014",
-    matterTitle: "Asante v. Mensah Industries Ltd",
+    caseId: "case-2026-014",
+    caseReference: "CAS-2026-014",
+    caseTitle: "Asante v. Mensah Industries Ltd",
     clientName: "Asante Holdings Ltd",
     title: "Scanned Court Notice - 7 March",
     documentType: "Court Notice",
@@ -163,9 +163,9 @@ const documents: DocumentRecord[] = [
   },
   {
     id: "doc-003",
-    matterId: "mat-2026-011",
-    matterReference: "MAT-2026-011",
-    matterTitle: "Darko Family Estate Administration",
+    caseId: "case-2026-011",
+    caseReference: "CAS-2026-011",
+    caseTitle: "Darko Family Estate Administration",
     clientName: "Esi Darko",
     title: "Probate Inventory Letter",
     documentType: "Client Letter",
@@ -223,9 +223,9 @@ const documents: DocumentRecord[] = [
   },
   {
     id: "doc-004",
-    matterId: "mat-2026-009",
-    matterReference: "MAT-2026-009",
-    matterTitle: "Volta Ridge Land Transfer",
+    caseId: "case-2026-009",
+    caseReference: "CAS-2026-009",
+    caseTitle: "Volta Ridge Land Transfer",
     clientName: "Volta Ridge Developers",
     title: "Executed Transfer Deed",
     documentType: "Executed Deed",
@@ -277,9 +277,9 @@ const documents: DocumentRecord[] = [
   },
   {
     id: "doc-005",
-    matterId: "mat-2026-003",
-    matterReference: "MAT-2026-003",
-    matterTitle: "Tema Port Customs Appeal",
+    caseId: "case-2026-003",
+    caseReference: "CAS-2026-003",
+    caseTitle: "Tema Port Customs Appeal",
     clientName: "Harbourline Imports",
     title: "Requested Commercial Invoice Bundle",
     documentType: "Supporting Documents",
@@ -330,19 +330,19 @@ const templates: DocumentTemplate[] = [
     sourceKind: "word",
     status: "active",
     ownerName: "Kwame Boateng",
-    matterTypes: ["Commercial Litigation", "Debt Recovery"],
+    caseTypes: ["Commercial Litigation", "Debt Recovery"],
     practiceAreas: ["Dispute Resolution", "Commercial"],
     updatedAt: "2026-03-08T16:00:00Z",
     defaultDocumentType: "Court Filing",
     defaultTags: ["litigation", "reply"],
-    titlePattern: "{{matter.reference}} - Reply Draft",
+    titlePattern: "{{case.reference}} - Reply Draft",
     supportsInternalGeneration: false,
     outputTargets: ["word"],
     sourceFileName: "litigation-reply.dotx",
     fields: [
-      { id: "field-001", token: "{{matter.reference}}", label: "Matter Reference", source: "matter.reference", required: true },
+      { id: "field-001", token: "{{case.reference}}", label: "Case Reference", source: "case.reference", required: true },
       { id: "field-002", token: "{{client.name}}", label: "Client Name", source: "client.name", required: true },
-      { id: "field-003", token: "{{court.name}}", label: "Court Name", source: "matter.court", required: false },
+      { id: "field-003", token: "{{court.name}}", label: "Court Name", source: "case.court", required: false },
     ],
   },
   {
@@ -352,7 +352,7 @@ const templates: DocumentTemplate[] = [
     sourceKind: "google_docs",
     status: "active",
     ownerName: "Ama Osei",
-    matterTypes: ["Probate"],
+    caseTypes: ["Probate"],
     practiceAreas: ["Estates"],
     updatedAt: "2026-03-07T11:00:00Z",
     defaultDocumentType: "Client Letter",
@@ -363,7 +363,7 @@ const templates: DocumentTemplate[] = [
     sourceFileName: "probate-inventory-template.gdoc",
     fields: [
       { id: "field-004", token: "{{client.name}}", label: "Client Name", source: "client.name", required: true },
-      { id: "field-005", token: "{{matter.title}}", label: "Matter Title", source: "matter.title", required: true },
+      { id: "field-005", token: "{{case.title}}", label: "Case Title", source: "case.title", required: true },
     ],
   },
   {
@@ -373,17 +373,17 @@ const templates: DocumentTemplate[] = [
     sourceKind: "generated",
     status: "active",
     ownerName: "Kweku Biney",
-    matterTypes: ["Conveyancing"],
+    caseTypes: ["Conveyancing"],
     practiceAreas: ["Property"],
     updatedAt: "2026-03-05T09:00:00Z",
     defaultDocumentType: "Executed Deed",
     defaultTags: ["deed", "generated"],
-    titlePattern: "{{matter.reference}} - Transfer Deed",
+    titlePattern: "{{case.reference}} - Transfer Deed",
     supportsInternalGeneration: true,
     outputTargets: ["legalos", "word"],
     sourceFileName: "transfer-deed.docx",
     fields: [
-      { id: "field-006", token: "{{matter.title}}", label: "Matter Title", source: "matter.title", required: true },
+      { id: "field-006", token: "{{case.title}}", label: "Case Title", source: "case.title", required: true },
       { id: "field-007", token: "{{firm.name}}", label: "Firm Name", source: "firm.name", required: true },
       { id: "field-008", token: "{{today.long}}", label: "Generation Date", source: "today.long", required: true },
     ],
@@ -395,18 +395,18 @@ const templates: DocumentTemplate[] = [
     sourceKind: "upload",
     status: "draft",
     ownerName: "Efua Nkrumah",
-    matterTypes: ["Regulatory Appeal", "Commercial Litigation"],
+    caseTypes: ["Regulatory Appeal", "Commercial Litigation"],
     practiceAreas: ["Regulatory", "Dispute Resolution"],
     updatedAt: "2026-03-09T07:00:00Z",
     defaultDocumentType: "Supporting Documents",
     defaultTags: ["request", "client"],
-    titlePattern: "{{matter.reference}} - Requested Uploads",
+    titlePattern: "{{case.reference}} - Requested Uploads",
     supportsInternalGeneration: true,
     outputTargets: ["legalos"],
     sourceFileName: "request-checklist.docx",
     fields: [
       { id: "field-009", token: "{{client.name}}", label: "Client Name", source: "client.name", required: true },
-      { id: "field-010", token: "{{matter.reference}}", label: "Matter Reference", source: "matter.reference", required: true },
+      { id: "field-010", token: "{{case.reference}}", label: "Case Reference", source: "case.reference", required: true },
     ],
   },
 ];
@@ -421,7 +421,7 @@ function buildFacetOptions(values: string[]): Array<{ value: string; count: numb
 
 function buildFacets(items: DocumentRecord[]): DocumentWorkspaceFacets {
   return {
-    matterOptions: buildFacetOptions(items.map((item) => `${item.matterId}::${item.matterReference}`)),
+    caseOptions: buildFacetOptions(items.map((item) => `${item.caseId}::${item.caseReference}`)),
     documentTypeOptions: buildFacetOptions(items.map((item) => item.documentType)),
     sourceOptions: buildFacetOptions(items.map((item) => item.sourceKind)),
     aiStatusOptions: buildFacetOptions(items.map((item) => item.aiStatus)),
@@ -444,7 +444,7 @@ export function getDocumentWorkspaceData(): DocumentWorkspaceData {
     })),
     templates: templates.map((item) => ({
       ...item,
-      matterTypes: [...item.matterTypes],
+      caseTypes: [...item.caseTypes],
       practiceAreas: [...item.practiceAreas],
       defaultTags: [...item.defaultTags],
       outputTargets: [...item.outputTargets],
@@ -455,9 +455,9 @@ export function getDocumentWorkspaceData(): DocumentWorkspaceData {
   };
 }
 
-export function getMatterDocumentWorkspaceData(matterId: string): DocumentWorkspaceData {
+export function getCaseDocumentWorkspaceData(caseId: string): DocumentWorkspaceData {
   const workspace = getDocumentWorkspaceData();
-  const filteredDocuments = workspace.documents.filter((item) => item.matterId === matterId);
+  const filteredDocuments = workspace.documents.filter((item) => item.caseId === caseId);
 
   return {
     ...workspace,
