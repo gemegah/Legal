@@ -312,6 +312,8 @@ function TaskWorkspace({
           canFilterByMatter={canFilterByMatter}
           createLabel={createLabel}
           dueWindow={dueWindow}
+          initialMatterId={initialMatterId ?? null}
+          isMatterContext={isMatterContext}
           matterId={selectedMatterId || null}
           matterOptions={availableMatterOptions}
           onAssignedScope={() =>
@@ -378,6 +380,8 @@ function TaskToolbar({
   canFilterByMatter,
   createLabel,
   dueWindow,
+  initialMatterId,
+  isMatterContext,
   matterId,
   matterOptions,
   onAssignedScope,
@@ -394,6 +398,8 @@ function TaskToolbar({
   canFilterByMatter: boolean;
   createLabel: string;
   dueWindow: TaskDueWindow;
+  initialMatterId: string | null;
+  isMatterContext: boolean;
   matterId: string | null;
   matterOptions: MatterOption[];
   onAssignedScope: () => void;
