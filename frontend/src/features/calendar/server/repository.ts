@@ -1,20 +1,20 @@
 import "server-only";
 
-import { listMockEvents, listMockEventsByMatter } from "@/features/calendar/data/mock";
+import { listMockEvents, listMockEventsByCase } from "@/features/calendar/data/mock";
 import type { CalendarEventItem } from "@/features/calendar/types";
 import { getDataSource } from "@/lib/data-source";
 
 export interface EventRepository {
   listEvents(): Promise<CalendarEventItem[]>;
-  listEventsByMatter(matterId: string): Promise<CalendarEventItem[]>;
+  listEventsByCase(caseId: string): Promise<CalendarEventItem[]>;
 }
 
 export const mockEventRepository: EventRepository = {
   async listEvents() {
     return listMockEvents();
   },
-  async listEventsByMatter(matterId) {
-    return listMockEventsByMatter(matterId);
+  async listEventsByCase(caseId) {
+    return listMockEventsByCase(caseId);
   },
 };
 
@@ -22,7 +22,7 @@ export const apiEventRepository: EventRepository = {
   async listEvents() {
     throw new Error('Calendar API repository is not wired yet. Use DATA_SOURCE="mock" for calendar views until the backend slice is implemented.');
   },
-  async listEventsByMatter() {
+  async listEventsByCase() {
     throw new Error('Calendar API repository is not wired yet. Use DATA_SOURCE="mock" for calendar views until the backend slice is implemented.');
   },
 };

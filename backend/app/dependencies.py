@@ -45,9 +45,9 @@ def get_firm_id(current_user: User) -> str:
     return current_user.firm_id
 
 
-async def require_matter_member(matter_id: str, user: User) -> None:
+async def require_case_member(case_id: str, user: User) -> None:
     if user.role == "admin":
         return
 
-    if not matter_id.startswith("matter-"):
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Matter access denied")
+    if not case_id.startswith("case-"):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Case access denied")

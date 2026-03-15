@@ -52,27 +52,27 @@ import {
 interface CalendarWorkspaceProps {
   initialEvents: CalendarEventItem[];
   initialScope: CalendarScope;
-  matterTitle?: string | null;
+  caseTitle?: string | null;
 }
 
 export function SharedCalendarClient({ initialEvents }: { initialEvents: CalendarEventItem[] }) {
   return <CalendarWorkspace initialEvents={initialEvents} initialScope="firm" />;
 }
 
-export function MatterCalendarClient({
+export function CaseCalendarClient({
   initialEvents,
-  matterTitle,
+  caseTitle,
 }: {
   initialEvents: CalendarEventItem[];
-  matterTitle?: string | null;
+  caseTitle?: string | null;
 }) {
-  return <CalendarWorkspace initialEvents={initialEvents} initialScope="matter" matterTitle={matterTitle} />;
+  return <CalendarWorkspace initialEvents={initialEvents} initialScope="case" caseTitle={caseTitle} />;
 }
 
 function CalendarWorkspace({
   initialEvents,
   initialScope,
-  matterTitle,
+  caseTitle,
 }: CalendarWorkspaceProps) {
   const [events, setEvents] = useState<CalendarEventItem[]>(initialEvents);
   const [viewMode, setViewMode] = useState<CalendarViewMode>("week");

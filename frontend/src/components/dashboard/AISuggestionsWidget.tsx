@@ -16,7 +16,7 @@ interface AISuggestionsWidgetProps {
 const categoryLabels: Record<AISuggestionPreview["category"], string> = {
   deadline: "Deadline Suggestion",
   invoice: "Invoice Draft",
-  summary: "Matter Summary",
+  summary: "Case Summary",
 };
 
 export function AISuggestionsWidget({ items }: AISuggestionsWidgetProps) {

@@ -39,27 +39,27 @@ router = APIRouter()
 
 
 @router.get("/documents/workspace", response_model=DocumentWorkspaceData)
-async def document_workspace(matter_id: str | None = Query(default=None)) -> DocumentWorkspaceData:
-    return get_workspace(matter_id)
+async def document_workspace(case_id: str | None = Query(default=None)) -> DocumentWorkspaceData:
+    return get_workspace(case_id)
 
 
-@router.get("/matters/{matter_id}/documents", response_model=list[DocumentRecord])
-async def matter_documents(matter_id: str) -> list[DocumentRecord]:
-    return get_workspace(matter_id).documents
+@router.get("/cases/{case_id}/documents", response_model=list[DocumentRecord])
+async def case_documents(case_id: str) -> list[DocumentRecord]:
+    return get_workspace(case_id).documents
 
 
-@router.post("/matters/{matter_id}/documents/upload-initiate", response_model=UploadInitiateResponse)
-async def initiate_upload(matter_id: str, payload: UploadInitiateRequest) -> UploadInitiateResponse:
-    document_id = f"{matter_id}-pending-upload"
+@router.post("/cases/{case_id}/documents/upload-initiate", response_model=UploadInitiateResponse)
+async def initiate_upload(case_id: str, payload: UploadInitiateRequest) -> UploadInitiateResponse:
+    document_id = f"{case_id}-pending-upload"
     return UploadInitiateResponse(
         document_id=document_id,
         upload_url=f"https://uploads.example/{document_id}",
-        storage_key=f"firms/demo/matters/{matter_id}/documents/{payload.file_name}",
+        storage_key=f"firms/demo/cases/{case_id}/documents/{payload.file_name}",
     )
 
 
-@router.post("/matters/{matter_id}/documents/{doc_id}/confirm", response_model=UploadConfirmResponse)
-async def confirm_upload(matter_id: str, doc_id: str, payload: UploadConfirmRequest) -> UploadConfirmResponse:
+@router.post("/cases/{case_id}/documents/{doc_id}/confirm", response_model=UploadConfirmResponse)
+async def confirm_upload(case_id: str, doc_id: str, payload: UploadConfirmRequest) -> UploadConfirmResponse:
     return UploadConfirmResponse(document_id=doc_id, version_id=f"{doc_id}-v1", ocr_status="pending")
 
 

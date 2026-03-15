@@ -7,6 +7,10 @@ import {
   formatDateForInput 
 } from "./utils";
 
+function toCaseId(caseReference: string) {
+  return caseReference.trim().toLowerCase().replace(/^cas-/, "case-");
+}
+
 export function EventDetailModal({
   event,
   onClose,
@@ -66,15 +70,15 @@ export function EventDetailModal({
             <span className="calendar-event-row-icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></svg>
             </span>
-            <p className="calendar-event-time">Tue, March 03 — {formatTimeRange(event.startsAt, event.endsAt)}</p>
+            <p className="calendar-event-time">Tue, March 03 -- {formatTimeRange(event.startsAt, event.endsAt)}</p>
           </div>
 
-          {event.matterReference && (
+          {event.caseReference && (
             <div className="calendar-event-row">
               <span className="calendar-event-row-icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14.5 2 14.5 7.5 20 7.5"/></svg>
               </span>
-              <span className="matter-chip">{event.matterReference}</span>
+              <span className="case-chip">{event.caseReference}</span>
             </div>
           )}
 
@@ -129,8 +133,8 @@ export function CreateEventModal({
 }) {
   const [formData, setFormData] = useState({
     title: "",
-    matterReference: "MAT-2026-014",
-    matterTitle: "Asante v. Mensah Industries Ltd",
+    caseReference: "CAS-2026-014",
+    caseTitle: "Asante v. Mensah Industries Ltd",
     type: "meeting" as CalendarEventType,
     urgency: "normal" as const,
     startsAt: formatDateForInput(new Date()),
@@ -153,7 +157,7 @@ export function CreateEventModal({
       ...formData,
       startsAt: new Date(formData.startsAt).toISOString(),
       endsAt: new Date(formData.endsAt).toISOString(),
-      matterId: formData.matterReference.toLowerCase(),
+      caseId: toCaseId(formData.caseReference),
       clientName: "Internal Client",
       ownerName: "Current User",
       source: "manual",
@@ -193,12 +197,12 @@ export function CreateEventModal({
 
           <div className="form-grid">
             <div className="form-section">
-              <label className="form-label">Matter Reference</label>
+              <label className="form-label">Case Reference</label>
               <input
                 type="text"
                 className="form-input"
-                value={formData.matterReference}
-                onChange={(e) => setFormData({ ...formData, matterReference: e.target.value })}
+                value={formData.caseReference}
+                onChange={(e) => setFormData({ ...formData, caseReference: e.target.value })}
                 required
               />
             </div>

@@ -48,7 +48,7 @@ Research date: 2026-03-09
 - **Personal account** settings are self-serve and usually include profile, password, timezone, notifications, and MFA/security actions.
 - Team management is not just invite/deactivate. Competitors expose **role/permission visibility**, **last login or status**, and **security reset actions**.
 - Deactivation typically preserves work history and assignments rather than deleting the user.
-- Legal SaaS competitors frequently separate **matter visibility** from **billing visibility**, because finance access is more sensitive than ordinary case collaboration.
+- Legal SaaS competitors frequently separate **case visibility** from **billing visibility**, because finance access is more sensitive than ordinary case collaboration.
 
 ### Product takeaways for LegalOS
 
@@ -61,7 +61,7 @@ Research date: 2026-03-09
 - Because LegalOS is Ghana-first, billing/payment defaults should reference the real product constraints already in the repo:
   - GHS-only
   - Hubtel + Paystack context
-  - reminder cadence and firm contact identity matter more than US-specific accounting setup
+  - reminder cadence and firm contact identity case more than US-specific accounting setup
 
 ## Recommended Information Architecture
 
@@ -455,7 +455,7 @@ Research date: 2026-03-09
 ## Rollback Plan
 
 - If nested settings routing proves too disruptive, keep `/settings` as the shell and gate the three surfaces behind internal tabs first.
-- If backend endpoints are not ready, ship the screens with repository-backed mocks and explicit “coming next” treatment for unwired save actions instead of inventing unstable contracts.
+- If backend endpoints are not ready, ship the screens with repository-backed mocks and explicit "coming next" treatment for unwired save actions instead of inventing unstable contracts.
 - If the team screen becomes the only backend-ready surface, merge it first and keep practice/account behind staged follow-up tickets.
 
 ## Competitor Sources

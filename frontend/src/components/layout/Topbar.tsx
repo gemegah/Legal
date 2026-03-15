@@ -9,14 +9,14 @@ const routeMeta = [
     subtitle: "Thursday, 27 February 2025 - 4 items need attention today",
   },
   {
-    match: (pathname: string) => pathname.startsWith("/matters"),
-    title: "Matters",
-    subtitle: "Track case activity, deadlines, and matter-level work.",
+    match: (pathname: string) => pathname.startsWith("/cases"),
+    title: "Cases",
+    subtitle: "Track case activity, deadlines, and case-level work.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/tasks"),
     title: "Tasks",
-    subtitle: "Manage personal and matter-linked work across the firm.",
+    subtitle: "Manage personal and case-linked work across the firm.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/calendar"),
@@ -26,7 +26,7 @@ const routeMeta = [
   {
     match: (pathname: string) => pathname.startsWith("/documents"),
     title: "Documents",
-    subtitle: "Upload, review, and search matter evidence in one place.",
+    subtitle: "Upload, review, and search case evidence in one place.",
   },
   {
     match: (pathname: string) => pathname.startsWith("/billing"),
@@ -60,7 +60,7 @@ export function Topbar() {
       <div className="topbar-actions">
         <label className="topbar-search" aria-label="Search">
           <SearchIcon />
-          <input type="search" placeholder="Search matters, clients..." />
+          <input type="search" placeholder="Search cases, clients..." />
         </label>
 
         <button className="icon-button" type="button" aria-label="Notifications">

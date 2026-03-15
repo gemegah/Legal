@@ -9,10 +9,10 @@ export function DeadlineRow({ event }: { event: CalendarEventItem }) {
       <div className="calendar-deadline-body">
         <p className="row-title">{event.title}</p>
         <p className="row-meta">
-          {formatRelativeDate(event.startsAt)} • {event.location}
+          {formatRelativeDate(event.startsAt)} * {event.location}
         </p>
       </div>
-      {event.matterReference ? <span className="matter-chip">{event.matterReference}</span> : null}
+      {event.caseReference ? <span className="case-chip">{event.caseReference}</span> : null}
     </div>
   );
 }

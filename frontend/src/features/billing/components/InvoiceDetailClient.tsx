@@ -87,19 +87,19 @@ export function InvoiceDetailClient({ invoice: initialInvoice }: InvoiceDetailCl
           <Link className="task-action-link" href="/billing">
             Billing
           </Link>
-          <span aria-hidden="true">·</span>
+          <span aria-hidden="true"> - </span>
           <span className="row-meta">{invoice.reference}</span>
         </div>
 
         <div className="invoice-detail-title-row">
           <div>
-            <h1 className="matter-title">{invoice.reference}</h1>
+            <h1 className="case-title">{invoice.reference}</h1>
             <div className="invoice-detail-badges">
               <span className={cn("invoice-status-badge is-lg", `is-${invoice.status}`)}>
                 {getStatusLabel(invoice.status)}
               </span>
-              <Link className="invoice-matter-badge" href={`/matters/${invoice.matterId}`}>
-                {invoice.matterReference}
+              <Link className="invoice-case-badge" href={`/cases/${invoice.caseId}`}>
+                {invoice.caseReference}
               </Link>
             </div>
           </div>
@@ -141,8 +141,8 @@ export function InvoiceDetailClient({ invoice: initialInvoice }: InvoiceDetailCl
             <p className="table-copy">{invoice.clientName}</p>
           </div>
           <div className="invoice-meta-field">
-            <p className="eyebrow-label">Matter</p>
-            <p className="table-copy">{invoice.matterTitle}</p>
+            <p className="eyebrow-label">Case</p>
+            <p className="table-copy">{invoice.caseTitle}</p>
           </div>
           <div className="invoice-meta-field">
             <p className="eyebrow-label">Issued</p>
@@ -158,31 +158,32 @@ export function InvoiceDetailClient({ invoice: initialInvoice }: InvoiceDetailCl
               <p className="table-copy">{formatDate(invoice.sentAt)}</p>
             </div>
           ) : null}
+          <div className="invoice-meta-field is-summary">
+            <p className="eyebrow-label">Total</p>
+            <p className="billing-amount table-copy">{formatGHS(invoice.total)}</p>
+          </div>
+          <div className="invoice-meta-field is-summary">
+            <p className="eyebrow-label">Paid</p>
+            <p className="billing-amount table-copy">{formatGHS(invoice.paid)}</p>
+          </div>
+          <div className="invoice-meta-field is-summary">
+            <p className="eyebrow-label">Balance Due</p>
+            <p
+              className={cn(
+                "billing-amount table-copy",
+                invoice.balance > 0 && invoice.status === "overdue" && "is-danger",
+              )}
+            >
+              {formatGHS(invoice.balance)}
+            </p>
+          </div>
         </div>
-      </div>
-
-      <div className="invoice-detail-stats-row">
-        <InvoiceStatCard
-          label="Total"
-          value={formatGHS(invoice.total)}
-          tone="default"
-        />
-        <InvoiceStatCard
-          label="Paid"
-          value={formatGHS(invoice.paid)}
-          tone={invoice.paid > 0 ? "success" : "default"}
-        />
-        <InvoiceStatCard
-          label="Balance Due"
-          value={formatGHS(invoice.balance)}
-          tone={invoice.balance > 0 && invoice.status === "overdue" ? "danger" : "default"}
-        />
       </div>
 
       <div className="surface-card invoice-section">
         <h2 className="invoice-section-title">Line Items</h2>
         {invoice.lineItems.length === 0 ? (
-          <div className="matter-tab-empty billing-empty">
+          <div className="case-tab-empty billing-empty">
             No line items yet. Add time entries or expenses to this invoice.
           </div>
         ) : (
@@ -200,7 +201,7 @@ export function InvoiceDetailClient({ invoice: initialInvoice }: InvoiceDetailCl
                   <div className="line-item-primary">
                     <p className="table-copy">{item.description}</p>
                     <p className="row-meta">
-                      {formatDate(item.date)} · {item.addedBy}
+                      {formatDate(item.date)}  -  {item.addedBy}
                     </p>
                   </div>
                   <span className={cn("line-item-type-badge", `is-${item.type}`)}>
@@ -233,7 +234,7 @@ export function InvoiceDetailClient({ invoice: initialInvoice }: InvoiceDetailCl
       <div className="surface-card invoice-section">
         <h2 className="invoice-section-title">Payment History</h2>
         {invoice.payments.length === 0 ? (
-          <div className="matter-tab-empty billing-empty">
+          <div className="case-tab-empty billing-empty">
             No payments recorded yet.
           </div>
         ) : (
@@ -265,32 +266,13 @@ export function InvoiceDetailClient({ invoice: initialInvoice }: InvoiceDetailCl
   );
 }
 
-function InvoiceStatCard({
-  label,
-  value,
-  tone,
-}: {
-  label: string;
-  value: string;
-  tone: "default" | "danger" | "success";
-}) {
-  return (
-    <div className={cn("surface-card billing-stat-card", `is-${tone}`)}>
-      <p className="billing-stat-label">{label}</p>
-      <p className="billing-stat-value" aria-label={`${label}: ${value}`}>
-        {value}
-      </p>
-    </div>
-  );
-}
-
 function PaymentEntry({ payment }: { payment: InvoicePayment }) {
   return (
     <div className="payment-row">
       <div>
         <p className="table-copy">{formatGHS(payment.amount)}</p>
         <p className="row-meta">
-          {getMethodLabel(payment.method)} · Ref: {payment.reference}
+          {getMethodLabel(payment.method)}  -  Ref: {payment.reference}
         </p>
       </div>
       <div className="payment-value">
@@ -360,7 +342,7 @@ function RecordPaymentModal({
         <div className="task-modal-head">
           <div>
             <p className="eyebrow-label">Record Payment</p>
-            <h3 className="matter-title task-modal-title" id="record-payment-title">
+            <h3 className="case-title task-modal-title" id="record-payment-title">
               {invoiceReference}
             </h3>
           </div>
@@ -370,7 +352,7 @@ function RecordPaymentModal({
             onClick={onClose}
             type="button"
           >
-            ×
+            x
           </button>
         </div>
 
@@ -472,7 +454,7 @@ function VoidConfirmModal({
         <div className="task-modal-head">
           <div>
             <p className="eyebrow-label">Confirm Action</p>
-            <h3 className="matter-title task-modal-title" id="void-confirm-title">
+            <h3 className="case-title task-modal-title" id="void-confirm-title">
               Void {invoiceReference}?
             </h3>
           </div>
@@ -494,7 +476,7 @@ function VoidConfirmModal({
   );
 }
 
-// ── Helpers ────────────────────────────────────────────────────────────────
+// â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 function getNextStatus(status: InvoiceStatus): InvoiceStatus | null {
   const map: Partial<Record<InvoiceStatus, InvoiceStatus>> = {

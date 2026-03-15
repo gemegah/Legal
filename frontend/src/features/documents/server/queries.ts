@@ -10,6 +10,6 @@ export const getDocumentWorkspace = cache(async (): Promise<DocumentWorkspaceDat
   return documentsRepository.getWorkspace();
 });
 
-export const getMatterDocumentWorkspace = cache(async (matterId: string): Promise<DocumentWorkspaceData> => {
-  return documentsRepository.getMatterWorkspace(matterId);
+export const getCaseDocumentWorkspace = cache(async (caseId: string): Promise<DocumentWorkspaceData> => {
+  return documentsRepository.getCaseWorkspace(caseId);
 });

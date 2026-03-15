@@ -24,7 +24,7 @@ interface ThreadDraft {
 interface NewThreadState {
   type: MessageThreadType;
   subject: string;
-  matterId: string;
+  caseId: string;
   assigneeId: string;
   body: string;
 }
@@ -38,7 +38,7 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
   const [threads, setThreads] = useState(initialData.threads);
   const [queue, setQueue] = useState<QueueFilter>("unread");
   const [query, setQuery] = useState("");
-  const [matterFilter, setMatterFilter] = useState("");
+  const [caseFilter, setCaseFilter] = useState("");
   const [assigneeFilter, setAssigneeFilter] = useState("");
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(initialData.threads[0]?.id ?? null);
   const [drafts, setDrafts] = useState<Record<string, ThreadDraft>>({});
@@ -47,7 +47,7 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
   const [newThreadState, setNewThreadState] = useState<NewThreadState>({
     type: "internal",
     subject: "",
-    matterId: "",
+    caseId: "",
     assigneeId: initialData.assigneeOptions[0]?.value ?? "",
     body: "",
   });
@@ -61,13 +61,13 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
         if (queue === "client" && (thread.type !== "client" || thread.status === "archived")) return false;
         if (queue === "needs_reply" && thread.status !== "waiting_on_firm") return false;
         if (queue === "archived" && thread.status !== "archived") return false;
-        if (matterFilter && thread.matterId !== matterFilter) return false;
+        if (caseFilter && thread.caseId !== caseFilter) return false;
         if (assigneeFilter && thread.assigneeId !== assigneeFilter) return false;
         if (!normalizedQuery) return true;
         return [
           thread.subject,
           thread.lastMessagePreview,
-          thread.matterLabel ?? "",
+          thread.caseLabel ?? "",
           ...thread.participants.map((participant) => participant.name),
         ]
           .join(" ")
@@ -75,7 +75,7 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
           .includes(normalizedQuery);
       })
       .sort((left, right) => Date.parse(right.lastMessageAt) - Date.parse(left.lastMessageAt));
-  }, [assigneeFilter, matterFilter, query, queue, threads]);
+  }, [assigneeFilter, caseFilter, query, queue, threads]);
 
   const selectedThread = filteredThreads.find((thread) => thread.id === selectedThreadId) ?? filteredThreads[0] ?? null;
   const draft = selectedThread ? drafts[selectedThread.id] ?? defaultDraftForThread(selectedThread) : emptyDraft;
@@ -144,17 +144,17 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
     setFeedback(`Draft saved for "${selectedThread.subject}".`);
   }
 
-  function handleThreadMeta(threadId: string, patch: Partial<Pick<MessageThreadDetail, "assigneeId" | "matterId" | "status" | "portalSafe" | "unreadCount">>) {
+  function handleThreadMeta(threadId: string, patch: Partial<Pick<MessageThreadDetail, "assigneeId" | "caseId" | "status" | "portalSafe" | "unreadCount">>) {
     setThreads((current) =>
       current.map((thread) =>
         thread.id === threadId
           ? {
               ...thread,
               ...patch,
-              matterLabel:
-                patch.matterId !== undefined
-                  ? initialData.matterOptions.find((option) => option.value === patch.matterId)?.label ?? null
-                  : thread.matterLabel,
+              caseLabel:
+                patch.caseId !== undefined
+                  ? initialData.caseOptions.find((option) => option.value === patch.caseId)?.label ?? null
+                  : thread.caseLabel,
             }
           : thread,
       ),
@@ -165,7 +165,7 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
     setNewThreadState({
       type,
       subject: "",
-      matterId: "",
+      caseId: "",
       assigneeId: initialData.assigneeOptions[0]?.value ?? "",
       body: "",
     });
@@ -182,9 +182,9 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
     const threadId = `thr-${Math.random().toString(36).slice(2, 10)}`;
     const newThread: MessageThreadDetail = {
       id: threadId,
-      matterId: newThreadState.matterId || null,
-      matterLabel:
-        initialData.matterOptions.find((option) => option.value === newThreadState.matterId)?.label ?? null,
+      caseId: newThreadState.caseId || null,
+      caseLabel:
+        initialData.caseOptions.find((option) => option.value === newThreadState.caseId)?.label ?? null,
       type: newThreadState.type,
       subject: newThreadState.subject.trim(),
       participants: [
@@ -228,9 +228,9 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
 
         {/* <div className="messages-hero-copy">
           <p className="eyebrow-label">Message Center</p>
-          <h2 className="matter-title">Internal and client-facing communication in one queue</h2>
+          <h2 className="case-title">Internal and client-facing communication in one queue</h2>
           <p className="placeholder-copy">
-            Keep internal coordination separate from portal-safe updates while preserving matter context, assignee ownership, and unread routing.
+            Keep internal coordination separate from portal-safe updates while preserving case context, assignee ownership, and unread routing.
           </p>
         </div> */}
         <div className="messages-hero-actions" style={{alignSelf: 'end'}}>
@@ -272,13 +272,13 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
             <h3 className="section-title">Filters</h3>
             <label className="messages-field">
               <span>Search</span>
-              <input onChange={(event) => setQuery(event.target.value)} placeholder="Subject, participant, matter..." value={query} />
+              <input onChange={(event) => setQuery(event.target.value)} placeholder="Subject, participant, case..." value={query} />
             </label>
             <label className="messages-field">
-              <span>Matter</span>
-              <select onChange={(event) => setMatterFilter(event.target.value)} value={matterFilter}>
-                <option value="">All matters</option>
-                {initialData.matterOptions.map((option) => (
+              <span>Case</span>
+              <select onChange={(event) => setCaseFilter(event.target.value)} value={caseFilter}>
+                <option value="">All cases</option>
+                {initialData.caseOptions.map((option) => (
                   <option key={option.value} value={option.value}>
                     {option.label}
                   </option>
@@ -333,7 +333,7 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                   </div>
                   <p className="messages-thread-preview">{thread.lastMessagePreview}</p>
                   <div className="messages-thread-meta">
-                    <span>{thread.matterLabel ?? "No matter linked"}</span>
+                    <span>{thread.caseLabel ?? "No case linked"}</span>
                     <span>{thread.participants.map((participant) => participant.name).join(", ")}</span>
                     {thread.unreadCount > 0 ? <span className="messages-unread-pill">{thread.unreadCount} unread</span> : null}
                   </div>
@@ -394,7 +394,7 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                       <div className="messages-bubble-head">
                         <strong>{message.authorName}</strong>
                         <span className="row-meta">
-                          {message.authorRole} · {formatDateTime(message.createdAt)}
+                          {message.authorRole}  -  {formatDateTime(message.createdAt)}
                         </span>
                       </div>
                       <p>{message.body}</p>
@@ -425,13 +425,13 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                       </select>
                     </label>
                     <label className="messages-field">
-                      <span>Linked matter</span>
+                      <span>Linked case</span>
                       <select
-                        onChange={(event) => handleThreadMeta(selectedThread.id, { matterId: event.target.value || null })}
-                        value={selectedThread.matterId ?? ""}
+                        onChange={(event) => handleThreadMeta(selectedThread.id, { caseId: event.target.value || null })}
+                        value={selectedThread.caseId ?? ""}
                       >
-                        <option value="">No matter linked</option>
-                        {initialData.matterOptions.map((option) => (
+                        <option value="">No case linked</option>
+                        {initialData.caseOptions.map((option) => (
                           <option key={option.value} value={option.value}>
                             {option.label}
                           </option>
@@ -454,9 +454,9 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                       <span>Channel</span>
                       <strong>{selectedThread.channel.replace(/_/g, " ")}</strong>
                     </div>
-                    {selectedThread.matterId ? (
-                      <Link className="panel-link" href={`/matters/${selectedThread.matterId}`}>
-                        Open matter
+                    {selectedThread.caseId ? (
+                      <Link className="panel-link" href={`/cases/${selectedThread.caseId}`}>
+                        Open case
                       </Link>
                     ) : null}
                   </div>
@@ -583,13 +583,13 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
             />
           </label>
           <label className="messages-field">
-            <span>Linked matter</span>
+            <span>Linked case</span>
             <select
-              onChange={(event) => setNewThreadState((current) => ({ ...current, matterId: event.target.value }))}
-              value={newThreadState.matterId}
+              onChange={(event) => setNewThreadState((current) => ({ ...current, caseId: event.target.value }))}
+              value={newThreadState.caseId}
             >
-              <option value="">No matter linked</option>
-              {initialData.matterOptions.map((option) => (
+              <option value="">No case linked</option>
+              {initialData.caseOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>

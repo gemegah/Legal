@@ -7,7 +7,7 @@ export type CalendarEventType =
   | "other";
 
 export type CalendarViewMode = "day" | "week" | "agenda";
-export type CalendarScope = "firm" | "matter";
+export type CalendarScope = "firm" | "case";
 export type CalendarEventStatus = "confirmed" | "tentative" | "ai_suggested";
 export type CalendarUrgency = "normal" | "elevated" | "critical";
 export type ReminderChannel = "email" | "sms" | "in_app";
@@ -23,9 +23,9 @@ export interface CalendarEventItem {
   id: string;
   title: string;
   description: string;
-  matterId: string | null;
-  matterReference: string | null;
-  matterTitle: string | null;
+  caseId: string | null;
+  caseReference: string | null;
+  caseTitle: string | null;
   clientName: string | null;
   ownerName: string;
   startsAt: string;
