@@ -23,8 +23,6 @@ export const queryKeys = {
   expenses: (caseId: string) => ["expenses", caseId] as const,
   invoices: (filters?: Record<string, unknown>) => ["invoices", filters] as const,
   invoice: (id: string) => ["invoice", id] as const,
-  messageThreads: (filters?: Record<string, unknown>) => ["messages", "threads", filters] as const,
-  messageThread: (id: string) => ["messages", "thread", id] as const,
   aiSuggestions: (entityId?: string) => ["ai-suggestions", entityId] as const,
   unreadNotifications: () => ["notifications", "unread"] as const,
 } as const;

@@ -34,11 +34,6 @@ const routeMeta = [
     subtitle: "Manage invoices, AR, and payment collection workflows.",
   },
   {
-    match: (pathname: string) => pathname.startsWith("/messages"),
-    title: "Messages",
-    subtitle: "Keep internal and client-facing communication organized.",
-  },
-  {
     match: (pathname: string) => pathname.startsWith("/settings"),
     title: "Settings",
     subtitle: "Control firm preferences, roles, and workspace defaults.",

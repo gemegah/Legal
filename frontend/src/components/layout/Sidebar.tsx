@@ -4,8 +4,6 @@ import type { ReactElement } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import { getUnreadMessageCount } from "@/features/messages/data/mock";
-
 interface NavItem {
   href: string;
   label: string;
@@ -19,12 +17,10 @@ const navItems: NavItem[] = [
   { href: "/calendar", label: "Calendar", icon: CalendarIcon },
   { href: "/documents", label: "Documents", icon: DocumentIcon },
   { href: "/billing", label: "Billing", icon: BillingIcon },
-  { href: "/messages", label: "Messages", icon: MessageIcon },
 ];
 
 export function Sidebar() {
   const pathname = usePathname();
-  const unreadMessages = getUnreadMessageCount();
 
   return (
     <aside className="app-sidebar">
@@ -51,11 +47,6 @@ export function Sidebar() {
             >
               <Icon />
               <span>{item.label}</span>
-              {item.href === "/messages" && unreadMessages > 0 ? (
-                <span className="sidebar-pill" aria-label={`${unreadMessages} unread messages`}>
-                  {unreadMessages}
-                </span>
-              ) : null}
             </Link>
           );
         })}
@@ -144,14 +135,6 @@ function BillingIcon() {
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <line x1="12" y1="1" x2="12" y2="23" />
       <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" />
-    </svg>
-  );
-}
-
-function MessageIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
     </svg>
   );
 }
