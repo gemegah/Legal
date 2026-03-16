@@ -264,33 +264,21 @@ function TaskWorkspace({
 
   return (
     <section className="task-workspace">
-      {/* <div className="task-workspace-hero-copy">
-          <p className="eyebrow-label">
-            {isMatterContext ? "Matter Task Coordination" : "Practitioner Task Queue"}
-          </p>
-          <h2 className="matter-title">{isMatterContext ? "Matter Tasks" : "Tasks"}</h2>
-          <p className="task-workspace-copy">
-            {isMatterContext
-              ? `Manage assignments, due dates, and progress for ${matterTitle ?? "this matter"} without leaving the matter workspace.`
-              : "Manage matter-linked work across the firm, with a list-first queue and a board for flow management."}
-          </p>
-        </div> */}
-
-      {/* <div className="task-workspace-actions">
-          {isMatterContext && initialMatterId ? (
-            <Link className="btn btn-ghost" href={`/tasks?matter_id=${initialMatterId}`}>
-              View All Tasks
-            </Link>
-          ) : null}
-        </div> */}
-      <div style={{ display: 'flex'}}>
+      {/* Search bar + primary action row */}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+        }}
+      >
         <label
           className="matter-search-field task-search-field"
           aria-label="Search tasks"
+          style={{ flex: 1 }}
         >
           <SearchIcon />
           <input
-          style={{backgroundColor: '#ffffff'}}
             onChange={(event) => onSearchChange(event.target.value)}
             placeholder="Search tasks, matters, clients, assignees"
             type="search"
@@ -299,11 +287,12 @@ function TaskWorkspace({
         </label>
         <button
           className="btn btn-primary"
-          style={{ width: "fit-content", alignSelf: "end" }}
+          style={{ flexShrink: 0, whiteSpace: "nowrap" }}
           onClick={() => handleCreateTask()}
           type="button"
         >
-          + {createLabel}
+          <PlusIcon />
+          {createLabel}
         </button>
       </div>
 
@@ -414,10 +403,7 @@ function TaskToolbar({
   viewMode: TaskViewMode;
 }) {
   return (
-    <div
-      className="task-toolbar-shell"
-      style={{ justifyContent: "space-between" }}
-    >
+    <div className="task-toolbar-shell">
       <div className="task-toolbar-top">
         <TaskViewToggle onChange={onViewModeChange} value={viewMode} />
 
@@ -427,26 +413,15 @@ function TaskToolbar({
             className={cn("task-chip-button", scope === "mine" && "is-active")}
             onClick={onAssignedScope}
             type="button"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
+            <PersonIcon />
             Assigned to Me
           </button>
         </div>
       </div>
 
-      <div
-        className="task-toolbar-filters"
-        style={{ gap: 8, justifyContent: "space-between" }}
-      >
-        {/* <label className="matter-search-field task-search-field" aria-label="Search tasks">
-          <SearchIcon />
-          <input
-            onChange={(event) => onSearchChange(event.target.value)}
-            placeholder="Search tasks, matters, clients, assignees"
-            type="search"
-            value={search}
-          />
-        </label> */}
-
+      <div className="task-toolbar-filters">
         <label className="task-inline-select">
           <span>Status</span>
           <select
@@ -511,6 +486,7 @@ function TaskViewToggle({
       className="task-view-toggle"
       role="tablist"
       aria-label="Task view mode"
+      
     >
       {(["list", "kanban"] as TaskViewMode[]).map((mode) => (
         <button
@@ -519,8 +495,19 @@ function TaskViewToggle({
           key={mode}
           onClick={() => onChange(mode)}
           type="button"
+          style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: "4px", fontSize: "0.875rem", padding: "6px 10px"}}
         >
-          {mode === "list" ? "List View" : "Kanban"}
+          {mode === "list" ? (
+            <>
+              <ListIcon />
+              List
+            </>
+          ) : (
+            <>
+              <KanbanIcon />
+              Board
+            </>
+          )}
         </button>
       ))}
     </div>
@@ -548,7 +535,7 @@ function TaskListTable({
 
   return (
     <>
-      <div className="task-table-desktop surface-card task-table-shell">
+      <div className="task-table-desktop task-table-shell">
         <div
           className={cn(
             "task-table-head",
@@ -614,6 +601,7 @@ function TaskListRow({
           className="task-inline-link"
           onClick={() => onEdit(task.id)}
           type="button"
+          style={{ fontSize: "0.9375rem", letterSpacing: "-0.01em" }}
         >
           {task.title}
         </button>
@@ -626,7 +614,22 @@ function TaskListRow({
           <span className="row-meta">{task.matterTitle}</span>
         </Link>
       ) : null}
-      <span className="table-copy">{task.assigneeName ?? "Unassigned"}</span>
+      <span
+        className="table-copy"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "7px",
+          fontSize: "0.875rem",
+        }}
+      >
+        <AssigneeAvatar name={task.assigneeName ?? null} />
+        {task.assigneeName ?? (
+          <span style={{ color: "var(--color-ink-light)", fontStyle: "italic" }}>
+            Unassigned
+          </span>
+        )}
+      </span>
       <TaskStatusSelect
         onChange={(status) => onStatusChange(task.id, status)}
         value={task.status}
@@ -734,16 +737,25 @@ function TaskBoard({
           onDrop={() => onDropTask(column.status)}
         >
           <div className="task-board-column-head">
-            <div>
-              <p className="task-board-column-title">{column.label}</p>
-              <p className="row-meta">{column.items.length} task(s)</p>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <BoardStatusDot status={column.status} />
+              <div>
+                <p className="task-board-column-title">{column.label}</p>
+                <p className="row-meta">
+                  {column.items.length}{" "}
+                  {column.items.length === 1 ? "task" : "tasks"}
+                </p>
+              </div>
             </div>
             <button
               className="task-column-add"
               onClick={() => onAddTask(column.status)}
               type="button"
+              aria-label={`Add task to ${column.label}`}
+              style={{ display: "flex", alignItems: "center", gap: "4px" }}
             >
-              + Add Task
+              <SmallPlusIcon />
+              Add
             </button>
           </div>
 
@@ -758,11 +770,13 @@ function TaskBoard({
                   onDragStart={() => onDragStart(task.id)}
                 >
                   <div className="task-board-card-head">
+                    <DragHandleIcon />
                     <TaskPriorityBadge priority={task.priority} />
                     <button
                       className="task-action-link"
                       onClick={() => onEdit(task.id)}
                       type="button"
+                      style={{ marginLeft: "auto" }}
                     >
                       Edit
                     </button>
@@ -785,7 +799,14 @@ function TaskBoard({
                   </Link>
 
                   <div className="task-board-card-meta">
-                    <span>{task.assigneeName ?? "Unassigned"}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <AssigneeAvatar name={task.assigneeName ?? null} />
+                      {task.assigneeName ?? (
+                        <span style={{ color: "var(--color-ink-light)", fontStyle: "italic", fontSize: "0.8125rem" }}>
+                          Unassigned
+                        </span>
+                      )}
+                    </span>
                     <span>{getDueLabel(task)}</span>
                   </div>
 
@@ -832,16 +853,87 @@ function TaskStatusSelect({
 }
 
 function TaskPriorityBadge({ priority }: { priority: TaskPriority }) {
+  const label =
+    priority.charAt(0).toUpperCase() + priority.slice(1).toLowerCase();
   return (
-    <span className={cn("task-priority-badge", `is-${priority}`)}>
-      {priority}
+    <span
+      className={cn("task-priority-badge", `is-${priority}`)}
+      style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          width: "6px",
+          height: "6px",
+          borderRadius: "50%",
+          flexShrink: 0,
+          backgroundColor: PRIORITY_DOT_COLORS[priority] ?? "currentColor",
+        }}
+      />
+      {label}
+    </span>
+  );
+}
+
+function AssigneeAvatar({ name }: { name: string | null }) {
+  if (!name) {
+    return (
+      <span
+        aria-hidden="true"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "26px",
+          height: "26px",
+          borderRadius: "50%",
+          backgroundColor: "var(--color-border)",
+          color: "var(--color-ink-light)",
+          fontSize: "0.6875rem",
+          fontWeight: 600,
+          flexShrink: 0,
+        }}
+      >
+        –
+      </span>
+    );
+  }
+  const initials = name
+    .split(" ")
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+  return (
+    <span
+      aria-hidden="true"
+      title={name}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "26px",
+        height: "26px",
+        borderRadius: "50%",
+        backgroundColor: "#143D29",
+        color: "#C9963A",
+        fontSize: "0.6875rem",
+        fontWeight: 600,
+        letterSpacing: "0.02em",
+        flexShrink: 0,
+      }}
+    >
+      {initials}
     </span>
   );
 }
 
 function TaskEmptyState({ copy, title }: { copy: string; title: string }) {
   return (
-    <div className="task-empty-state">
+    <div
+      className="task-empty-state"
+      style={{ alignItems: "center", textAlign: "center" }}
+    >
+      <EmptyTasksIcon />
       <h3 className="section-title">{title}</h3>
       <p className="placeholder-copy">{copy}</p>
     </div>
@@ -929,16 +1021,20 @@ function TaskEditorModal({
             type="button"
             aria-label="Close"
           >
-            x
+            <CloseIcon />
           </button>
         </div>
 
         <form className="task-form" onSubmit={handleSubmit}>
           <label className="task-form-field">
-            <span>Title</span>
+            <span>
+              Title
+              <span aria-hidden="true" style={{ color: "#C0392B", marginLeft: "3px" }}>*</span>
+            </span>
             <input
               onChange={(event) => update("title", event.target.value)}
               placeholder="Prepare filing, call client, review evidence..."
+              required
               value={values.title}
             />
           </label>
@@ -1051,7 +1147,11 @@ function TaskDueMeta({ task }: { task: TaskItem }) {
 
   return (
     <div className="task-due-meta">
-      <span className={cn("task-due-label", `is-${tone}`)}>
+      <span
+        className={cn("task-due-label", `is-${tone}`)}
+        style={{ display: "inline-flex", alignItems: "center", gap: "5px" }}
+      >
+        <CalendarIcon />
         {getDueLabel(task)}
       </span>
       <span className="row-meta">
@@ -1069,6 +1169,43 @@ function TaskCardMeta({ label, value }: { label: string; value: string }) {
     </div>
   );
 }
+
+// ---------- design-system token maps ----------
+
+const PRIORITY_DOT_COLORS: Record<string, string> = {
+  urgent: "#C0392B",
+  high: "#D97706",
+  medium: "#2563EB",
+  low: "#16A34A",
+};
+
+// ---------- status dot for board column headers ----------
+
+const BOARD_STATUS_COLORS: Record<string, string> = {
+  todo: "var(--color-amber-soft)",
+  in_progress: "var(--color-blue-soft)",
+  blocked: "var(--color-red-soft)",
+  done: "var(--color-green-soft)",
+  cancelled: "var(--color-ink-light)",
+};
+
+function BoardStatusDot({ status }: { status: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display: "inline-block",
+        width: "8px",
+        height: "8px",
+        borderRadius: "50%",
+        flexShrink: 0,
+        backgroundColor: BOARD_STATUS_COLORS[status] ?? "var(--color-ink-light)",
+      }}
+    />
+  );
+}
+
+// ---------- utility helpers ----------
 
 function getDueLabel(task: TaskItem): string {
   if (!task.dueAt) {
@@ -1147,11 +1284,210 @@ function toLocalInputDate(value: string): string {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+// ---------- inline SVG icons ----------
+
 function SearchIcon() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="11" cy="11" r="8" />
       <line x1="21" x2="16.65" y1="21" y2="16.65" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: "15px", height: "15px", flexShrink: 0 }}
+    >
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+function SmallPlusIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: "12px", height: "12px", flexShrink: 0 }}
+    >
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: "16px", height: "16px" }}
+    >
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+function ListIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: "13px", height: "13px", flexShrink: 0 }}
+    >
+      <line x1="8" y1="6" x2="21" y2="6" />
+      <line x1="8" y1="12" x2="21" y2="12" />
+      <line x1="8" y1="18" x2="21" y2="18" />
+      <line x1="3" y1="6" x2="3.01" y2="6" />
+      <line x1="3" y1="12" x2="3.01" y2="12" />
+      <line x1="3" y1="18" x2="3.01" y2="18" />
+    </svg>
+  );
+}
+
+function KanbanIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: "13px", height: "13px", flexShrink: 0 }}
+    >
+      <rect x="3" y="3" width="5" height="18" rx="1" />
+      <rect x="10" y="3" width="5" height="11" rx="1" />
+      <rect x="17" y="3" width="5" height="14" rx="1" />
+    </svg>
+  );
+}
+
+function DragHandleIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{
+        width: "14px",
+        height: "14px",
+        flexShrink: 0,
+        opacity: 0.35,
+        cursor: "grab",
+      }}
+    >
+      <line x1="8" y1="6" x2="8" y2="6" strokeWidth="3" />
+      <line x1="16" y1="6" x2="16" y2="6" strokeWidth="3" />
+      <line x1="8" y1="12" x2="8" y2="12" strokeWidth="3" />
+      <line x1="16" y1="12" x2="16" y2="12" strokeWidth="3" />
+      <line x1="8" y1="18" x2="8" y2="18" strokeWidth="3" />
+      <line x1="16" y1="18" x2="16" y2="18" strokeWidth="3" />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: "12px", height: "12px", flexShrink: 0 }}
+    >
+      <rect x="3" y="4" width="18" height="18" rx="2" />
+      <line x1="16" y1="2" x2="16" y2="6" />
+      <line x1="8" y1="2" x2="8" y2="6" />
+      <line x1="3" y1="10" x2="21" y2="10" />
+    </svg>
+  );
+}
+
+function PersonIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{ width: "13px", height: "13px", flexShrink: 0 }}
+    >
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+    </svg>
+  );
+}
+
+function EmptyTasksIcon() {
+  return (
+    <svg
+      viewBox="0 0 48 48"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      style={{
+        width: "44px",
+        height: "44px",
+        color: "var(--color-ink-light)",
+        opacity: 0.5,
+      }}
+    >
+      <rect x="8" y="6" width="32" height="36" rx="4" />
+      <line x1="16" y1="16" x2="32" y2="16" />
+      <line x1="16" y1="22" x2="32" y2="22" />
+      <line x1="16" y1="28" x2="24" y2="28" />
+      <circle cx="35" cy="35" r="7" fill="none" />
+      <line x1="35" y1="32" x2="35" y2="38" />
+      <line x1="32" y1="35" x2="38" y2="35" />
     </svg>
   );
 }

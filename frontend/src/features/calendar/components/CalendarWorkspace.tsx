@@ -258,8 +258,7 @@ function CalendarWorkspace({
             )}
           </div>
 
-          {showSidePanel && (
-            <aside className="calendar-side-column">
+          <aside className={cn("calendar-side-column", !showSidePanel && "is-hidden")}>
               <div className="calendar-side-card">
                 <div className="panel-header">
                   <div>
@@ -301,7 +300,6 @@ function CalendarWorkspace({
                 </div>
               </div>
             </aside>
-          )}
         </div>
       </div>
 

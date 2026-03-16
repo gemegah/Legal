@@ -225,88 +225,58 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
 
   return (
     <section className="messages-workspace">
-
-        {/* <div className="messages-hero-copy">
-          <p className="eyebrow-label">Message Center</p>
-          <h2 className="matter-title">Internal and client-facing communication in one queue</h2>
-          <p className="placeholder-copy">
-            Keep internal coordination separate from portal-safe updates while preserving matter context, assignee ownership, and unread routing.
-          </p>
-        </div> */}
-        <div className="messages-hero-actions" style={{alignSelf: 'end'}}>
-          <Button onClick={() => openNewThread("internal")} variant="ghost">
-            New Internal Thread
-          </Button>
-          <Button onClick={() => openNewThread("client")}>New Client Update</Button>
+      <div className="messages-toolbar">
+        <div className="messages-toolbar-filters">
+          <input
+            className="messages-filter-input"
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Search threads..."
+            value={query}
+          />
+          <select className="messages-filter-select" onChange={(event) => setMatterFilter(event.target.value)} value={matterFilter}>
+            <option value="">All matters</option>
+            {initialData.matterOptions.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+          <select className="messages-filter-select" onChange={(event) => setAssigneeFilter(event.target.value)} value={assigneeFilter}>
+            <option value="">All assignees</option>
+            {initialData.assigneeOptions.map((option) => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
         </div>
-
+        <div className="messages-toolbar-right">
+          <div className="messages-queue-tabs">
+            {([
+              ["unread", "Unread"],
+              ["internal", "Internal"],
+              ["client", "Client"],
+              ["needs_reply", "Needs Reply"],
+              ["archived", "Archived"],
+            ] as Array<[QueueFilter, string]>).map(([value, label]) => (
+              <button
+                className={cn("messages-queue-tab", queue === value && "is-active")}
+                key={value}
+                onClick={() => setQueue(value)}
+                type="button"
+              >
+                {label}
+                <span className="messages-queue-count">{countThreads(threads, value)}</span>
+              </button>
+            ))}
+          </div>
+          <div className="messages-hero-actions">
+            <Button onClick={() => openNewThread("internal")} variant="ghost">New Internal</Button>
+            <Button onClick={() => openNewThread("client")}>New Client Update</Button>
+          </div>
+        </div>
+      </div>
 
       {feedback ? <div className="messages-feedback">{feedback}</div> : null}
 
       <div className="messages-shell">
-        <div className="surface-card messages-rail">
-          <div className="messages-rail-group">
-            <h3 className="section-title">Queues</h3>
-            <div className="messages-queue-list">
-              {([
-                ["unread", "Unread"],
-                ["internal", "Internal"],
-                ["client", "Client"],
-                ["needs_reply", "Needs Reply"],
-                ["archived", "Archived"],
-              ] as Array<[QueueFilter, string]>).map(([value, label]) => (
-                <button
-                  className={cn("messages-queue-button", queue === value && "is-active")}
-                  key={value}
-                  onClick={() => setQueue(value)}
-                  type="button"
-                >
-                  <span>{label}</span>
-                  <span className="messages-queue-count">{countThreads(threads, value)}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="messages-rail-group">
-            <h3 className="section-title">Filters</h3>
-            <label className="messages-field">
-              <span>Search</span>
-              <input onChange={(event) => setQuery(event.target.value)} placeholder="Subject, participant, matter..." value={query} />
-            </label>
-            <label className="messages-field">
-              <span>Matter</span>
-              <select onChange={(event) => setMatterFilter(event.target.value)} value={matterFilter}>
-                <option value="">All matters</option>
-                {initialData.matterOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className="messages-field">
-              <span>Assignee</span>
-              <select onChange={(event) => setAssigneeFilter(event.target.value)} value={assigneeFilter}>
-                <option value="">All assignees</option>
-                {initialData.assigneeOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
-        </div>
-
         <div className="surface-card messages-list-panel">
-          <div className="messages-panel-head">
-            <div>
-              <p className="eyebrow-label">Threads</p>
-              <h3 className="section-title">{filteredThreads.length} visible thread{filteredThreads.length === 1 ? "" : "s"}</h3>
-            </div>
-          </div>
-
           {filteredThreads.length === 0 ? (
             <div className="empty-state">
               No threads match the current queue and filters. Switch queues or create a new thread from the hero actions.
@@ -320,22 +290,18 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                   onClick={() => selectThread(thread)}
                   type="button"
                 >
-                  <div className="messages-thread-head">
-                    <div className="messages-thread-title-group">
+                  <span className="messages-thread-avatar">{initialsForName(thread.participants[0]?.name ?? "")}</span>
+                  <div className="messages-thread-body">
+                    <div className="messages-thread-head">
                       <p className="messages-thread-title">{thread.subject}</p>
-                      <div className="messages-thread-badges">
-                        <span className={cn("messages-chip", `is-${thread.type}`)}>{thread.type === "client" ? "Client" : "Internal"}</span>
-                        <span className={cn("messages-chip", `is-status-${thread.status}`)}>{labelForStatus(thread.status)}</span>
-                        {thread.portalSafe ? <span className="messages-chip is-portal-safe">Portal-safe</span> : null}
-                      </div>
+                      <span className="messages-thread-time">{formatRelativeDate(thread.lastMessageAt)}</span>
                     </div>
-                    <span className="row-meta">{formatRelativeDate(thread.lastMessageAt)}</span>
-                  </div>
-                  <p className="messages-thread-preview">{thread.lastMessagePreview}</p>
-                  <div className="messages-thread-meta">
-                    <span>{thread.matterLabel ?? "No matter linked"}</span>
-                    <span>{thread.participants.map((participant) => participant.name).join(", ")}</span>
-                    {thread.unreadCount > 0 ? <span className="messages-unread-pill">{thread.unreadCount} unread</span> : null}
+                    <p className="messages-thread-preview">{thread.lastMessagePreview}</p>
+                    <div className="messages-thread-foot">
+                      <span className="messages-thread-matter">{thread.matterLabel ?? "No matter"}</span>
+                      <span className={cn("messages-chip", `is-${thread.type}`)}>{thread.type === "client" ? "Client" : "Internal"}</span>
+                      {thread.unreadCount > 0 ? <span className="messages-unread-dot">{thread.unreadCount}</span> : null}
+                    </div>
                   </div>
                 </button>
               ))}
@@ -380,7 +346,7 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                 </div>
               </div>
 
-              <div className="messages-detail-grid">
+              <div className="messages-detail-content">
                 <div className="messages-transcript">
                   {selectedThread.messages.map((message) => (
                     <div
@@ -391,18 +357,17 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                       )}
                       key={message.id}
                     >
-                      <div className="messages-bubble-head">
-                        <strong>{message.authorName}</strong>
-                        <span className="row-meta">
-                          {message.authorRole} · {formatDateTime(message.createdAt)}
-                        </span>
-                      </div>
-                      <p>{message.body}</p>
-                      <div className="messages-bubble-meta">
+                      <div className="messages-bubble-header">
+                        <span className="messages-author-avatar">{initialsForName(message.authorName)}</span>
+                        <div className="messages-bubble-author-info">
+                          <strong>{message.authorName}</strong>
+                          <span className="messages-bubble-time">{formatDateTime(message.createdAt)}</span>
+                        </div>
                         <span className={cn("messages-chip", message.visibility === "client_visible" ? "is-portal-safe" : "is-internal-note")}>
-                          {message.visibility === "client_visible" ? "Client visible" : "Internal only"}
+                          {message.visibility === "client_visible" ? "Client visible" : "Internal"}
                         </span>
                       </div>
+                      <p className="messages-bubble-body">{message.body}</p>
                     </div>
                   ))}
                 </div>
@@ -526,7 +491,7 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                   <textarea
                     onChange={(event) => updateDraft({ body: event.target.value })}
                     placeholder="Write the reply, internal note, or client-safe update."
-                    rows={5}
+                    rows={3}
                     value={draft.body}
                   />
                 </label>

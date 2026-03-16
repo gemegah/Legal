@@ -41,7 +41,7 @@ export function DocumentsWorkspaceClient({
   const [documents, setDocuments] = useState(initialData.documents);
   const [templates, setTemplates] = useState(initialData.templates);
   const [providers, setProviders] = useState(initialData.providers);
-  const [selectedDocumentId, setSelectedDocumentId] = useState(initialData.documents[0]?.id ?? null);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isGenerateOpen, setIsGenerateOpen] = useState(false);
@@ -75,8 +75,9 @@ export function DocumentsWorkspaceClient({
     });
   }, [activeTab, deferredQuery, documents, filters, matter?.id]);
 
-  const selectedDocument =
-    filteredDocuments.find((doc) => doc.id === selectedDocumentId) ?? filteredDocuments[0] ?? null;
+  const selectedDocument = selectedDocumentId
+    ? (filteredDocuments.find((doc) => doc.id === selectedDocumentId) ?? null)
+    : null;
 
   const kpis = useMemo(
     () => ({
@@ -303,16 +304,13 @@ export function DocumentsWorkspaceClient({
               </div>
             </div>
 
-            <div className="documents-main-grid">
-              <div className="documents-table-shell">
+            <div className="documents-table-shell">
                 <div className="documents-table-head">
                   <span>Title</span>
                   {!matter ? <span>Matter</span> : null}
                   <span>Type</span>
                   <span>Source</span>
                   <span>Latest</span>
-                  <span>OCR</span>
-                  <span>AI</span>
                   <span>Shared / Request</span>
                   <span>Updated</span>
                   <span>Owner</span>
@@ -337,8 +335,6 @@ export function DocumentsWorkspaceClient({
                       <span>{doc.documentType}</span>
                       <span>{labelForSource(doc.sourceKind)}</span>
                       <span>v{doc.latestVersionNumber}</span>
-                      <span className={cn("workspace-pill", `is-${doc.ocrStatus}`)}>{labelForStatus(doc.ocrStatus)}</span>
-                      <span className={cn("workspace-pill", `is-${doc.aiStatus}`)}>{labelForStatus(doc.aiStatus)}</span>
                       <span>{doc.isClientShared ? "Shared" : "Internal"}<small>{labelForRequest(doc.requestStatus)}</small></span>
                       <span>{formatRelativeDate(doc.updatedAt)}</span>
                       <span>{doc.uploadedBy}</span>
@@ -347,20 +343,38 @@ export function DocumentsWorkspaceClient({
                 )}
               </div>
 
-              <div className="surface-card documents-detail-rail">
-                {selectedDocument ? (
-                  <DocumentDetailPanel document={selectedDocument} onAnalyze={() => handleAnalyze(selectedDocument.id)} onRequest={() => handleRequest(selectedDocument.id)} onShare={() => handleToggleShare(selectedDocument.id)} />
-                ) : (
-                  <div className="documents-empty-state">
-                    <p className="section-title">Select a document</p>
-                    <p className="placeholder-copy">The detail rail shows versions, AI review, sharing state, and recent activity.</p>
-                  </div>
-                )}
-              </div>
-            </div>
           </>
         )}
       </div>
+
+      {/* Detail drawer — always rendered so slide-out transition fires */}
+      <div
+        className={cn("documents-drawer-backdrop", !selectedDocument && "is-hidden")}
+        onClick={() => setSelectedDocumentId(null)}
+        aria-hidden="true"
+      />
+      <aside className={cn("documents-detail-drawer", !selectedDocument && "is-hidden")}>
+        <div className="documents-drawer-header">
+          <button
+            className="documents-drawer-close"
+            onClick={() => setSelectedDocumentId(null)}
+            type="button"
+            aria-label="Close document details"
+          >
+            <DrawerCloseIcon />
+          </button>
+        </div>
+        <div className="documents-drawer-body">
+          {selectedDocument && (
+            <DocumentDetailPanel
+              document={selectedDocument}
+              onAnalyze={() => handleAnalyze(selectedDocument.id)}
+              onRequest={() => handleRequest(selectedDocument.id)}
+              onShare={() => handleToggleShare(selectedDocument.id)}
+            />
+          )}
+        </div>
+      </aside>
 
       <UploadDocumentModal open={isUploadOpen} onClose={() => setIsUploadOpen(false)} onSave={handleUpload} />
       <GenerateDocumentModal matter={matter} matterOptions={matterOptions} open={isGenerateOpen} onClose={() => setIsGenerateOpen(false)} onSave={handleGenerate} templates={templates} />
@@ -500,6 +514,14 @@ function DocumentDetailPanel({
 
 function DetailBlock({ label, value }: { label: string; value: string }) {
   return <div className="documents-detail-block"><span>{label}</span><strong>{value}</strong></div>;
+}
+
+function DrawerCloseIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 function TemplateLibrary({
