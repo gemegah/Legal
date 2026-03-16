@@ -49,7 +49,10 @@ class DocumentRecord(BaseModel):
     caseTitle: str
     clientName: str
     title: str
+    fileName: str
+    fileExtension: str
     documentType: str
+    status: str
     sourceKind: str
     latestVersionNumber: int
     ocrStatus: str

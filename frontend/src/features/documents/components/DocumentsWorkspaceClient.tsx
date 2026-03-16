@@ -5,281 +5,349 @@ import { useDeferredValue, useMemo, useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
 import type { CaseDetail } from "@/features/cases/types";
-import { cn, formatDate, formatDateTime, formatRelativeDate } from "@/lib/utils";
+import { createTemplate, generateTemplateDocument, updateClientRequest, updateDocumentShare, uploadDocument } from "@/features/documents/client";
+import { deriveDocumentStatus, inferFileExtension, matchesDateFilter } from "@/features/documents/helpers";
+import { cn, formatDateTime, formatRelativeDate } from "@/lib/utils";
 
 import type {
   ClientRequestStatus,
+  DocumentDateFilter,
+  DocumentOutputTarget,
   DocumentRecord,
   DocumentSearchFilters,
   DocumentTemplate,
   DocumentTemplateStatus,
+  DocumentWorkflowStatus,
   DocumentWorkspaceData,
 } from "../types";
 
-type WorkspaceTab = "all" | "templates" | "review" | "requests";
-
-const defaultFilters: DocumentSearchFilters = {
-  query: "",
-  caseId: "",
-  documentType: "",
-  sourceKind: "",
-  aiStatus: "",
-  ocrStatus: "",
-  sharedState: "",
-  requestState: "",
-};
+const defaultFilters: DocumentSearchFilters = { query: "", status: "", date: "all", caseId: "" };
 
 export function DocumentsWorkspaceClient({
-  initialData,
+  apiBaseUrl,
   caseDetail,
+  dataSource,
+  initialData,
 }: {
-  initialData: DocumentWorkspaceData;
+  apiBaseUrl: string | null;
   caseDetail?: CaseDetail | null;
+  dataSource: "mock" | "api";
+  initialData: DocumentWorkspaceData;
 }) {
-  const [activeTab, setActiveTab] = useState<WorkspaceTab>("all");
-  const [filters, setFilters] = useState<DocumentSearchFilters>({ ...defaultFilters, caseId: caseDetail?.id ?? "" });
   const [documents, setDocuments] = useState(initialData.documents);
   const [templates, setTemplates] = useState(initialData.templates);
   const [providers, setProviders] = useState(initialData.providers);
   const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
-  const [isGenerateOpen, setIsGenerateOpen] = useState(false);
-  const [isTemplateOpen, setIsTemplateOpen] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
+  const [templateOpen, setTemplateOpen] = useState(false);
+  const [filterOpen, setFilterOpen] = useState(false);
   const deferredQuery = useDeferredValue(filters.query);
 
   const caseOptions = useMemo(() => {
-    const map = new Map<string, string>();
-    documents.forEach((doc) => map.set(doc.caseId, `${doc.caseReference} - ${doc.caseTitle}`));
-    return Array.from(map.entries()).map(([id, label]) => ({ value: id, label }));
+    const map = new Map<string, { value: string; label: string; meta: string }>();
+    documents.forEach((doc) => {
+      if (!map.has(doc.caseId)) map.set(doc.caseId, { value: doc.caseId, label: `${doc.caseReference} - ${doc.caseTitle}`, meta: doc.clientName });
+    });
+    return Array.from(map.values()).sort((a, b) => a.label.localeCompare(b.label));
   }, [documents]);
+
+  const statusOptions = useMemo(
+    () => Array.from(new Set(documents.map((doc) => doc.status))).sort().map((value) => ({ value, label: labelForStatus(value) })),
+    [documents],
+  );
 
   const filteredDocuments = useMemo(() => {
     const query = deferredQuery.trim().toLowerCase();
-    return documents.filter((doc) => {
-      if (caseDetail?.id && doc.caseId !== caseDetail.id) return false;
-      if (activeTab === "review" && !needsReview(doc)) return false;
-      if (activeTab === "requests" && doc.requestStatus === "none") return false;
-      if (filters.caseId && doc.caseId !== filters.caseId) return false;
-      if (filters.documentType && doc.documentType !== filters.documentType) return false;
-      if (filters.sourceKind && doc.sourceKind !== filters.sourceKind) return false;
-      if (filters.aiStatus && doc.aiStatus !== filters.aiStatus) return false;
-      if (filters.ocrStatus && doc.ocrStatus !== filters.ocrStatus) return false;
-      if (filters.requestState && doc.requestStatus !== filters.requestState) return false;
-      if (filters.sharedState === "shared" && !doc.isClientShared) return false;
-      if (filters.sharedState === "internal" && doc.isClientShared) return false;
-      if (!query) return true;
-      return [doc.title, doc.caseTitle, doc.clientName, doc.uploadedBy, doc.previewSummary, doc.tags.join(" ")].some((value) =>
-        value.toLowerCase().includes(query),
-      );
+    return documents
+      .filter((doc) => {
+        if (caseDetail?.id && doc.caseId !== caseDetail.id) return false;
+        if (filters.caseId && doc.caseId !== filters.caseId) return false;
+        if (filters.status && doc.status !== filters.status) return false;
+        if (!matchesDateFilter(doc.updatedAt, filters.date)) return false;
+        if (!query) return true;
+        return [doc.title, doc.caseReference, doc.caseTitle, doc.clientName, doc.fileName, doc.documentType, doc.uploadedBy, doc.tags.join(" ")]
+          .join(" ")
+          .toLowerCase()
+          .includes(query);
+      })
+      .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt));
+  }, [caseDetail?.id, deferredQuery, documents, filters]);
+
+  const groups = useMemo(() => {
+    if (caseDetail) return [{ id: caseDetail.id, caseReference: caseDetail.reference, caseTitle: caseDetail.title, clientName: caseDetail.clientName, documents: filteredDocuments }];
+    const map = new Map<string, { id: string; caseReference: string; caseTitle: string; clientName: string; documents: DocumentRecord[] }>();
+    filteredDocuments.forEach((doc) => {
+      if (!map.has(doc.caseId)) map.set(doc.caseId, { id: doc.caseId, caseReference: doc.caseReference, caseTitle: doc.caseTitle, clientName: doc.clientName, documents: [] });
+      map.get(doc.caseId)?.documents.push(doc);
     });
-  }, [activeTab, deferredQuery, documents, filters, caseDetail?.id]);
+    return Array.from(map.values()).sort((a, b) => +new Date(b.documents[0]?.updatedAt ?? 0) - +new Date(a.documents[0]?.updatedAt ?? 0));
+  }, [caseDetail, filteredDocuments]);
 
   const selectedDocument = selectedDocumentId
     ? (filteredDocuments.find((doc) => doc.id === selectedDocumentId) ?? null)
     : null;
 
-  function updateFilter(key: keyof DocumentSearchFilters, value: string) {
-    setFilters((current) => ({ ...current, [key]: value }));
+  function updateQuery(value: string) {
+    setFilters((current) => ({ ...current, query: value }));
+    setDraftFilters((current) => ({ ...current, query: value }));
   }
 
-  function pushMessage(next: string) {
-    setMessage(next);
+  function upsertDocument(next: DocumentRecord) {
+    const record = ensureDocument(next);
+    setDocuments((current) => (current.some((item) => item.id === record.id) ? current.map((item) => (item.id === record.id ? record : item)) : [record, ...current]));
   }
 
-  function handleUpload(values: { title: string; documentType: string; tags: string }) {
-    const caseId = caseDetail?.id ?? filters.caseId ?? documents[0]?.caseId ?? "case-2026-014";
-    const caseLabel = caseOptions.find((option) => option.value === caseId)?.label ?? "CAS-NEW - Case";
-    const [caseReference, caseTitle] = caseLabel.split(" - ");
-    const next: DocumentRecord = {
-      id: `doc-${Math.random().toString(36).slice(2, 8)}`,
-      caseId,
-      caseReference,
-      caseTitle,
-      clientName: caseDetail?.clientName ?? "Client pending confirmation",
-      title: values.title,
-      documentType: values.documentType,
-      sourceKind: "upload",
-      latestVersionNumber: 1,
-      ocrStatus: "pending",
-      aiStatus: "idle",
-      requestStatus: "none",
-      isClientShared: false,
-      tags: values.tags.split(",").map((item) => item.trim()).filter(Boolean),
-      updatedAt: new Date().toISOString(),
-      uploadedBy: "K. Boateng",
-      previewSummary: "Fresh upload queued for OCR and metadata review.",
-      versions: [{ id: "new-v1", versionNumber: 1, createdAt: new Date().toISOString(), createdBy: "K. Boateng", summary: "Initial upload.", ocrStatus: "pending", providerRevisionId: null }],
-      aiReview: { status: "idle", summary: "AI analysis has not been requested yet.", flags: [], lastAnalyzedAt: null },
-      providerLink: null,
-      activity: [{ id: "new-activity", at: new Date().toISOString(), actor: "K. Boateng", detail: "Uploaded from practitioner workspace." }],
-    };
-    setDocuments((current) => [next, ...current]);
-    setSelectedDocumentId(next.id);
-    setIsUploadOpen(false);
-    pushMessage(`Uploaded "${values.title}" and queued OCR.`);
+  function openDocument(document: DocumentRecord) {
+    if (document.providerLink?.documentUrl) {
+      window.open(document.providerLink.documentUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+    setMessage(`"${document.title}" is indexed in this starter workspace, but direct downloads are not wired into this view yet.`);
   }
 
-  function handleAnalyze(documentId: string) {
-    setDocuments((current) =>
-      current.map((doc) =>
-        doc.id === documentId
-          ? {
-              ...doc,
-              aiStatus: "ready",
-              aiReview: {
-                status: "ready",
-                summary: doc.aiReview.flags.length ? doc.aiReview.summary : "1 deadline flagged for practitioner review.",
-                flags: doc.aiReview.flags.length
-                  ? doc.aiReview.flags
-                  : [{ id: "generated-flag", label: "Review extracted date", detail: "Confirm the document's next action date before filing.", confidence: "medium" }],
-                lastAnalyzedAt: new Date().toISOString(),
-              },
-            }
-          : doc,
-      ),
-    );
-    pushMessage("AI review completed.");
+  async function saveUpload(values: { caseId: string; documentType: string; file: File; tags: string[]; title: string }) {
+    setPendingAction("upload");
+    try {
+      if (dataSource === "api" && apiBaseUrl) {
+        upsertDocument(
+          await uploadDocument({
+            apiBaseUrl,
+            caseId: values.caseId,
+            payload: { file_name: values.file.name, document_type: values.documentType, title: values.title },
+            confirm: {
+              checksum_sha256: "starter-checksum",
+              file_size_bytes: values.file.size || 0,
+              mime_type: values.file.type || "application/octet-stream",
+              storage_key: "",
+            },
+          }),
+        );
+      } else {
+        const option = caseOptions.find((item) => item.value === values.caseId);
+        const [caseReference, caseTitle] = option?.label.split(" - ") ?? ["CAS-NEW", "New Case"];
+        const now = new Date().toISOString();
+        upsertDocument({
+          id: `doc-${Math.random().toString(36).slice(2, 8)}`,
+          caseId: values.caseId,
+          caseReference,
+          caseTitle,
+          clientName: option?.meta ?? "Case client",
+          title: values.title,
+          fileName: values.file.name,
+          fileExtension: inferFileExtension(values.file.name, "upload"),
+          documentType: values.documentType,
+          status: "processing",
+          sourceKind: "upload",
+          latestVersionNumber: 1,
+          ocrStatus: "processing",
+          aiStatus: "pending",
+          requestStatus: "none",
+          isClientShared: false,
+          tags: values.tags,
+          updatedAt: now,
+          uploadedBy: "K. Boateng",
+          previewSummary: "Upload confirmed and background OCR is processing.",
+          versions: [{ id: "new-upload-v1", versionNumber: 1, createdAt: now, createdBy: "K. Boateng", summary: "Initial upload confirmed.", ocrStatus: "processing", providerRevisionId: null }],
+          aiReview: { status: "pending", summary: "Background extraction will start after OCR completes.", flags: [], lastAnalyzedAt: null },
+          providerLink: null,
+          activity: [{ id: "new-upload-activity", at: now, actor: "LegalOS OCR", detail: "Upload confirmed and OCR queued." }],
+        });
+      }
+      setUploadOpen(false);
+      setMessage(`Queued "${values.title}" for background processing.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Upload failed.");
+    } finally {
+      setPendingAction(null);
+    }
   }
 
-  function handleToggleShare(documentId: string) {
-    setDocuments((current) => current.map((doc) => (doc.id === documentId ? { ...doc, isClientShared: !doc.isClientShared } : doc)));
-    pushMessage("Sharing state updated.");
+  async function saveTemplate(values: { category: string; name: string; sourceKind: DocumentTemplate["sourceKind"]; status: DocumentTemplateStatus }) {
+    setPendingAction("template");
+    try {
+      if (dataSource === "api" && apiBaseUrl) {
+        const created = await createTemplate({ apiBaseUrl, payload: values });
+        setTemplates((current) => [created, ...current]);
+      } else
+        setTemplates((current) => [
+          {
+            id: `tpl-${Math.random().toString(36).slice(2, 8)}`,
+            name: values.name,
+            category: values.category,
+            sourceKind: values.sourceKind,
+            status: values.status,
+            ownerName: "K. Boateng",
+            caseTypes: ["Commercial Litigation", "Advisory"],
+            practiceAreas: ["Commercial"],
+            updatedAt: new Date().toISOString(),
+            defaultDocumentType: "Advice Letter",
+            defaultTags: ["automation"],
+            titlePattern: "{{case.reference}} - Draft",
+            supportsInternalGeneration: values.sourceKind === "generated" || values.sourceKind === "upload",
+            outputTargets: values.sourceKind === "google_docs" ? ["google_docs"] : values.sourceKind === "word" ? ["word"] : ["legalos", "word"],
+            sourceFileName: `${values.name.toLowerCase().replace(/\s+/g, "-")}.docx`,
+            fields: [{ id: "field-new", token: "{{client.name}}", label: "Client Name", source: "client.name", required: true }],
+          },
+          ...current,
+        ]);
+      setTemplateOpen(false);
+      setMessage(`Template "${values.name}" saved.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Template could not be saved.");
+    } finally {
+      setPendingAction(null);
+    }
   }
 
-  function handleRequest(documentId: string) {
-    setDocuments((current) =>
-      current.map((doc) =>
-        doc.id === documentId
-          ? { ...doc, requestStatus: doc.requestStatus === "requested" ? "uploaded" : "requested" }
-          : doc,
-      ),
-    );
-    pushMessage("Request state updated.");
-  }
-
-  function handleProvider(provider: "word" | "google_docs") {
-    setProviders((current) =>
-      current.map((item) =>
-        item.provider === provider ? { ...item, status: "connected", lastSyncedAt: new Date().toISOString() } : item,
-      ),
-    );
-    pushMessage(`${labelForSource(provider)} integration is now marked connected in the mock workspace.`);
-  }
-
-  function handleCreateTemplate(template: DocumentTemplate) {
-    setTemplates((current) => [template, ...current]);
-    setIsTemplateOpen(false);
-    pushMessage(`Template "${template.name}" saved.`);
-  }
-
-  function handleGenerate(values: { templateId: string; caseId: string; outputTarget: string; title: string }) {
+  async function saveGenerated(values: { caseId: string; outputTarget: DocumentOutputTarget; templateId: string; title: string }) {
     const template = templates.find((item) => item.id === values.templateId);
-    const caseLabel = caseOptions.find((item) => item.value === values.caseId)?.label;
-    if (!template || !caseLabel) return;
-    const [caseReference, caseTitle] = caseLabel.split(" - ");
-    const next: DocumentRecord = {
-      id: `doc-${Math.random().toString(36).slice(2, 8)}`,
-      caseId: values.caseId,
-      caseReference,
-      caseTitle,
-      clientName: caseDetail?.clientName ?? "Generated Draft Client",
-      title: values.title,
-      documentType: template.defaultDocumentType,
-      sourceKind: values.outputTarget === "legalos" ? "generated" : (values.outputTarget as DocumentRecord["sourceKind"]),
-      latestVersionNumber: 1,
-      ocrStatus: "complete",
-      aiStatus: "idle",
-      requestStatus: "none",
-      isClientShared: false,
-      tags: [...template.defaultTags],
-      updatedAt: new Date().toISOString(),
-      uploadedBy: "LegalOS Templates",
-      previewSummary: `Generated from ${template.name}.`,
-      versions: [{ id: "generated-v1", versionNumber: 1, createdAt: new Date().toISOString(), createdBy: "LegalOS Templates", summary: "Initial generated draft.", ocrStatus: "complete", providerRevisionId: null }],
-      aiReview: { status: "idle", summary: "No AI review has run yet.", flags: [], lastAnalyzedAt: null },
-      providerLink: values.outputTarget === "word" || values.outputTarget === "google_docs" ? { provider: values.outputTarget as "word" | "google_docs", documentUrl: "https://example.com/generated", templateUrl: "https://example.com/template", syncStatus: "syncing", lastSyncedAt: new Date().toISOString() } : null,
-      activity: [{ id: "generated-activity", at: new Date().toISOString(), actor: "LegalOS Templates", detail: `Generated from ${template.name}.` }],
-    };
-    setDocuments((current) => [next, ...current]);
-    setSelectedDocumentId(next.id);
-    setActiveTab("all");
-    setIsGenerateOpen(false);
-    pushMessage(`Created "${values.title}" from template.`);
+    if (!template) return;
+    setPendingAction("generate");
+    try {
+      if (dataSource === "api" && apiBaseUrl) {
+        upsertDocument(await generateTemplateDocument({ apiBaseUrl, templateId: values.templateId, payload: values }));
+      } else {
+        const option = caseOptions.find((item) => item.value === values.caseId);
+        const [caseReference, caseTitle] = option?.label.split(" - ") ?? ["CAS-NEW", "Generated Case"];
+        const ext = values.outputTarget === "google_docs" ? "gdoc" : "docx";
+        const now = new Date().toISOString();
+        upsertDocument({
+          id: `doc-${Math.random().toString(36).slice(2, 8)}`,
+          caseId: values.caseId,
+          caseReference,
+          caseTitle,
+          clientName: option?.meta ?? "Generated Client",
+          title: values.title,
+          fileName: `${values.title.toLowerCase().replace(/\s+/g, "-")}.${ext}`,
+          fileExtension: ext,
+          documentType: template.defaultDocumentType,
+          status: "ready",
+          sourceKind: values.outputTarget === "legalos" ? "generated" : values.outputTarget,
+          latestVersionNumber: 1,
+          ocrStatus: "complete",
+          aiStatus: "idle",
+          requestStatus: "none",
+          isClientShared: false,
+          tags: [...template.defaultTags],
+          updatedAt: now,
+          uploadedBy: "LegalOS Templates",
+          previewSummary: `Created from ${template.name}.`,
+          versions: [{ id: "generated-v1", versionNumber: 1, createdAt: now, createdBy: "LegalOS Templates", summary: "Generated draft.", ocrStatus: "complete", providerRevisionId: null }],
+          aiReview: { status: "idle", summary: "Built-in extraction will run automatically where supported.", flags: [], lastAnalyzedAt: null },
+          providerLink: values.outputTarget === "word" || values.outputTarget === "google_docs" ? { provider: values.outputTarget, documentUrl: "https://example.com/generated", templateUrl: null, syncStatus: "syncing", lastSyncedAt: now } : null,
+          activity: [{ id: "generated-activity", at: now, actor: "LegalOS Templates", detail: `Created from ${template.name}.` }],
+        });
+      }
+      setCreateOpen(false);
+      setMessage(`Created "${values.title}" from template.`);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Document generation failed.");
+    } finally {
+      setPendingAction(null);
+    }
+  }
+
+  async function toggleShare(document: DocumentRecord) {
+    setPendingAction(document.id);
+    try {
+      const updated =
+        dataSource === "api" && apiBaseUrl
+          ? await updateDocumentShare({ apiBaseUrl, documentId: document.id, payload: { is_client_shared: !document.isClientShared } })
+          : ensureDocument({ ...document, isClientShared: !document.isClientShared, updatedAt: new Date().toISOString() });
+      upsertDocument(updated);
+      setMessage(document.isClientShared ? "Document returned to internal-only access." : "Document shared with the client.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Share action failed.");
+    } finally {
+      setOpenMenuId(null);
+      setPendingAction(null);
+    }
+  }
+
+  async function toggleRequest(document: DocumentRecord) {
+    const nextStatus: ClientRequestStatus = document.requestStatus === "requested" || document.requestStatus === "uploaded" ? "fulfilled" : "requested";
+    setPendingAction(document.id);
+    try {
+      const updated =
+        dataSource === "api" && apiBaseUrl
+          ? await updateClientRequest({ apiBaseUrl, documentId: document.id, payload: { status: nextStatus } })
+          : ensureDocument({ ...document, requestStatus: nextStatus, updatedAt: new Date().toISOString() });
+      upsertDocument(updated);
+      setMessage(nextStatus === "requested" ? "Client upload request marked active." : "Client upload request marked complete.");
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "Request state could not be updated.");
+    } finally {
+      setOpenMenuId(null);
+      setPendingAction(null);
+    }
   }
 
   return (
     <section className={cn("documents-workspace", caseDetail && "is-case")}>
       <div className="surface-card documents-panel">
-        <div className="documents-panel-header">
-          <div className="documents-panel-copy">
+        <div className="documents-shell-header">
+          <div className="documents-shell-copy">
             <p className="eyebrow-label">{caseDetail ? "Case Documents" : "Document Center"}</p>
-            <h2 className="case-title">{caseDetail ? `${caseDetail.reference} document workflow` : "Search-first document operations"}</h2>
-            <p className="documents-panel-subcopy">
-              {caseDetail
-                ? "Upload, classify, generate, and share case documents with provider-aware authoring."
-                : "Search, upload, classify, and share documents across active cases with OCR, AI review, and template automation."}
-            </p>
+            <h2 className="case-title">{caseDetail ? `${caseDetail.reference} documents` : "Documents"}</h2>
+            <p className="documents-shell-subcopy">{caseDetail ? "Case files, uploads, and drafts in one calm list view." : "Grouped case files with built-in processing and a lighter document workspace."}</p>
           </div>
-          <div className="documents-panel-actions">
-            <Button onClick={() => setIsUploadOpen(true)} variant="ghost">Upload</Button>
-            <Button onClick={() => setIsGenerateOpen(true)}>Create from Template</Button>
-            <Button onClick={() => handleProvider("word")} variant="ghost">Open in Word</Button>
-            <Button onClick={() => handleProvider("google_docs")} variant="ghost">Open in Google Docs</Button>
+          <div className="documents-shell-actions">
+            <Button onClick={() => setUploadOpen(true)} variant="ghost">Upload document</Button>
+            <Button onClick={() => setCreateOpen(true)}>Create document</Button>
           </div>
         </div>
-
-        <div className="documents-provider-strip" aria-label="Document provider status">
-          {providers.map((provider) => (
-            <div className="documents-provider-inline" key={provider.provider}>
-              <div className="documents-provider-inline-copy">
-                <span className="documents-provider-label">{provider.label}</span>
-                <span className={cn("workspace-pill", `is-${provider.status}`)}>{labelForProvider(provider.status)}</span>
-                <span className="case-inline-note">
-                  {provider.lastSyncedAt ? `Synced ${formatRelativeDate(provider.lastSyncedAt)}` : "No recent sync"}
-                </span>
-              </div>
-              {provider.status !== "connected" ? (
-                <Button onClick={() => handleProvider(provider.provider)} size="sm" variant="ghost">
-                  Connect
+        {message ? <div className="documents-feedback">{message}</div> : null}
+        <div className="documents-toolbar">
+          <label className="case-search-field documents-search-field" aria-label="Search documents">
+            <SearchIcon />
+            <input onChange={(event) => updateQuery(event.target.value)} placeholder={caseDetail ? "Search case documents..." : "Search documents, cases, owners..."} type="search" value={filters.query} />
+          </label>
+          <div className="documents-toolbar-actions">
+            <button className={cn("documents-filter-trigger", filterOpen && "is-open")} onClick={() => setFilterOpen((current) => !current)} type="button">
+              Filters
+              {filterCount > 0 ? <span className="documents-filter-count">{filterCount}</span> : null}
+            </button>
+          </div>
+          {filterOpen ? (
+            <div className="documents-filter-popover">
+              <FilterSection label="Status" options={[{ value: "", label: "All statuses" }, ...statusOptions]} value={draftFilters.status} onChange={(value) => setDraftFilters((current) => ({ ...current, status: value }))} />
+              <FilterSection
+                label="Date"
+                options={[
+                  { value: "all", label: "All dates" },
+                  { value: "today", label: "Updated today" },
+                  { value: "last_7_days", label: "Last 7 days" },
+                  { value: "last_30_days", label: "Last 30 days" },
+                  { value: "older", label: "Older" },
+                ]}
+                value={draftFilters.date}
+                onChange={(value) => setDraftFilters((current) => ({ ...current, date: value as DocumentDateFilter }))}
+              />
+              {!caseDetail ? <FilterSection label="Case" options={[{ value: "", label: "All cases" }, ...caseOptions.map((item) => ({ value: item.value, label: item.label }))]} value={draftFilters.caseId} onChange={(value) => setDraftFilters((current) => ({ ...current, caseId: value }))} /> : null}
+              <div className="documents-filter-footer">
+                <Button
+                  onClick={() => {
+                    const next = { ...defaultFilters, query: filters.query };
+                    setFilters(next);
+                    setDraftFilters(next);
+                    setFilterOpen(false);
+                  }}
+                  variant="ghost"
+                >
+                  Clear
                 </Button>
-              ) : null}
+                <Button onClick={() => { setFilters(draftFilters); setFilterOpen(false); }}>Apply filters</Button>
+              </div>
             </div>
-          ))}
+          ) : null}
         </div>
-
-        {message ? <div className="documents-inline-alert">{message}</div> : null}
-
-        <div className="documents-tabs">
-          <TabButton active={activeTab === "all"} label="All Documents" onClick={() => setActiveTab("all")} />
-          <TabButton active={activeTab === "templates"} label="Templates" onClick={() => setActiveTab("templates")} />
-          <TabButton active={activeTab === "review"} label="Needs Review" onClick={() => setActiveTab("review")} />
-          <TabButton active={activeTab === "requests"} label="Requests" onClick={() => setActiveTab("requests")} />
-        </div>
-
-        {activeTab === "templates" ? (
-          <TemplateLibrary caseDetail={caseDetail} onGenerate={() => setIsGenerateOpen(true)} onNewTemplate={() => setIsTemplateOpen(true)} templates={templates} />
-        ) : (
-          <>
-            <div className="documents-filter-grid">
-              <label className="case-search-field documents-search-field" aria-label="Search documents">
-                <SearchIcon />
-                <input
-                  onChange={(event) => updateFilter("query", event.target.value)}
-                  placeholder={caseDetail ? "Search case documents..." : "Search documents, OCR text, tags..."}
-                  type="search"
-                  value={filters.query}
-                />
-              </label>
-              {!caseDetail ? (
-                <FilterSelect label="Case" onChange={(value) => updateFilter("caseId", value)} options={caseOptions} value={filters.caseId} />
-              ) : null}
-              <FilterSelect label="Type" onChange={(value) => updateFilter("documentType", value)} options={facetValues(documents, "documentType")} value={filters.documentType} />
-              <FilterSelect label="Source" onChange={(value) => updateFilter("sourceKind", value)} options={facetValues(documents, "sourceKind")} value={filters.sourceKind} />
-              <FilterSelect label="AI" onChange={(value) => updateFilter("aiStatus", value)} options={facetValues(documents, "aiStatus")} value={filters.aiStatus} />
-              <FilterSelect label="OCR" onChange={(value) => updateFilter("ocrStatus", value)} options={facetValues(documents, "ocrStatus")} value={filters.ocrStatus} />
-              <FilterSelect label="Share" onChange={(value) => updateFilter("sharedState", value)} options={[{ value: "shared", label: "Shared" }, { value: "internal", label: "Internal only" }]} value={filters.sharedState} />
-              <FilterSelect label="Requests" onChange={(value) => updateFilter("requestState", value)} options={facetValues(documents, "requestStatus").filter((item) => item.value !== "none")} value={filters.requestState} />
+        <div className="documents-list-shell">
+          {groups.every((group) => group.documents.length === 0) ? (
+            <div className="documents-empty-state">
+              <p className="section-title">No documents match the current workspace view.</p>
+              <p className="placeholder-copy">Adjust the filters or add a new document to refill the list.</p>
             </div>
 
             <div className="documents-table-shell">
@@ -361,111 +429,49 @@ export function DocumentsWorkspaceClient({
   );
 }
 
-function TabButton({ active, label, onClick }: { active: boolean; label: string; onClick: () => void }) {
-  return <button className={cn("documents-tab-button", active && "is-active")} onClick={onClick} type="button">{label}</button>;
-}
-
-function FilterSelect({
-  label,
-  onChange,
-  options,
-  value,
-}: {
-  label: string;
-  onChange: (value: string) => void;
-  options: Array<{ value: string; label: string }>;
-  value: string;
-}) {
-  return (
-    <label className="documents-filter-field">
-      <span>{label}</span>
-      <select onChange={(event) => onChange(event.target.value)} value={value}>
-        <option value="">All</option>
-        {options.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}
-      </select>
-    </label>
-  );
-}
-
-function DocumentDetailPanel({
+function DocumentRow({
   document,
-  onAnalyze,
+  isMenuOpen,
+  onOpen,
   onRequest,
-  onShare,
+  onToggleMenu,
+  onToggleShare,
+  pending,
 }: {
   document: DocumentRecord;
-  onAnalyze: () => void;
+  isMenuOpen: boolean;
+  onOpen: () => void;
   onRequest: () => void;
-  onShare: () => void;
+  onToggleMenu: () => void;
+  onToggleShare: () => void;
+  pending: boolean;
 }) {
   return (
-    <div className="documents-detail-body">
-      <div className="documents-detail-header">
-        <div>
-          <p className="eyebrow-label">{document.caseReference}</p>
-          <h3 className="section-title">{document.title}</h3>
-          <p className="placeholder-copy">{document.previewSummary}</p>
-        </div>
-        <div className="documents-detail-actions">
-          <Button onClick={onAnalyze} size="sm" variant="ghost">Analyze</Button>
-          <Button onClick={onRequest} size="sm" variant="ghost">Request</Button>
-          <Button onClick={onShare} size="sm">{document.isClientShared ? "Unshare" : "Share"}</Button>
+    <div className="documents-row">
+      <div className="documents-file-cell">
+        <FileBadge fileExtension={document.fileExtension} sourceKind={document.sourceKind} />
+        <div className="documents-file-copy">
+          <div className="documents-file-title-line"><strong>{document.title}</strong><span className="documents-file-extension">{document.fileExtension.toUpperCase()}</span></div>
+          <p className="documents-file-meta"><span>{document.documentType}</span><span>v{document.latestVersionNumber}</span><span>{document.isClientShared ? "Client shared" : "Internal only"}</span>{document.requestStatus !== "none" ? <span>{labelForRequest(document.requestStatus)}</span> : null}</p>
+          <p className="documents-file-note">{noteForDocument(document)}</p>
         </div>
       </div>
-
-      <div className="documents-detail-grid">
-        <DetailBlock label="Type" value={document.documentType} />
-        <DetailBlock label="Source" value={labelForSource(document.sourceKind)} />
-        <DetailBlock label="Updated" value={formatDateTime(document.updatedAt)} />
-        <DetailBlock label="Owner" value={document.uploadedBy} />
+      <div className="documents-status-cell"><span className={cn("documents-status-badge", `is-${document.status}`)}>{labelForStatus(document.status)}</span></div>
+      <div className="documents-date-cell"><strong>{formatRelativeDate(document.updatedAt)}</strong><small>{formatDateTime(document.updatedAt)}</small></div>
+      <div className="documents-owner-cell"><strong>{document.uploadedBy}</strong><small>{document.fileName}</small></div>
+      <div className="documents-actions-cell">
+        <button className="documents-inline-action" onClick={onOpen} type="button">Open</button>
+        <div className="documents-row-menu">
+          <button aria-label="More document actions" className="documents-row-menu-trigger" onClick={onToggleMenu} type="button"><MenuIcon /></button>
+          {isMenuOpen ? (
+            <div className="documents-row-menu-panel">
+              <button onClick={onToggleShare} type="button">{document.isClientShared ? "Unshare with client" : "Share with client"}</button>
+              <button onClick={onRequest} type="button">{document.requestStatus === "requested" || document.requestStatus === "uploaded" ? "Mark client request complete" : "Request client upload"}</button>
+            </div>
+          ) : null}
+        </div>
+        {pending ? <span className="documents-row-working">Updating...</span> : null}
       </div>
-
-      <section className="documents-detail-section">
-        <div className="documents-detail-section-head">
-          <p className="section-title">AI Review</p>
-          <span className={cn("workspace-pill", `is-${document.aiStatus}`)}>{labelForStatus(document.aiStatus)}</span>
-        </div>
-        <p className="placeholder-copy">{document.aiReview.summary}</p>
-        {document.aiReview.flags.length > 0 ? (
-          <div className="documents-flag-list">
-            {document.aiReview.flags.map((flag) => (
-              <div className="documents-flag-card" key={flag.id}>
-                <strong>{flag.label}</strong>
-                <span>{flag.detail}</span>
-                <small>{flag.confidence} confidence</small>
-              </div>
-            ))}
-          </div>
-        ) : null}
-      </section>
-
-      <section className="documents-detail-section">
-        <div className="documents-detail-section-head">
-          <p className="section-title">Version Rail</p>
-          <span className="case-inline-note">v{document.latestVersionNumber}</span>
-        </div>
-        <div className="documents-version-list">
-          {document.versions.map((version) => (
-            <div className="documents-version-card" key={version.id}>
-              <strong>Version {version.versionNumber}</strong>
-              <span>{version.summary}</span>
-              <small>{formatDateTime(version.createdAt)} - {version.createdBy}</small>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="documents-detail-section">
-        <p className="section-title">Recent Activity</p>
-        <div className="documents-activity-list">
-          {document.activity.map((entry) => (
-            <div className="documents-activity-item" key={entry.id}>
-              <strong>{entry.detail}</strong>
-              <span>{entry.actor} - {formatRelativeDate(entry.at)}</span>
-            </div>
-          ))}
-        </div>
-      </section>
     </div>
   );
 }
@@ -501,38 +507,13 @@ function TemplateLibrary({
   });
 
   return (
-    <div className="documents-template-shell">
-      <div className="documents-template-toolbar">
-        <div className="documents-tabs">
-          <TabButton active={statusFilter === "all"} label="All" onClick={() => setStatusFilter("all")} />
-          <TabButton active={statusFilter === "active"} label="Active" onClick={() => setStatusFilter("active")} />
-          <TabButton active={statusFilter === "draft"} label="Draft" onClick={() => setStatusFilter("draft")} />
-        </div>
-        <div className="documents-template-actions">
-          <Button onClick={onNewTemplate} variant="ghost">New Template</Button>
-          <Button onClick={onGenerate}>Generate Document</Button>
-        </div>
-      </div>
-
-      <div className="documents-template-grid">
-        {visibleTemplates.map((template) => (
-          <div className="surface-card template-card" key={template.id}>
-            <div className="template-card-head">
-              <div>
-                <p className="eyebrow-label">{template.category}</p>
-                <h3 className="section-title">{template.name}</h3>
-              </div>
-              <span className={cn("workspace-pill", `is-${template.status}`)}>{template.status}</span>
-            </div>
-            <p className="placeholder-copy">{labelForSource(template.sourceKind)} - {template.defaultDocumentType} - {template.fields.length} mapped fields</p>
-            <div className="template-token-list">
-              {template.fields.map((field) => <span className="case-detail-chip" key={field.id}>{field.token}</span>)}
-            </div>
-            <div className="template-meta-grid">
-              <DetailBlock label="Owner" value={template.ownerName} />
-              <DetailBlock label="Updated" value={formatDate(template.updatedAt)} />
-            </div>
-          </div>
+    <div className="documents-filter-section">
+      <p className="documents-filter-label">{label}</p>
+      <div className="documents-filter-options">
+        {options.map((option) => (
+          <button className={cn("documents-filter-option", value === option.value && "is-active")} key={option.value} onClick={() => onChange(option.value)} type="button">
+            {option.label}
+          </button>
         ))}
       </div>
     </div>
@@ -540,189 +521,149 @@ function TemplateLibrary({
 }
 
 function UploadDocumentModal({
-  open,
+  caseDetail,
+  caseOptions,
+  loading,
   onClose,
   onSave,
+  open,
 }: {
-  open: boolean;
+  caseDetail?: CaseDetail | null;
+  caseOptions: Array<{ value: string; label: string; meta: string }>;
+  loading: boolean;
   onClose: () => void;
-  onSave: (values: { title: string; documentType: string; tags: string }) => void;
+  onSave: (values: { caseId: string; documentType: string; file: File; tags: string[]; title: string }) => Promise<void>;
+  open: boolean;
 }) {
+  const [caseId, setCaseId] = useState(caseDetail?.id ?? caseOptions[0]?.value ?? "");
+  const [documentType, setDocumentType] = useState("Court Filing");
   const [title, setTitle] = useState("");
-  const [documentType, setDocumentType] = useState("Court Notice");
-  const [tags, setTags] = useState("uploaded, pending-review");
-
+  const [tags, setTags] = useState("uploaded, legalos");
+  const [file, setFile] = useState<File | null>(null);
   return (
-    <Modal
-      footer={<><Button onClick={onClose} variant="ghost">Cancel</Button><Button onClick={() => onSave({ title, documentType, tags })}>Queue Upload</Button></>}
-      onClose={onClose}
-      open={open}
-      title="Upload Document"
-    >
+    <Modal footer={<><Button onClick={onClose} variant="ghost">Cancel</Button><Button disabled={!file || !title.trim()} loading={loading} onClick={() => file ? void onSave({ caseId, documentType, file, tags: tags.split(",").map((item) => item.trim()).filter(Boolean), title }) : undefined}>Queue upload</Button></>} onClose={onClose} open={open} title="Upload document">
       <div className="documents-modal-grid">
-        <label className="documents-filter-field"><span>Title</span><input onChange={(event) => setTitle(event.target.value)} value={title} /></label>
-        <label className="documents-filter-field"><span>Document type</span><input onChange={(event) => setDocumentType(event.target.value)} value={documentType} /></label>
-        <label className="documents-filter-field"><span>Tags</span><input onChange={(event) => setTags(event.target.value)} value={tags} /></label>
+        {!caseDetail ? <label className="documents-field"><span>Case</span><select onChange={(event) => setCaseId(event.target.value)} value={caseId}>{caseOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label> : null}
+        <label className="documents-field"><span>File</span><input accept=".doc,.docx,.pdf,.ppt,.pptx,.xls,.xlsx,.png,.jpg,.jpeg" onChange={(event) => { const nextFile = event.target.files?.[0] ?? null; setFile(nextFile); if (nextFile && !title) setTitle(nextFile.name.replace(/\.[^.]+$/, "")); }} type="file" /></label>
+        <label className="documents-field"><span>Title</span><input onChange={(event) => setTitle(event.target.value)} value={title} /></label>
+        <label className="documents-field"><span>Document type</span><input onChange={(event) => setDocumentType(event.target.value)} value={documentType} /></label>
+        <label className="documents-field"><span>Tags</span><input onChange={(event) => setTags(event.target.value)} value={tags} /></label>
+      </div>
+    </Modal>
+  );
+}
+
+function CreateDocumentModal({
+  caseDetail,
+  caseOptions,
+  loading,
+  onClose,
+  onManageTemplates,
+  onSave,
+  open,
+  templates,
+}: {
+  caseDetail?: CaseDetail | null;
+  caseOptions: Array<{ value: string; label: string; meta: string }>;
+  loading: boolean;
+  onClose: () => void;
+  onManageTemplates: () => void;
+  onSave: (values: { caseId: string; outputTarget: DocumentOutputTarget; templateId: string; title: string }) => Promise<void>;
+  open: boolean;
+  templates: DocumentTemplate[];
+}) {
+  const visibleTemplates = useMemo(() => !caseDetail ? templates : templates.filter((template) => template.caseTypes.includes(caseDetail.caseType) || template.practiceAreas.includes(caseDetail.practiceArea)), [caseDetail, templates]);
+  const [templateId, setTemplateId] = useState(visibleTemplates[0]?.id ?? templates[0]?.id ?? "");
+  const [caseId, setCaseId] = useState(caseDetail?.id ?? caseOptions[0]?.value ?? "");
+  const [title, setTitle] = useState("Generated draft");
+  const selectedTemplate = visibleTemplates.find((template) => template.id === templateId) ?? templates.find((template) => template.id === templateId) ?? null;
+  const outputOptions = selectedTemplate?.outputTargets ?? ["word"];
+  const [outputTarget, setOutputTarget] = useState<DocumentOutputTarget>((outputOptions[0] ?? "word") as DocumentOutputTarget);
+  return (
+    <Modal footer={<><Button onClick={onClose} variant="ghost">Cancel</Button><Button disabled={!templateId || !title.trim()} loading={loading} onClick={() => void onSave({ caseId, outputTarget, templateId, title })}>Create document</Button></>} onClose={onClose} open={open} title="Create document">
+      <div className="documents-create-shell">
+        <div className="documents-create-head"><p className="placeholder-copy">Template selection stays inside the create flow. Editor targets apply in the background.</p><Button onClick={onManageTemplates} variant="ghost">Manage templates</Button></div>
+        <div className="documents-modal-grid">
+          {!caseDetail ? <label className="documents-field"><span>Case</span><select onChange={(event) => setCaseId(event.target.value)} value={caseId}>{caseOptions.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}</select></label> : null}
+          <label className="documents-field"><span>Template</span><select onChange={(event) => { const nextTemplateId = event.target.value; setTemplateId(nextTemplateId); const nextTemplate = visibleTemplates.find((template) => template.id === nextTemplateId) ?? templates.find((template) => template.id === nextTemplateId); if (nextTemplate) setOutputTarget((nextTemplate.outputTargets[0] ?? "word") as DocumentOutputTarget); }} value={templateId}>{(visibleTemplates.length ? visibleTemplates : templates).map((template) => <option key={template.id} value={template.id}>{template.name}</option>)}</select></label>
+          <label className="documents-field"><span>Document title</span><input onChange={(event) => setTitle(event.target.value)} value={title} /></label>
+          <label className="documents-field"><span>Output</span><select onChange={(event) => setOutputTarget(event.target.value as DocumentOutputTarget)} value={outputTarget}>{outputOptions.map((option) => <option key={option} value={option}>{labelForOutput(option as DocumentOutputTarget)}</option>)}</select></label>
+        </div>
       </div>
     </Modal>
   );
 }
 
 function TemplateBuilderModal({
-  open,
+  loading,
   onClose,
   onSave,
+  open,
 }: {
-  open: boolean;
+  loading: boolean;
   onClose: () => void;
-  onSave: (template: DocumentTemplate) => void;
+  onSave: (values: { category: string; name: string; sourceKind: DocumentTemplate["sourceKind"]; status: DocumentTemplateStatus }) => Promise<void>;
+  open: boolean;
 }) {
-  const [step, setStep] = useState(0);
-  const [name, setName] = useState("New Document Automation");
+  const [name, setName] = useState("New document automation");
   const [category, setCategory] = useState("Advisory");
   const [sourceKind, setSourceKind] = useState<DocumentTemplate["sourceKind"]>("word");
-  const [titlePattern, setTitlePattern] = useState("{{case.reference}} - Draft");
   const [status, setStatus] = useState<DocumentTemplateStatus>("draft");
-
   return (
-    <Modal
-      footer={
-        <>
-          <Button onClick={onClose} variant="ghost">Close</Button>
-          {step > 0 ? <Button onClick={() => setStep((current) => current - 1)} variant="ghost">Back</Button> : null}
-          {step < 3 ? (
-            <Button onClick={() => setStep((current) => current + 1)}>Next</Button>
-          ) : (
-            <Button
-              onClick={() =>
-                onSave({
-                  id: `tpl-${Math.random().toString(36).slice(2, 8)}`,
-                  name,
-                  category,
-                  sourceKind,
-                  status,
-                  ownerName: "K. Boateng",
-                  caseTypes: ["Commercial Litigation", "Advisory"],
-                  practiceAreas: ["Commercial", "Dispute Resolution"],
-                  updatedAt: new Date().toISOString(),
-                  defaultDocumentType: "Advice Letter",
-                  defaultTags: ["automation", "new-template"],
-                  titlePattern,
-                  supportsInternalGeneration: sourceKind === "generated" || sourceKind === "upload",
-                  outputTargets: sourceKind === "google_docs" ? ["google_docs"] : sourceKind === "word" ? ["word"] : ["legalos", "word"],
-                  sourceFileName: `${name.toLowerCase().replace(/\s+/g, "-")}.docx`,
-                  fields: [
-                    { id: "field-new-1", token: "{{client.name}}", label: "Client Name", source: "client.name", required: true },
-                    { id: "field-new-2", token: "{{case.reference}}", label: "Case Reference", source: "case.reference", required: true },
-                    { id: "field-new-3", token: "{{today.long}}", label: "Today", source: "today.long", required: true },
-                  ],
-                })
-              }
-            >
-              Publish Template
-            </Button>
-          )}
-        </>
-      }
-      onClose={onClose}
-      open={open}
-      title={`Template Builder - ${["Source", "Fields", "Output Rules", "Publish"][step]}`}
-    >
+    <Modal footer={<><Button onClick={onClose} variant="ghost">Close</Button><Button loading={loading} onClick={() => void onSave({ category, name, sourceKind, status })}>Save template</Button></>} onClose={onClose} open={open} title="Manage templates">
       <div className="documents-modal-grid">
-        {step === 0 ? (
-          <>
-            <label className="documents-filter-field"><span>Template name</span><input onChange={(event) => setName(event.target.value)} value={name} /></label>
-            <label className="documents-filter-field"><span>Category</span><input onChange={(event) => setCategory(event.target.value)} value={category} /></label>
-            <FilterSelect label="Source provider" onChange={(value) => setSourceKind(value as DocumentTemplate["sourceKind"])} options={[{ value: "word", label: "Microsoft Word" }, { value: "google_docs", label: "Google Docs" }, { value: "generated", label: "Generate in LegalOS" }, { value: "upload", label: "Uploaded DOCX" }]} value={sourceKind} />
-          </>
-        ) : null}
-        {step === 1 ? <p className="placeholder-copy">Auto-detected placeholders: {"{{client.name}}"}, {"{{case.reference}}"}, {"{{today.long}}"}.</p> : null}
-        {step === 2 ? <label className="documents-filter-field"><span>Title pattern</span><input onChange={(event) => setTitlePattern(event.target.value)} value={titlePattern} /></label> : null}
-        {step === 3 ? <FilterSelect label="Publish status" onChange={(value) => setStatus(value as DocumentTemplateStatus)} options={[{ value: "draft", label: "Draft" }, { value: "active", label: "Active" }]} value={status} /> : null}
+        <label className="documents-field"><span>Template name</span><input onChange={(event) => setName(event.target.value)} value={name} /></label>
+        <label className="documents-field"><span>Category</span><input onChange={(event) => setCategory(event.target.value)} value={category} /></label>
+        <label className="documents-field"><span>Source</span><select onChange={(event) => setSourceKind(event.target.value as DocumentTemplate["sourceKind"])} value={sourceKind}><option value="word">Microsoft Word</option><option value="google_docs">Google Docs</option><option value="generated">Generate in LegalOS</option><option value="upload">Uploaded template</option></select></label>
+        <label className="documents-field"><span>Status</span><select onChange={(event) => setStatus(event.target.value as DocumentTemplateStatus)} value={status}><option value="draft">Draft</option><option value="active">Active</option></select></label>
       </div>
     </Modal>
   );
 }
 
-function GenerateDocumentModal({
-  caseDetail,
-  caseOptions,
-  open,
-  onClose,
-  onSave,
-  templates,
-}: {
-  caseDetail?: CaseDetail | null;
-  caseOptions: Array<{ value: string; label: string }>;
-  open: boolean;
-  onClose: () => void;
-  onSave: (values: { templateId: string; caseId: string; outputTarget: string; title: string }) => void;
-  templates: DocumentTemplate[];
-}) {
-  const [templateId, setTemplateId] = useState(templates[0]?.id ?? "");
-  const [caseId, setCaseId] = useState(caseDetail?.id ?? caseOptions[0]?.value ?? "");
-  const [outputTarget, setOutputTarget] = useState("word");
-  const [title, setTitle] = useState("Generated draft");
-  const selectedTemplate = templates.find((item) => item.id === templateId);
-  const outputOptions = selectedTemplate?.outputTargets ?? ["word"];
-
-  return (
-    <Modal
-      footer={<><Button onClick={onClose} variant="ghost">Cancel</Button><Button onClick={() => onSave({ templateId, caseId, outputTarget, title })}>Generate</Button></>}
-      onClose={onClose}
-      open={open}
-      title="Create from Template"
-    >
-      <div className="documents-modal-grid">
-        <FilterSelect label="Template" onChange={setTemplateId} options={templates.map((item) => ({ value: item.id, label: item.name }))} value={templateId} />
-        {!caseDetail ? <FilterSelect label="Case" onChange={setCaseId} options={caseOptions} value={caseId} /> : null}
-        <FilterSelect label="Output target" onChange={setOutputTarget} options={outputOptions.map((item) => ({ value: item, label: labelForOutput(item) }))} value={outputTarget} />
-        <label className="documents-filter-field"><span>Document title</span><input onChange={(event) => setTitle(event.target.value)} value={title} /></label>
-      </div>
-    </Modal>
-  );
-}
-
-function facetValues<T extends keyof DocumentRecord>(documents: DocumentRecord[], key: T) {
-  return Array.from(new Set(documents.map((item) => String(item[key]))))
-    .filter(Boolean)
-    .sort((a, b) => a.localeCompare(b))
-    .map((value) => ({ value, label: labelForStatus(value) }));
-}
-
-function labelForSource(source: string) {
-  if (source === "google_docs") return "Google Docs";
-  if (source === "generated") return "Generated";
-  if (source === "upload") return "Upload";
-  if (source === "word") return "Word";
-  return source;
-}
-
-function labelForOutput(source: string) {
-  return source === "legalos" ? "Generate and keep in LegalOS" : labelForSource(source);
-}
-
-function labelForRequest(status: ClientRequestStatus) {
-  return status === "none" ? "No request" : labelForStatus(status);
-}
-
-function labelForStatus(value: string) {
-  return value.split("_").map((item) => item.charAt(0).toUpperCase() + item.slice(1)).join(" ");
-}
-
-function labelForProvider(status: string) {
-  return status === "attention" ? "Needs attention" : labelForStatus(status);
-}
-
-function needsReview(document: DocumentRecord) {
-  return document.aiStatus === "ready" || document.aiStatus === "failed" || document.ocrStatus === "processing" || document.ocrStatus === "failed";
+function FileBadge({ fileExtension, sourceKind }: { fileExtension: string; sourceKind: DocumentRecord["sourceKind"] }) {
+  const tone = sourceKind === "google_docs" ? "google" : fileExtension === "doc" || fileExtension === "docx" ? "word" : fileExtension === "ppt" || fileExtension === "pptx" ? "powerpoint" : fileExtension === "xls" || fileExtension === "xlsx" ? "spreadsheet" : fileExtension === "pdf" ? "pdf" : "generic";
+  const label = sourceKind === "google_docs" ? "G" : fileExtension === "doc" || fileExtension === "docx" ? "W" : fileExtension === "ppt" || fileExtension === "pptx" ? "P" : fileExtension === "xls" || fileExtension === "xlsx" ? "X" : fileExtension === "pdf" ? "PDF" : fileExtension.slice(0, 3).toUpperCase();
+  return <span aria-hidden="true" className={cn("documents-file-badge", `is-${tone}`)}>{label}</span>;
 }
 
 function SearchIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" x2="16.65" y1="21" y2="16.65" />
-    </svg>
-  );
+  return <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8" /><line x1="21" x2="16.65" y1="21" y2="16.65" /></svg>;
+}
+
+function MenuIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 20 20"><circle cx="4" cy="10" r="1.5" /><circle cx="10" cy="10" r="1.5" /><circle cx="16" cy="10" r="1.5" /></svg>;
+}
+
+function ensureDocument(document: DocumentRecord): DocumentRecord {
+  return { ...document, fileExtension: document.fileExtension || inferFileExtension(document.fileName, document.sourceKind), status: document.status || deriveDocumentStatus({ aiStatus: document.aiStatus, isClientShared: document.isClientShared, ocrStatus: document.ocrStatus, requestStatus: document.requestStatus }) };
+}
+
+function noteForDocument(document: DocumentRecord): string {
+  if (document.status === "processing") return "Background OCR and extraction are still running.";
+  if (document.status === "attention") return "Built-in extraction flagged an issue that needs follow-up.";
+  if (document.status === "client_requested") return "Client-facing request is active on this document.";
+  return document.previewSummary;
+}
+
+function labelForStatus(value: DocumentWorkflowStatus | string): string {
+  if (value === "client_requested") return "Client requested";
+  if (value === "client_shared") return "Client shared";
+  if (value === "attention") return "Attention";
+  if (value === "processing") return "Processing";
+  return "Ready";
+}
+
+function labelForRequest(status: ClientRequestStatus): string {
+  if (status === "requested") return "Client request";
+  if (status === "uploaded") return "Client uploaded";
+  if (status === "fulfilled") return "Request fulfilled";
+  if (status === "cancelled") return "Request cancelled";
+  return "No request";
+}
+
+function labelForOutput(value: DocumentOutputTarget): string {
+  if (value === "google_docs") return "Google Docs";
+  if (value === "legalos") return "LegalOS";
+  return "Microsoft Word";
 }
