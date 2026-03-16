@@ -27,22 +27,41 @@
 ## 4. Role Hierarchy
 `admin > lawyer > staff > client`
 
-## 5. File Naming Conventions
+## 5. Product And UX Truth Sources
+
+For implementation decisions that go beyond the raw code, consult these documents explicitly:
+
+- `docs/WORKFLOWS.md` for the three canonical end-to-end product workflows
+- `docs/PRD.md` for product scope, v1 boundaries, and feature intent
+- `system.md` for the end-to-end system map and service boundaries
+- `docs/DESIGN_SYSTEM.md` for practitioner-first UI rules, surface-status truthfulness, and extension guidance
+
+Use them to resolve behavior, workflow sequencing, and UI presentation questions. Do not re-invent policy from scratch inside feature code.
+
+## 6. Implementation Rules
+
+- Keep portal behavior as a strict subset of practitioner behavior with separate visibility rules.
+- Treat AI as reviewed assistance. Labels, accept/edit/dismiss controls, and pending status must remain explicit in the UI and API.
+- Respect document truthfulness rules from `docs/DESIGN_SYSTEM.md`: placeholder and partial workflows must be described and tracked as partial, not complete.
+- Keep workflow sequencing aligned with `docs/WORKFLOWS.md` and `system.md`, especially around OCR, AI review, reminders, invoice creation, payments, and portal updates.
+
+## 7. File Naming Conventions
 - Python: `snake_case` files, `PascalCase` classes, `snake_case` functions
 - TypeScript: `kebab-case` files, `PascalCase` components, `camelCase` functions
 - Database: `snake_case` tables and columns
 - API routes: `kebab-case` path segments and plural nouns
 - Environment variables: `SCREAMING_SNAKE_CASE`
 
-## 6. PR / Commit Rules
+## 8. PR / Commit Rules
 - Conventional commits: `feat:`, `fix:`, `chore:`, `docs:`, `test:`
 - Never commit `.env` files
 - Never commit `node_modules/` or `.venv/`
 - Run `pnpm lint` and `pytest` before committing
 
-## 7. When You Are Unsure
+## 9. When You Are Unsure
 - Check `docs/PRD.md` for product decisions
 - Check `docs/API.md` for endpoint contracts
 - Check `docs/SCHEMA.md` for DB schema
-- Check `docs/DESIGN_SYSTEM.md` for UI decisions
+- Check `docs/WORKFLOWS.md` and `system.md` for workflow behavior
+- Check `docs/DESIGN_SYSTEM.md` for UI decisions and truthfulness rules
 - If still unsure, leave `// TODO(agent): <question>` and continue

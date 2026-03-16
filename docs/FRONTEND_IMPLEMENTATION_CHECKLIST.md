@@ -3,6 +3,11 @@
 This checklist mirrors the Linear project `LegalOS Frontend MVP` and is grouped into the same three frontend tracks.
 Last cross-checked against the current frontend routes/components: 2026-03-09.
 
+Status rule:
+- `[x]` means the surface is implemented and reflected in current routes/components.
+- `[ ]` means work is still open, in review, partial, starter-only, or not implemented enough to treat as done.
+- Inline notes call out issues that are actively in review or intentionally partial.
+
 Execution order:
 1. Practitioner dashboard
 2. Customer portal
@@ -68,3 +73,7 @@ Current portal status:
 - [ ] Keyboard navigation and base accessibility checks are complete
 - [ ] API integrations replace placeholder data on implemented screens
 - [ ] Core user journeys are manually smoke-tested before closing issues
+
+Linear sync note:
+- This file should stay aligned with the issue states in `LegalOS Frontend MVP`.
+- Use the current route/component surface plus the design-system surface-status table as the completion evidence.

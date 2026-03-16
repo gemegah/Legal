@@ -27,4 +27,4 @@ Ghana-first AI-assisted legal practice management SaaS.
 - Tasks and calendar remain mock-backed until their backend endpoints are implemented.
 
 ## Docs
-See `docs/` for the PRD, schema, API, workflows, environment variables, and design system.
+See `docs/` for the PRD, schema, API, workflows, environment variables, design system, and Symphony setup runbook.
