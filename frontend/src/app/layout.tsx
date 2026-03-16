@@ -8,7 +8,7 @@ export const metadata: Metadata = {
     template: "%s | LegalOS",
   },
   description:
-    "Ghana-first legal practice management for matters, deadlines, billing, documents, and review-first AI assistance.",
+    "Ghana-first legal practice management for cases, deadlines, billing, documents, and review-first AI assistance.",
   applicationName: "LegalOS",
   metadataBase: new URL("https://legalos.local"),
   robots: {
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "LegalOS",
     description:
-      "A Ghana-first legal operating system for matters, audit-ready work, and faster billing.",
+      "A Ghana-first legal operating system for cases, audit-ready work, and faster billing.",
     siteName: "LegalOS",
     type: "website",
   },
@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "LegalOS",
     description:
-      "A Ghana-first legal operating system for matters, audit-ready work, and faster billing.",
+      "A Ghana-first legal operating system for cases, audit-ready work, and faster billing.",
   },
 };
 

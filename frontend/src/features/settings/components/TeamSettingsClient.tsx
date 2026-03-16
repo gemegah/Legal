@@ -31,7 +31,7 @@ export function TeamSettingsClient({ initialData }: { initialData: TeamSettingsD
     if (!deferredQuery.trim()) return true;
 
     const value = deferredQuery.toLowerCase();
-    return [member.fullName, member.email, member.title, member.matterAccessSummary].some((item) =>
+    return [member.fullName, member.email, member.title, member.caseAccessSummary].some((item) =>
       item.toLowerCase().includes(value),
     );
   });
@@ -76,7 +76,7 @@ export function TeamSettingsClient({ initialData }: { initialData: TeamSettingsD
       isActive: true,
       inviteStatus: "pending",
       lastLoginAt: null,
-      matterAccessSummary: inviteRole === "staff" ? "Assigned matters only" : "Role coverage pending review",
+      caseAccessSummary: inviteRole === "staff" ? "Assigned cases only" : "Role coverage pending review",
       billingAccess: inviteRole === "staff" ? "none" : "limited",
     };
 
@@ -234,7 +234,7 @@ export function TeamSettingsClient({ initialData }: { initialData: TeamSettingsD
                       )}
                     </span>
 
-                    <span className="settings-inline-copy">{member.matterAccessSummary}</span>
+                    <span className="settings-inline-copy">{member.caseAccessSummary}</span>
                     <span className="settings-inline-copy">{labelForBillingAccess(member.billingAccess)}</span>
                     <span className="settings-inline-copy">
                       {member.lastLoginAt
@@ -270,7 +270,7 @@ export function TeamSettingsClient({ initialData }: { initialData: TeamSettingsD
                     </Badge>
                   </div>
                   <p className="placeholder-copy">{member.email}</p>
-                  <p className="settings-inline-copy">{member.matterAccessSummary}</p>
+                  <p className="settings-inline-copy">{member.caseAccessSummary}</p>
                   <div className="settings-team-tags">
                     <Badge tone={badgeToneForInvite(member.inviteStatus)}>
                       {labelForInvite(member.inviteStatus)}
@@ -320,7 +320,7 @@ export function TeamSettingsClient({ initialData }: { initialData: TeamSettingsD
             </div>
             <div className="settings-rule-item">
               <strong>Lawyer</strong>
-              <p>Works the legal matter surface directly, but should not implicitly inherit every administrative power.</p>
+              <p>Works the legal case surface directly, but should not implicitly inherit every administrative power.</p>
             </div>
             <div className="settings-rule-item">
               <strong>Staff</strong>

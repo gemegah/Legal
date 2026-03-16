@@ -52,9 +52,9 @@ export interface DocumentProviderLink {
 
 export interface DocumentRecord {
   id: string;
-  matterId: string;
-  matterReference: string;
-  matterTitle: string;
+  caseId: string;
+  caseReference: string;
+  caseTitle: string;
   clientName: string;
   title: string;
   documentType: string;
@@ -90,7 +90,7 @@ export interface DocumentTemplate {
   sourceKind: Exclude<DocumentSourceKind, "upload"> | "upload";
   status: DocumentTemplateStatus;
   ownerName: string;
-  matterTypes: string[];
+  caseTypes: string[];
   practiceAreas: string[];
   updatedAt: string;
   defaultDocumentType: string;
@@ -112,7 +112,7 @@ export interface DocumentProviderStatus {
 
 export interface DocumentSearchFilters {
   query: string;
-  matterId: string;
+  caseId: string;
   documentType: string;
   sourceKind: string;
   aiStatus: string;
@@ -127,7 +127,7 @@ export interface DocumentFacetOption {
 }
 
 export interface DocumentWorkspaceFacets {
-  matterOptions: DocumentFacetOption[];
+  caseOptions: DocumentFacetOption[];
   documentTypeOptions: DocumentFacetOption[];
   sourceOptions: DocumentFacetOption[];
   aiStatusOptions: DocumentFacetOption[];

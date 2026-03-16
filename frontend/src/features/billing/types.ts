@@ -39,9 +39,9 @@ export interface InvoicePayment {
 export interface Invoice {
   id: string;
   reference: string;
-  matterId: string;
-  matterReference: string;
-  matterTitle: string;
+  caseId: string;
+  caseReference: string;
+  caseTitle: string;
   clientName: string;
   status: InvoiceStatus;
   total: number;
@@ -56,9 +56,9 @@ export interface Invoice {
 
 export interface TimeEntry {
   id: string;
-  matterId: string;
-  matterReference: string;
-  matterTitle: string;
+  caseId: string;
+  caseReference: string;
+  caseTitle: string;
   clientName: string;
   description: string;
   hours: number;
@@ -74,12 +74,12 @@ export interface BillingWorkspaceData {
   timeEntries: TimeEntry[];
 }
 
-export interface MatterBillingData {
+export interface CaseBillingData {
   invoices: Invoice[];
   timeEntries: TimeEntry[];
 }
 
-export interface MatterOption {
+export interface CaseOption {
   id: string;
   reference: string;
   title: string;
@@ -87,7 +87,7 @@ export interface MatterOption {
 }
 
 export interface TimeEntryFormValues {
-  matterId: string;
+  caseId: string;
   description: string;
   hours: string;
   rate: string;

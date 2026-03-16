@@ -9,16 +9,16 @@ export default function Page() {
         <p className="auth-brand">LegalOS</p>
         <div className="starter-stack">
           <Badge tone="warning">Starter Surface Ready</Badge>
-          <h1 className="auth-title">Run the firm from one matter-centric workspace.</h1>
+          <h1 className="auth-title">Run the firm from one case-centric workspace.</h1>
           <p className="starter-copy">
             LegalOS brings deadlines, billing, documents, and client updates into one Ghana-first operating system.
             This starter login screen is now a real integration surface instead of placeholder copy.
           </p>
         </div>
         <ul className="starter-list">
-          <li>Deadline reminders stay visible across matters and the shared calendar.</li>
+          <li>Deadline reminders stay visible across cases and the shared calendar.</li>
           <li>AI drafts remain review-first and clearly separated from saved records.</li>
-          <li>Client billing and document access stay tied to the same matter audit trail.</li>
+          <li>Client billing and document access stay tied to the same case audit trail.</li>
         </ul>
       </section>
 

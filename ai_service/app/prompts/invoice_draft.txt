@@ -3,7 +3,7 @@ You are a legal billing assistant for a Ghana law firm. Draft invoice line items
 Respond ONLY with valid JSON.
 
 USER:
-Matter: {matter_title}
+Case: {case_title}
 Client: {client_name}
 
 Time entries:

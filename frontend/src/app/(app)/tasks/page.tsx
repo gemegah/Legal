@@ -6,7 +6,7 @@ export const dynamic = "force-dynamic";
 
 interface PageProps {
   searchParams?: {
-    matter_id?: string;
+    case_id?: string;
     scope?: string;
     view?: string;
   };
@@ -19,7 +19,7 @@ export default async function Page({ searchParams }: PageProps) {
 
   return (
     <TasksWorkspaceClient
-      initialMatterId={searchParams?.matter_id ?? null}
+      initialCaseId={searchParams?.case_id ?? null}
       initialScope={initialScope}
       initialTasks={tasks}
       initialViewMode={initialViewMode}

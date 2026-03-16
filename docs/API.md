@@ -2,6 +2,7 @@
 
 ## Summary
 Implementation-ready REST contract for the LegalOS staff API (`/v1`) and client portal API (`/portal/v1`).
+In v1 the authenticated portal is timeline-centric: clients review a derived feed of significant case activity, shared documents, and invoices, but no messaging surface is part of the MVP contract.
 
 ## Global Conventions
 
@@ -211,11 +212,11 @@ Paginated responses include:
 { "portal_enabled": true, "temporary_password_issued": true }
 ```
 
-### Matters
+### Cases
 
-#### `GET /v1/matters`
+#### `GET /v1/cases`
 - Auth: `admin`, `lawyer`, `staff`
-- Purpose: list matters visible to current user
+- Purpose: list cases visible to current user
 - Query params: `page`, `per_page`, `status`, `client_id`, `query`, `assigned_to_me`
 - Response item:
 ```json
@@ -223,7 +224,7 @@ Paginated responses include:
   "id": "uuid",
   "client_id": "uuid",
   "title": "Estate Administration - Mensah",
-  "matter_type": "probate",
+  "case_type": "probate",
   "practice_area": "estate",
   "status": "active",
   "next_deadline_at": "2026-03-07T09:00:00Z",
@@ -231,15 +232,15 @@ Paginated responses include:
 }
 ```
 
-#### `POST /v1/matters`
+#### `POST /v1/cases`
 - Auth: `admin`, `lawyer`, `staff`
-- Purpose: create matter
+- Purpose: create case
 - Request body:
 ```json
 {
   "client_id": "uuid",
   "title": "Estate Administration - Mensah",
-  "matter_type": "probate",
+  "case_type": "probate",
   "practice_area": "estate",
   "status": "active",
   "court": "High Court, Accra",
@@ -250,33 +251,33 @@ Paginated responses include:
 }
 ```
 
-#### `GET /v1/matters/{id}`
-- Auth: `admin`, `lawyer`, `staff` with matter access
-- Purpose: get matter detail
+#### `GET /v1/cases/{id}`
+- Auth: `admin`, `lawyer`, `staff` with case access
+- Purpose: get case detail
 
-#### `PATCH /v1/matters/{id}`
-- Auth: `admin`, `lawyer`, `staff` with matter access
-- Purpose: update matter metadata
+#### `PATCH /v1/cases/{id}`
+- Auth: `admin`, `lawyer`, `staff` with case access
+- Purpose: update case metadata
 
-#### `POST /v1/matters/{id}/archive`
+#### `POST /v1/cases/{id}/archive`
 - Auth: `admin`, `lawyer`
-- Purpose: archive matter
+- Purpose: archive case
 - Response:
 ```json
 { "id": "uuid", "status": "archived", "archived_at": "2026-03-02T11:00:00Z" }
 ```
 
-#### `GET /v1/matters/{id}/ai-summary`
-- Auth: `admin`, `lawyer`, `staff` with matter access
-- Purpose: request or retrieve an AI matter summary draft
+#### `GET /v1/cases/{id}/ai-summary`
+- Auth: `admin`, `lawyer`, `staff` with case access
+- Purpose: request or retrieve an AI case summary draft
 - Response:
 ```json
 {
   "suggestion_id": "uuid",
   "status": "pending",
-  "suggestion_type": "matter_summary",
+  "suggestion_type": "case_summary",
   "payload": {
-    "summary": "The matter is active and awaiting a filing deadline.",
+    "summary": "The case is active and awaiting a filing deadline.",
     "next_actions": ["Review filing", "Confirm hearing date"],
     "risk_flags": ["Deadline approaching"]
   },
@@ -284,15 +285,15 @@ Paginated responses include:
 }
 ```
 
-#### `GET /v1/matters/{id}/audit-log`
+#### `GET /v1/cases/{id}/audit-log`
 - Auth: `admin`, `lawyer`, policy-controlled `staff`
-- Purpose: list matter audit entries
+- Purpose: list case audit entries
 - Query params: `page`, `per_page`, `action`
 - Response item:
 ```json
 {
   "id": 1032,
-  "entity_type": "matter",
+  "entity_type": "case",
   "entity_id": "uuid",
   "action": "update",
   "diff": { "status": ["pending", "active"] },
@@ -302,13 +303,13 @@ Paginated responses include:
 
 ### Tasks
 
-#### `GET /v1/matters/{matter_id}/tasks`
-- Auth: `admin`, `lawyer`, `staff` with matter access
-- Purpose: list matter tasks
+#### `GET /v1/cases/{case_id}/tasks`
+- Auth: `admin`, `lawyer`, `staff` with case access
+- Purpose: list case tasks
 - Query params: `page`, `per_page`, `status`, `priority`
 
-#### `POST /v1/matters/{matter_id}/tasks`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+#### `POST /v1/cases/{case_id}/tasks`
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: create task
 - Request body:
 ```json
@@ -323,11 +324,11 @@ Paginated responses include:
 ```
 
 #### `PATCH /v1/tasks/{id}`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: update task state or assignment
 
 #### `DELETE /v1/tasks/{id}`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: delete task (contract-level delete; implementation may soft-delete)
 - Response:
 ```json
@@ -343,7 +344,7 @@ Paginated responses include:
 #### `GET /v1/events`
 - Auth: `admin`, `lawyer`, `staff`
 - Purpose: firm calendar view
-- Query params: `page`, `per_page`, `date_from`, `date_to`, `matter_id`, `event_type`
+- Query params: `page`, `per_page`, `date_from`, `date_to`, `case_id`, `event_type`
 
 #### `POST /v1/events`
 - Auth: `admin`, `lawyer`, `staff`
@@ -351,7 +352,7 @@ Paginated responses include:
 - Request body:
 ```json
 {
-  "matter_id": "uuid",
+  "case_id": "uuid",
   "title": "Court hearing",
   "description": "Main hearing date",
   "event_type": "hearing",
@@ -370,18 +371,18 @@ Paginated responses include:
 - Auth: `admin`, `lawyer`
 - Purpose: delete event
 
-#### `GET /v1/matters/{matter_id}/events`
-- Auth: `admin`, `lawyer`, `staff` with matter access
-- Purpose: list events for a matter
+#### `GET /v1/cases/{case_id}/events`
+- Auth: `admin`, `lawyer`, `staff` with case access
+- Purpose: list events for a case
 
 ### Documents
 
-#### `GET /v1/matters/{matter_id}/documents`
-- Auth: `admin`, `lawyer`, `staff` with matter access
-- Purpose: list matter documents
+#### `GET /v1/cases/{case_id}/documents`
+- Auth: `admin`, `lawyer`, `staff` with case access
+- Purpose: list case documents
 
-#### `POST /v1/matters/{matter_id}/documents/upload-initiate`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+#### `POST /v1/cases/{case_id}/documents/upload-initiate`
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: create pending document and return presigned upload target
 - Request body:
 ```json
@@ -399,18 +400,18 @@ Paginated responses include:
 {
   "document_id": "uuid",
   "upload_url": "https://storage.example/upload",
-  "storage_key": "firms/uuid/matters/uuid/documents/uuid/v1.pdf",
+  "storage_key": "firms/uuid/cases/uuid/documents/uuid/v1.pdf",
   "expires_in": 900
 }
 ```
 
-#### `POST /v1/matters/{matter_id}/documents/{doc_id}/confirm`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+#### `POST /v1/cases/{case_id}/documents/{doc_id}/confirm`
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: confirm upload and enqueue OCR
 - Request body:
 ```json
 {
-  "storage_key": "firms/uuid/matters/uuid/documents/uuid/v1.pdf",
+  "storage_key": "firms/uuid/cases/uuid/documents/uuid/v1.pdf",
   "checksum_sha256": "hex",
   "mime_type": "application/pdf",
   "file_size_bytes": 234221
@@ -422,7 +423,7 @@ Paginated responses include:
 ```
 
 #### `PATCH /v1/documents/{id}/metadata`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: update document metadata only
 - Request body:
 ```json
@@ -430,7 +431,7 @@ Paginated responses include:
 ```
 
 #### `GET /v1/documents/{id}/download`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: get time-limited download URL
 - Response:
 ```json
@@ -438,7 +439,7 @@ Paginated responses include:
 ```
 
 #### `POST /v1/documents/{id}/analyze`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: run AI deadline extraction from OCR text
 - Request body:
 ```json
@@ -466,16 +467,16 @@ Paginated responses include:
 #### `GET /v1/documents/search`
 - Auth: `admin`, `lawyer`, `staff`
 - Purpose: search OCR-indexed documents
-- Query params: `q`, `page`, `per_page`, `matter_id`, `document_type`
+- Query params: `q`, `page`, `per_page`, `case_id`, `document_type`
 
 ### Time Entries
 
-#### `GET /v1/matters/{matter_id}/time-entries`
-- Auth: `admin`, `lawyer`, `staff` with matter access
-- Purpose: list time entries for a matter
+#### `GET /v1/cases/{case_id}/time-entries`
+- Auth: `admin`, `lawyer`, `staff` with case access
+- Purpose: list time entries for a case
 
-#### `POST /v1/matters/{matter_id}/time-entries`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+#### `POST /v1/cases/{case_id}/time-entries`
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: create time entry
 - Request body:
 ```json
@@ -500,12 +501,12 @@ Paginated responses include:
 
 ### Expenses
 
-#### `GET /v1/matters/{matter_id}/expenses`
-- Auth: `admin`, `lawyer`, `staff` with matter access
-- Purpose: list matter expenses
+#### `GET /v1/cases/{case_id}/expenses`
+- Auth: `admin`, `lawyer`, `staff` with case access
+- Purpose: list case expenses
 
-#### `POST /v1/matters/{matter_id}/expenses`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+#### `POST /v1/cases/{case_id}/expenses`
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: create expense
 - Request body:
 ```json
@@ -522,7 +523,7 @@ Paginated responses include:
 #### `GET /v1/invoices`
 - Auth: `admin`, `lawyer`, `staff`
 - Purpose: list invoices
-- Query params: `page`, `per_page`, `status`, `client_id`, `matter_id`
+- Query params: `page`, `per_page`, `status`, `client_id`, `case_id`
 
 #### `POST /v1/invoices`
 - Auth: `admin`, `lawyer`, `staff`
@@ -530,7 +531,7 @@ Paginated responses include:
 - Request body:
 ```json
 {
-  "matter_id": "uuid",
+  "case_id": "uuid",
   "client_id": "uuid",
   "due_date": "2026-03-15",
   "notes": "Professional fees rendered.",
@@ -540,12 +541,12 @@ Paginated responses include:
 }
 ```
 
-#### `POST /v1/invoices/draft-from-matter`
+#### `POST /v1/invoices/draft-from-case`
 - Auth: `admin`, `lawyer`, `staff`
 - Purpose: generate AI invoice draft
 - Request body:
 ```json
-{ "matter_id": "uuid" }
+{ "case_id": "uuid" }
 ```
 - Response:
 ```json
@@ -609,12 +610,12 @@ Paginated responses include:
 
 ### Notes
 
-#### `GET /v1/matters/{matter_id}/notes`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+#### `GET /v1/cases/{case_id}/notes`
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: list notes
 
-#### `POST /v1/matters/{matter_id}/notes`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+#### `POST /v1/cases/{case_id}/notes`
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: create note
 - Request body:
 ```json
@@ -622,26 +623,12 @@ Paginated responses include:
 ```
 
 #### `PATCH /v1/notes/{id}`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: update note
 
 #### `DELETE /v1/notes/{id}`
-- Auth: `admin`, `lawyer`, `staff` with matter access
+- Auth: `admin`, `lawyer`, `staff` with case access
 - Purpose: delete note
-
-### Messages
-
-#### `GET /v1/matters/{matter_id}/messages`
-- Auth: `admin`, `lawyer`, `staff` with matter access
-- Purpose: list matter thread messages
-
-#### `POST /v1/matters/{matter_id}/messages`
-- Auth: `admin`, `lawyer`, `staff` with matter access
-- Purpose: post message
-- Request body:
-```json
-{ "body": "Please review the attached draft.", "is_client_visible": true }
-```
 
 ### AI Suggestions
 
@@ -724,20 +711,21 @@ Paginated responses include:
 {}
 ```
 
-### Portal Matters
+### Portal Cases
 
-#### `GET /portal/v1/matters`
+#### `GET /portal/v1/cases`
 - Auth: authenticated client
-- Purpose: list only the client's visible matters
+- Purpose: list only the client's visible cases
 
-#### `GET /portal/v1/matters/{id}`
-- Auth: authenticated client with access to the matter
-- Purpose: return client-safe matter detail only
-- Excludes: internal notes, non-shared documents, internal-only messages
+#### `GET /portal/v1/cases/{id}`
+- Auth: authenticated client with access to the case
+- Purpose: return client-safe case detail and recent derived timeline entries
+- Includes: case status, assigned lawyer, recent timeline entries from significant activity, shared document references, invoice summaries
+- Excludes: internal notes, non-shared documents, internal-only practitioner communications
 
 ### Portal Documents
 
-#### `GET /portal/v1/matters/{id}/documents`
+#### `GET /portal/v1/cases/{id}/documents`
 - Auth: authenticated client
 - Purpose: list only explicitly shared documents
 
@@ -746,7 +734,7 @@ Paginated responses include:
 - Purpose: upload a requested document to the firm
 - Request body:
 ```json
-{ "matter_id": "uuid", "title": "Requested ID copy", "file_name": "id-copy.pdf", "mime_type": "application/pdf" }
+{ "case_id": "uuid", "title": "Requested ID copy", "file_name": "id-copy.pdf", "mime_type": "application/pdf" }
 ```
 
 ### Portal Invoices
@@ -771,27 +759,12 @@ Paginated responses include:
 { "payment_id": "uuid", "status": "pending", "checkout_url": "https://gateway.example/checkout" }
 ```
 
-### Portal Messages
-
-#### `GET /portal/v1/messages`
-- Auth: authenticated client
-- Purpose: list client-visible message threads
-- Query params: `matter_id`, `page`, `per_page`
-
-#### `POST /portal/v1/messages`
-- Auth: authenticated client
-- Purpose: send a message to the firm
-- Request body:
-```json
-{ "matter_id": "uuid", "body": "Please confirm receipt of the uploaded document." }
-```
-
 ## Assumptions / Inferred Defaults
 - All resource IDs are UUID strings except `audit_log.id`, which is numeric
 - List endpoints are paginated by default where collection size is expected to grow materially
 - `DELETE` for tasks and notes is a contract-level delete; implementations may soft-delete internally
-- Matter access for `lawyer` and `staff` is enforced through matter membership or admin override
-- `GET /v1/matters/{id}/ai-summary` returns a pending AI suggestion payload rather than directly persisted summary text
+- Case access for `lawyer` and `staff` is enforced through case membership or admin override
+- `GET /v1/cases/{id}/ai-summary` returns a pending AI suggestion payload rather than directly persisted summary text
 - `POST /v1/documents/{id}/analyze` may return one or many pending `ai_suggestions`
 - `POST /v1/ai-suggestions/{id}/accept` may apply an optional edited payload before persisting accepted results
 - Portal upload is documented as one endpoint even if implementation later splits initiate and confirm steps

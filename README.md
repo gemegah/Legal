@@ -22,9 +22,9 @@ Ghana-first AI-assisted legal practice management SaaS.
 
 ## Current Starter Modes
 - Frontend defaults to `DATA_SOURCE=mock` unless you explicitly set `DATA_SOURCE=api`.
-- For API-backed matter pages, set `DATA_SOURCE=api` and `LEGALOS_API_BASE_URL=http://localhost:8000`.
-- Matters now have a live read-only backend slice at `/api/v1/matters` and `/api/v1/matters/{id}`.
+- For API-backed case pages, set `DATA_SOURCE=api` and `LEGALOS_API_BASE_URL=http://localhost:8000`.
+- Cases now have a live read-only backend slice at `/api/v1/cases` and `/api/v1/cases/{id}`.
 - Tasks and calendar remain mock-backed until their backend endpoints are implemented.
 
 ## Docs
-See `docs/` for the PRD, schema, API, workflows, environment variables, and design system.
+See `docs/` for the PRD, schema, API, workflows, environment variables, design system, and Symphony setup runbook.

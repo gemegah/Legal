@@ -2,7 +2,7 @@ export interface DeadlineItem {
   time: string;
   label: string;
   type: "hearing" | "filing" | "meeting" | "billing";
-  matter: string;
+  case: string;
   urgent?: boolean;
 }
 
@@ -36,7 +36,7 @@ export function TodayDeadlines({ items }: TodayDeadlinesProps) {
               <p className="row-title">{item.label}</p>
               <p className="row-meta">{typeLabels[item.type]}</p>
             </div>
-            <span className="matter-chip">{item.matter}</span>
+            <span className="case-chip">{item.case}</span>
           </div>
         ))}
       </div>

@@ -31,8 +31,8 @@ export interface MessageItem {
 
 export interface MessageThread {
   id: string;
-  matterId: string | null;
-  matterLabel: string | null;
+  caseId: string | null;
+  caseLabel: string | null;
   type: MessageThreadType;
   subject: string;
   participants: MessageParticipant[];
@@ -57,6 +57,6 @@ export interface MessageWorkspaceOption {
 
 export interface MessagesWorkspaceData {
   threads: MessageThreadDetail[];
-  matterOptions: MessageWorkspaceOption[];
+  caseOptions: MessageWorkspaceOption[];
   assigneeOptions: MessageWorkspaceOption[];
 }

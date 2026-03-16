@@ -3,9 +3,9 @@ import "server-only";
 import {
   getMockInvoiceById,
   listMockInvoices,
-  listMockInvoicesByMatter,
+  listMockInvoicesByCase,
   listMockTimeEntries,
-  listMockTimeEntriesByMatter,
+  listMockTimeEntriesByCase,
 } from "@/features/billing/data/mock";
 import type { Invoice, TimeEntry } from "@/features/billing/types";
 import { getDataSource } from "@/lib/data-source";
@@ -13,9 +13,9 @@ import { getDataSource } from "@/lib/data-source";
 export interface BillingRepository {
   getInvoiceById(id: string): Promise<Invoice | null>;
   listInvoices(): Promise<Invoice[]>;
-  listInvoicesByMatter(matterId: string): Promise<Invoice[]>;
+  listInvoicesByCase(caseId: string): Promise<Invoice[]>;
   listTimeEntries(): Promise<TimeEntry[]>;
-  listTimeEntriesByMatter(matterId: string): Promise<TimeEntry[]>;
+  listTimeEntriesByCase(caseId: string): Promise<TimeEntry[]>;
 }
 
 export const mockBillingRepository: BillingRepository = {
@@ -25,14 +25,14 @@ export const mockBillingRepository: BillingRepository = {
   async listInvoices() {
     return listMockInvoices();
   },
-  async listInvoicesByMatter(matterId) {
-    return listMockInvoicesByMatter(matterId);
+  async listInvoicesByCase(caseId) {
+    return listMockInvoicesByCase(caseId);
   },
   async listTimeEntries() {
     return listMockTimeEntries();
   },
-  async listTimeEntriesByMatter(matterId) {
-    return listMockTimeEntriesByMatter(matterId);
+  async listTimeEntriesByCase(caseId) {
+    return listMockTimeEntriesByCase(caseId);
   },
 };
 
@@ -43,13 +43,13 @@ export const apiBillingRepository: BillingRepository = {
   async listInvoices() {
     throw new Error('Billing API repository is not wired yet. Use DATA_SOURCE="mock" until the backend slice is implemented.');
   },
-  async listInvoicesByMatter() {
+  async listInvoicesByCase() {
     throw new Error('Billing API repository is not wired yet. Use DATA_SOURCE="mock" until the backend slice is implemented.');
   },
   async listTimeEntries() {
     throw new Error('Billing API repository is not wired yet. Use DATA_SOURCE="mock" until the backend slice is implemented.');
   },
-  async listTimeEntriesByMatter() {
+  async listTimeEntriesByCase() {
     throw new Error('Billing API repository is not wired yet. Use DATA_SOURCE="mock" until the backend slice is implemented.');
   },
 };

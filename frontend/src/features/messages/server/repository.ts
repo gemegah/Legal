@@ -7,7 +7,7 @@ export interface MessagesRepository {
   listThreads(): Promise<MessagesWorkspaceData>;
   getThread(id: string): Promise<MessageThreadDetail | null>;
   createThread(input: {
-    matterId: string | null;
+    caseId: string | null;
     type: "internal" | "client";
     subject: string;
     assigneeId: string | null;
@@ -16,7 +16,7 @@ export interface MessagesRepository {
   reply(threadId: string, input: Pick<MessageItem, "body" | "visibility">): Promise<MessageItem | null>;
   updateThreadMeta(
     id: string,
-    input: Partial<Pick<MessageThread, "assigneeId" | "matterId" | "status" | "portalSafe" | "unreadCount">>,
+    input: Partial<Pick<MessageThread, "assigneeId" | "caseId" | "status" | "portalSafe" | "unreadCount">>,
   ): Promise<MessageThreadDetail | null>;
 }
 

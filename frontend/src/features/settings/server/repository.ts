@@ -150,7 +150,7 @@ function normalizeTeamMember(payload: ApiTeamMember, fallbackMembers: TeamMember
     isActive: payload.is_active,
     inviteStatus: payload.last_login_at ? "accepted" : "pending",
     lastLoginAt: payload.last_login_at,
-    matterAccessSummary: fallback?.matterAccessSummary ?? "Assigned matters only",
+    caseAccessSummary: fallback?.caseAccessSummary ?? "Assigned cases only",
     billingAccess: fallback?.billingAccess ?? "limited",
   };
 }

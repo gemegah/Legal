@@ -1,9 +1,9 @@
-import type { MatterNote } from "@/features/notes/types";
+import type { CaseNote } from "@/features/notes/types";
 
-const seedNotes: MatterNote[] = [
+const seedNotes: CaseNote[] = [
   {
-    id: "note-mat-014-strategy",
-    matterId: "mat-2026-014",
+    id: "note-case-014-strategy",
+    caseId: "case-2026-014",
     title: "Partner strategy summary before affidavit filing",
     body:
       "Keep the affidavit bundle tight. Opposing counsel is trying to widen the factual dispute, but our strongest line remains the late delivery records and the board approval trail. Confirm the final exhibit numbering before filing.",
@@ -21,8 +21,8 @@ const seedNotes: MatterNote[] = [
     ],
   },
   {
-    id: "note-mat-014-ai-update",
-    matterId: "mat-2026-014",
+    id: "note-case-014-ai-update",
+    caseId: "case-2026-014",
     title: "AI draft client update for review",
     body:
       "Draft message: We have completed review of the revised affidavit materials and remain on track for filing. Next steps are final exhibit confirmation, filing, and service coordination. Please avoid direct engagement with the respondent until filing is complete.",
@@ -38,8 +38,8 @@ const seedNotes: MatterNote[] = [
     reviewedAt: null,
   },
   {
-    id: "note-mat-014-call",
-    matterId: "mat-2026-014",
+    id: "note-case-014-call",
+    caseId: "case-2026-014",
     title: "Client call notes",
     body:
       "Client confirmed no new commercial correspondence from Mensah Industries this week. They want a same-day update once filing is complete. Finance also asked whether the next invoice can separate counsel time from filing disbursements.",
@@ -54,8 +54,8 @@ const seedNotes: MatterNote[] = [
     relatedItems: [{ entityType: "invoice", entityId: "inv-2026-014", label: "Draft March invoice" }],
   },
   {
-    id: "note-mat-011-probate",
-    matterId: "mat-2026-011",
+    id: "note-case-011-probate",
+    caseId: "case-2026-011",
     title: "Registry follow-up checklist",
     body:
       "Registry clerk asked for the corrected beneficiary schedule and two additional certified copies before they release the next hearing date. Esi should not attend the registry in person until we confirm the file has moved.",
@@ -70,8 +70,8 @@ const seedNotes: MatterNote[] = [
     relatedItems: [{ entityType: "task", entityId: "task-beneficiary-schedule", label: "Correct beneficiary schedule" }],
   },
   {
-    id: "note-mat-003-customs",
-    matterId: "mat-2026-003",
+    id: "note-case-003-customs",
+    caseId: "case-2026-003",
     title: "Imported customs chronology",
     body:
       "Imported chronology from prior counsel file. Dates should be checked against the customs demand notices because two scanned copies disagree on service date.",
@@ -89,13 +89,13 @@ const seedNotes: MatterNote[] = [
 
 let mockNotes = seedNotes.map(cloneNote);
 
-export function listMockNotesByMatter(matterId: string): MatterNote[] {
-  return mockNotes.filter((note) => note.matterId === matterId).map(cloneNote);
+export function listMockNotesByCase(caseId: string): CaseNote[] {
+  return mockNotes.filter((note) => note.caseId === caseId).map(cloneNote);
 }
 
-export function createMockNote(input: Omit<MatterNote, "id" | "createdAt" | "updatedAt">): MatterNote {
+export function createMockNote(input: Omit<CaseNote, "id" | "createdAt" | "updatedAt">): CaseNote {
   const now = new Date().toISOString();
-  const note: MatterNote = {
+  const note: CaseNote = {
     ...input,
     id: `note-${Math.random().toString(36).slice(2, 10)}`,
     createdAt: now,
@@ -105,8 +105,8 @@ export function createMockNote(input: Omit<MatterNote, "id" | "createdAt" | "upd
   return cloneNote(note);
 }
 
-export function updateMockNote(id: string, input: Partial<Omit<MatterNote, "id" | "matterId" | "createdAt">>): MatterNote | null {
-  let updated: MatterNote | null = null;
+export function updateMockNote(id: string, input: Partial<Omit<CaseNote, "id" | "caseId" | "createdAt">>): CaseNote | null {
+  let updated: CaseNote | null = null;
   mockNotes = mockNotes.map((note) => {
     if (note.id !== id) {
       return note;
@@ -121,7 +121,7 @@ export function updateMockNote(id: string, input: Partial<Omit<MatterNote, "id" 
   return updated ? cloneNote(updated) : null;
 }
 
-export function toggleMockNotePin(id: string): MatterNote | null {
+export function toggleMockNotePin(id: string): CaseNote | null {
   const note = mockNotes.find((item) => item.id === id);
   if (!note) {
     return null;
@@ -129,7 +129,7 @@ export function toggleMockNotePin(id: string): MatterNote | null {
   return updateMockNote(id, { pinned: !note.pinned });
 }
 
-function cloneNote(note: MatterNote): MatterNote {
+function cloneNote(note: CaseNote): CaseNote {
   return {
     ...note,
     tags: [...note.tags],

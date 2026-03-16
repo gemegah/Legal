@@ -1,4 +1,4 @@
-import { listMockMatters } from "@/features/matters/data/mock";
+import { listMockCases } from "@/features/cases/data/mock";
 import type {
   MessageItem,
   MessageThreadDetail,
@@ -6,8 +6,8 @@ import type {
   MessageThreadType,
 } from "@/features/messages/types";
 
-const matterMap = new Map(
-  listMockMatters().map((matter) => [matter.id, `${matter.reference} - ${matter.title}`]),
+const caseMap = new Map(
+  listMockCases().map((item) => [item.id, `${item.reference} - ${item.title}`]),
 );
 
 const assigneeOptions = [
@@ -20,9 +20,9 @@ const assigneeOptions = [
 const seedThreads: MessageThreadDetail[] = [
   buildThread({
     id: "thr-internal-affidavit",
-    matterId: "mat-2026-014",
+    caseId: "case-2026-014",
     type: "internal",
-    subject: "Affidavit filing sequence for Mensah matter",
+    subject: "Affidavit filing sequence for Mensah case",
     assigneeId: "usr-kwame",
     status: "waiting_on_firm",
     portalSafe: false,
@@ -42,7 +42,7 @@ const seedThreads: MessageThreadDetail[] = [
   }),
   buildThread({
     id: "thr-client-affidavit",
-    matterId: "mat-2026-014",
+    caseId: "case-2026-014",
     type: "client",
     subject: "Client update draft before filing",
     assigneeId: "usr-ama",
@@ -68,9 +68,9 @@ const seedThreads: MessageThreadDetail[] = [
   }),
   buildThread({
     id: "thr-estate-registry",
-    matterId: "mat-2026-011",
+    caseId: "case-2026-011",
     type: "internal",
-    subject: "Registry copies for Darko estate matter",
+    subject: "Registry copies for Darko estate case",
     assigneeId: "usr-naa",
     status: "open",
     portalSafe: false,
@@ -88,7 +88,7 @@ const seedThreads: MessageThreadDetail[] = [
   }),
   buildThread({
     id: "thr-client-payment",
-    matterId: "mat-2026-011",
+    caseId: "case-2026-011",
     type: "client",
     subject: "Invoice clarification for registry disbursements",
     assigneeId: "usr-ama",
@@ -110,7 +110,7 @@ const seedThreads: MessageThreadDetail[] = [
   }),
   buildThread({
     id: "thr-archived-land",
-    matterId: "mat-2025-122",
+    caseId: "case-2025-122",
     type: "internal",
     subject: "Lease portfolio close-out notes",
     assigneeId: "usr-kwame",
@@ -137,7 +137,7 @@ export function getMessagesWorkspaceData(): MessagesWorkspaceData {
       .slice()
       .sort((left, right) => Date.parse(right.lastMessageAt) - Date.parse(left.lastMessageAt))
       .map(cloneThreadDetail),
-    matterOptions: Array.from(matterMap.entries()).map(([value, label]) => ({ value, label })),
+    caseOptions: Array.from(caseMap.entries()).map(([value, label]) => ({ value, label })),
     assigneeOptions: assigneeOptions.map((option) => ({ ...option })),
   };
 }
@@ -147,7 +147,7 @@ export function getUnreadMessageCount(): number {
 }
 
 export function createMockThread(input: {
-  matterId: string | null;
+  caseId: string | null;
   type: MessageThreadType;
   subject: string;
   assigneeId: string | null;
@@ -156,7 +156,7 @@ export function createMockThread(input: {
   const now = new Date().toISOString();
   const thread = buildThread({
     id: `thr-${Math.random().toString(36).slice(2, 10)}`,
-    matterId: input.matterId,
+    caseId: input.caseId,
     type: input.type,
     subject: input.subject,
     assigneeId: input.assigneeId,
@@ -191,23 +191,23 @@ export function replyToMockThread(threadId: string, input: Pick<MessageItem, "bo
 
 export function updateMockThreadMeta(
   threadId: string,
-  input: Partial<Pick<MessageThreadDetail, "assigneeId" | "matterId" | "status" | "portalSafe" | "unreadCount">>,
+  input: Partial<Pick<MessageThreadDetail, "assigneeId" | "caseId" | "status" | "portalSafe" | "unreadCount">>,
 ): MessageThreadDetail | null {
   const thread = mockThreads.find((item) => item.id === threadId);
   if (!thread) {
     return null;
   }
   Object.assign(thread, input);
-  thread.matterLabel = thread.matterId ? matterMap.get(thread.matterId) ?? "Linked matter" : null;
+  thread.caseLabel = thread.caseId ? caseMap.get(thread.caseId) ?? "Linked case" : null;
   syncThread(thread);
   return cloneThreadDetail(thread);
 }
 
-function buildThread(input: Omit<MessageThreadDetail, "lastMessageAt" | "lastMessagePreview" | "matterLabel"> & { matterId: string | null }) {
+function buildThread(input: Omit<MessageThreadDetail, "lastMessageAt" | "lastMessagePreview" | "caseLabel"> & { caseId: string | null }) {
   const lastMessage = input.messages[input.messages.length - 1];
   return {
     ...input,
-    matterLabel: input.matterId ? matterMap.get(input.matterId) ?? "Linked matter" : null,
+    caseLabel: input.caseId ? caseMap.get(input.caseId) ?? "Linked case" : null,
     lastMessageAt: lastMessage?.createdAt ?? new Date().toISOString(),
     lastMessagePreview: lastMessage?.body ?? "",
   };

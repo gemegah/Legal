@@ -7,7 +7,7 @@ import { getDataSource } from "@/lib/data-source";
 export interface TaskRepository {
   getTaskById(id: string): Promise<TaskItem | null>;
   listTasks(): Promise<TaskItem[]>;
-  listTasksByMatter(matterId: string): Promise<TaskItem[]>;
+  listTasksByCase(caseId: string): Promise<TaskItem[]>;
 }
 
 export const mockTaskRepository: TaskRepository = {
@@ -17,8 +17,8 @@ export const mockTaskRepository: TaskRepository = {
   async listTasks() {
     return listMockTasks();
   },
-  async listTasksByMatter(matterId) {
-    return listMockTasks().filter((task) => task.matterId === matterId);
+  async listTasksByCase(caseId) {
+    return listMockTasks().filter((task) => task.caseId === caseId);
   },
 };
 
@@ -29,7 +29,7 @@ export const apiTaskRepository: TaskRepository = {
   async listTasks() {
     throw new Error('Task API repository is not wired yet. Use DATA_SOURCE="mock" for tasks until the backend slice is implemented.');
   },
-  async listTasksByMatter() {
+  async listTasksByCase() {
     throw new Error('Task API repository is not wired yet. Use DATA_SOURCE="mock" for tasks until the backend slice is implemented.');
   },
 };

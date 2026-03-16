@@ -26,7 +26,7 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
           <p className="eyebrow-label">Practice Settings</p>
           <h3 className="settings-screen-title">Shape how the firm presents itself and how reminders behave.</h3>
           <p className="settings-screen-text">
-            This is the administrative layer for office identity, matter reminder cadence, and the billing language
+            This is the administrative layer for office identity, case reminder cadence, and the billing language
             clients will keep seeing.
           </p>
         </div>
@@ -55,8 +55,8 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
           <small>Current practitioner capacity for the workspace.</small>
         </div>
         <div className="surface-card settings-stat-card">
-          <span>Active matters</span>
-          <strong>{initialData.activeMatters}</strong>
+          <span>Active cases</span>
+          <strong>{initialData.activeCases}</strong>
           <small>Live work currently affected by reminder and access defaults.</small>
         </div>
         <div className="surface-card settings-stat-card">
@@ -120,11 +120,11 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
               </select>
             </label>
             <label className="ui-field">
-              <span className="ui-field-label">Default matter visibility</span>
+              <span className="ui-field-label">Default case visibility</span>
               <select
                 className="settings-select"
-                value={form.defaultMatterVisibility}
-                onChange={(event) => updateField("defaultMatterVisibility", event.target.value)}
+                value={form.defaultCaseVisibility}
+                onChange={(event) => updateField("defaultCaseVisibility", event.target.value)}
                 disabled={!canEdit}
               >
                 <option>Assigned team members plus admin oversight</option>
@@ -219,7 +219,7 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
         </section>
 
         <section className="surface-card settings-panel settings-panel-accent">
-          <p className="settings-panel-kicker">Why this screen matters</p>
+          <p className="settings-panel-kicker">Why this screen cases</p>
           <h4 className="settings-panel-title">The details here become the firm's operating tone.</h4>
           <p className="settings-screen-text">
             If reminder timing is sloppy or collections language drifts, the product starts feeling improvised. This

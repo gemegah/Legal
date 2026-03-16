@@ -6,6 +6,6 @@ import type { AuditListFilters, PaginatedAuditResult } from "@/features/audit/ty
 
 import { auditRepository } from "./repository";
 
-export const getMatterAudit = cache(async (matterId: string, filters?: AuditListFilters): Promise<PaginatedAuditResult> => {
-  return auditRepository.listByMatter(matterId, filters);
+export const getCaseAudit = cache(async (caseId: string, filters?: AuditListFilters): Promise<PaginatedAuditResult> => {
+  return auditRepository.listByCase(caseId, filters);
 });
