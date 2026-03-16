@@ -362,7 +362,9 @@ function TaskToolbar({
             className={cn("task-chip-button", scope === "mine" && "is-active")}
             onClick={onAssignedScope}
             type="button"
+            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
+            <PersonIcon />
             Assigned to Me
           </button>
           <TaskViewToggle onChange={onViewModeChange} value={viewMode} />
@@ -453,8 +455,19 @@ function TaskViewToggle({
           key={mode}
           onClick={() => onChange(mode)}
           type="button"
+          style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: "4px", fontSize: "0.875rem", padding: "6px 10px"}}
         >
-          {mode === "list" ? "List View" : "Kanban"}
+          {mode === "list" ? (
+            <>
+              <ListIcon />
+              List
+            </>
+          ) : (
+            <>
+              <KanbanIcon />
+              Board
+            </>
+          )}
         </button>
       ))}
     </div>
@@ -482,7 +495,7 @@ function TaskListTable({
 
   return (
     <>
-      <div className="task-table-desktop surface-card task-table-shell">
+      <div className="task-table-desktop task-table-shell">
         <div
           className={cn(
             "task-table-head",
@@ -633,9 +646,15 @@ function TaskBoard({
           onDrop={() => onDropTask(column.status)}
         >
           <div className="task-board-column-head">
-            <div>
-              <p className="task-board-column-title">{column.label}</p>
-              <p className="row-meta">{column.items.length} task(s)</p>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+              <BoardStatusDot status={column.status} />
+              <div>
+                <p className="task-board-column-title">{column.label}</p>
+                <p className="row-meta">
+                  {column.items.length}{" "}
+                  {column.items.length === 1 ? "task" : "tasks"}
+                </p>
+              </div>
             </div>
             <button className="task-column-add" onClick={() => onAddTask(column.status)} type="button">
               + Add Task
@@ -653,6 +672,7 @@ function TaskBoard({
                   onDragStart={() => onDragStart(task.id)}
                 >
                   <div className="task-board-card-head">
+                    <DragHandleIcon />
                     <TaskPriorityBadge priority={task.priority} />
                     <button className="task-action-link" onClick={() => onEdit(task.id)} type="button">
                       Edit
@@ -669,7 +689,14 @@ function TaskBoard({
                   </Link>
 
                   <div className="task-board-card-meta">
-                    <span>{task.assigneeName ?? "Unassigned"}</span>
+                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                      <AssigneeAvatar name={task.assigneeName ?? null} />
+                      {task.assigneeName ?? (
+                        <span style={{ color: "var(--color-ink-light)", fontStyle: "italic", fontSize: "0.8125rem" }}>
+                          Unassigned
+                        </span>
+                      )}
+                    </span>
                     <span>{getDueLabel(task)}</span>
                   </div>
 
@@ -713,7 +740,11 @@ function TaskPriorityBadge({ priority }: { priority: TaskPriority }) {
 
 function TaskEmptyState({ copy, title }: { copy: string; title: string }) {
   return (
-    <div className="task-empty-state">
+    <div
+      className="task-empty-state"
+      style={{ alignItems: "center", textAlign: "center" }}
+    >
+      <EmptyTasksIcon />
       <h3 className="section-title">{title}</h3>
       <p className="placeholder-copy">{copy}</p>
     </div>
@@ -784,10 +815,14 @@ function TaskEditorModal({
 
         <form className="task-form" onSubmit={handleSubmit}>
           <label className="task-form-field">
-            <span>Title</span>
+            <span>
+              Title
+              <span aria-hidden="true" style={{ color: "#C0392B", marginLeft: "3px" }}>*</span>
+            </span>
             <input
               onChange={(event) => update("title", event.target.value)}
               placeholder="Prepare filing, call client, review evidence..."
+              required
               value={values.title}
             />
           </label>
@@ -903,6 +938,43 @@ function TaskCardMeta({ label, value }: { label: string; value: string }) {
   );
 }
 
+// ---------- design-system token maps ----------
+
+const PRIORITY_DOT_COLORS: Record<string, string> = {
+  urgent: "#C0392B",
+  high: "#D97706",
+  medium: "#2563EB",
+  low: "#16A34A",
+};
+
+// ---------- status dot for board column headers ----------
+
+const BOARD_STATUS_COLORS: Record<string, string> = {
+  todo: "var(--color-amber-soft)",
+  in_progress: "var(--color-blue-soft)",
+  blocked: "var(--color-red-soft)",
+  done: "var(--color-green-soft)",
+  cancelled: "var(--color-ink-light)",
+};
+
+function BoardStatusDot({ status }: { status: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      style={{
+        display: "inline-block",
+        width: "8px",
+        height: "8px",
+        borderRadius: "50%",
+        flexShrink: 0,
+        backgroundColor: BOARD_STATUS_COLORS[status] ?? "var(--color-ink-light)",
+      }}
+    />
+  );
+}
+
+// ---------- utility helpers ----------
+
 function getDueLabel(task: TaskItem): string {
   if (!task.dueAt) {
     return "No due date";
@@ -975,9 +1047,19 @@ function toLocalInputDate(value: string): string {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+// ---------- inline SVG icons ----------
+
 function SearchIcon() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
       <circle cx="11" cy="11" r="8" />
       <line x1="21" x2="16.65" y1="21" y2="16.65" />
     </svg>

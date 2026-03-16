@@ -298,15 +298,12 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
             </label>
           </div>
         </div>
+      </div>
 
+      {feedback ? <div className="messages-feedback">{feedback}</div> : null}
+
+      <div className="messages-shell">
         <div className="surface-card messages-list-panel">
-          <div className="messages-panel-head">
-            <div>
-              <p className="eyebrow-label">Threads</p>
-              <h3 className="section-title">{filteredThreads.length} visible thread{filteredThreads.length === 1 ? "" : "s"}</h3>
-            </div>
-          </div>
-
           {filteredThreads.length === 0 ? (
             <div className="empty-state">
               No threads match the current queue and filters. Switch queues or create a new thread from the hero actions.
@@ -320,14 +317,11 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                   onClick={() => selectThread(thread)}
                   type="button"
                 >
-                  <div className="messages-thread-head">
-                    <div className="messages-thread-title-group">
+                  <span className="messages-thread-avatar">{initialsForName(thread.participants[0]?.name ?? "")}</span>
+                  <div className="messages-thread-body">
+                    <div className="messages-thread-head">
                       <p className="messages-thread-title">{thread.subject}</p>
-                      <div className="messages-thread-badges">
-                        <span className={cn("messages-chip", `is-${thread.type}`)}>{thread.type === "client" ? "Client" : "Internal"}</span>
-                        <span className={cn("messages-chip", `is-status-${thread.status}`)}>{labelForStatus(thread.status)}</span>
-                        {thread.portalSafe ? <span className="messages-chip is-portal-safe">Portal-safe</span> : null}
-                      </div>
+                      <span className="messages-thread-time">{formatRelativeDate(thread.lastMessageAt)}</span>
                     </div>
                     <span className="row-meta">{formatRelativeDate(thread.lastMessageAt)}</span>
                   </div>
@@ -380,7 +374,7 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                 </div>
               </div>
 
-              <div className="messages-detail-grid">
+              <div className="messages-detail-content">
                 <div className="messages-transcript">
                   {selectedThread.messages.map((message) => (
                     <div
@@ -400,9 +394,10 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                       <p>{message.body}</p>
                       <div className="messages-bubble-meta">
                         <span className={cn("messages-chip", message.visibility === "client_visible" ? "is-portal-safe" : "is-internal-note")}>
-                          {message.visibility === "client_visible" ? "Client visible" : "Internal only"}
+                          {message.visibility === "client_visible" ? "Client visible" : "Internal"}
                         </span>
                       </div>
+                      <p className="messages-bubble-body">{message.body}</p>
                     </div>
                   ))}
                 </div>
@@ -526,7 +521,7 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                   <textarea
                     onChange={(event) => updateDraft({ body: event.target.value })}
                     placeholder="Write the reply, internal note, or client-safe update."
-                    rows={5}
+                    rows={3}
                     value={draft.body}
                   />
                 </label>

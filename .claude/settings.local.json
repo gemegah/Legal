@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//d//**)",
+      "Read(//c//**)",
+      "Bash(find /c /d -maxdepth 3 -type d -name agents-agency)"
+    ]
+  }
+}

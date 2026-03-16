@@ -36,10 +36,8 @@ export function DocumentsWorkspaceClient({
 }) {
   const [documents, setDocuments] = useState(initialData.documents);
   const [templates, setTemplates] = useState(initialData.templates);
-  const [filters, setFilters] = useState<DocumentSearchFilters>(defaultFilters);
-  const [draftFilters, setDraftFilters] = useState<DocumentSearchFilters>(defaultFilters);
-  const [openMenuId, setOpenMenuId] = useState<string | null>(null);
-  const [pendingAction, setPendingAction] = useState<string | null>(null);
+  const [providers, setProviders] = useState(initialData.providers);
+  const [selectedDocumentId, setSelectedDocumentId] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -87,7 +85,9 @@ export function DocumentsWorkspaceClient({
     return Array.from(map.values()).sort((a, b) => +new Date(b.documents[0]?.updatedAt ?? 0) - +new Date(a.documents[0]?.updatedAt ?? 0));
   }, [caseDetail, filteredDocuments]);
 
-  const filterCount = Number(Boolean(filters.status)) + Number(filters.date !== "all") + Number(!caseDetail && Boolean(filters.caseId));
+  const selectedDocument = selectedDocumentId
+    ? (filteredDocuments.find((doc) => doc.id === selectedDocumentId) ?? null)
+    : null;
 
   function updateQuery(value: string) {
     setFilters((current) => ({ ...current, query: value }));
@@ -349,31 +349,82 @@ export function DocumentsWorkspaceClient({
               <p className="section-title">No documents match the current workspace view.</p>
               <p className="placeholder-copy">Adjust the filters or add a new document to refill the list.</p>
             </div>
-          ) : (
-            groups.map((group) =>
-              group.documents.length ? (
-                <section className="documents-case-group" key={group.id}>
-                  {!caseDetail ? (
-                    <div className="documents-case-header">
-                      <div><p className="eyebrow-label">{group.caseReference}</p><h3 className="section-title">{group.caseTitle}</h3></div>
-                      <div className="documents-case-meta"><span>{group.clientName}</span><span>{group.documents.length} document{group.documents.length === 1 ? "" : "s"}</span></div>
-                    </div>
-                  ) : null}
-                  <div className="documents-row-head"><span>Document</span><span>Status</span><span>Updated</span><span>Owner</span><span>Actions</span></div>
-                  <div className="documents-row-list">
-                    {group.documents.map((document) => (
-                      <DocumentRow document={document} isMenuOpen={openMenuId === document.id} key={document.id} onOpen={() => openDocument(document)} onRequest={() => void toggleRequest(document)} onToggleMenu={() => setOpenMenuId(openMenuId === document.id ? null : document.id)} onToggleShare={() => void toggleShare(document)} pending={pendingAction === document.id} />
-                    ))}
+
+            <div className="documents-table-shell">
+                <div className="documents-table-head">
+                  <span>Title</span>
+                  {!caseDetail ? <span>Case</span> : null}
+                  <span>Type</span>
+                  <span>Source</span>
+                  <span>Latest</span>
+                  <span>Shared / Request</span>
+                  <span>Updated</span>
+                  <span>Owner</span>
+                </div>
+
+                {filteredDocuments.length === 0 ? (
+                  <div className="documents-empty-state">
+                    <p className="section-title">No documents match the current workspace view.</p>
+                    <p className="placeholder-copy">Adjust your filters, create a document from a template, or upload a new file to populate the queue.</p>
                   </div>
-                </section>
-              ) : null,
-            )
+                ) : (
+                  filteredDocuments.map((doc) => (
+                    <button
+                      className={cn("documents-row", selectedDocument?.id === doc.id && "is-selected")}
+                      key={doc.id}
+                      onClick={() => setSelectedDocumentId(doc.id)}
+                      onDoubleClick={() => pushMessage(doc.providerLink?.documentUrl ? "Opening provider-authored file." : "Opening LegalOS download.")}
+                      type="button"
+                    >
+                      <span><strong>{doc.title}</strong><small>{doc.tags.join(" - ")}</small></span>
+                      {!caseDetail ? <span>{doc.caseReference}<small>{doc.clientName}</small></span> : null}
+                      <span>{doc.documentType}</span>
+                      <span>{labelForSource(doc.sourceKind)}</span>
+                      <span>v{doc.latestVersionNumber}</span>
+                      <span>{doc.isClientShared ? "Shared" : "Internal"}<small>{labelForRequest(doc.requestStatus)}</small></span>
+                      <span>{formatRelativeDate(doc.updatedAt)}</span>
+                      <span>{doc.uploadedBy}</span>
+                    </button>
+                  ))
+                )}
+              </div>
+
+          </>
+        )}
+      </div>
+
+      {/* Detail drawer — always rendered so slide-out transition fires */}
+      <div
+        className={cn("documents-drawer-backdrop", !selectedDocument && "is-hidden")}
+        onClick={() => setSelectedDocumentId(null)}
+        aria-hidden="true"
+      />
+      <aside className={cn("documents-detail-drawer", !selectedDocument && "is-hidden")}>
+        <div className="documents-drawer-header">
+          <button
+            className="documents-drawer-close"
+            onClick={() => setSelectedDocumentId(null)}
+            type="button"
+            aria-label="Close document details"
+          >
+            <DrawerCloseIcon />
+          </button>
+        </div>
+        <div className="documents-drawer-body">
+          {selectedDocument && (
+            <DocumentDetailPanel
+              document={selectedDocument}
+              onAnalyze={() => handleAnalyze(selectedDocument.id)}
+              onRequest={() => handleRequest(selectedDocument.id)}
+              onShare={() => handleToggleShare(selectedDocument.id)}
+            />
           )}
         </div>
-      </div>
-      <UploadDocumentModal caseDetail={caseDetail} caseOptions={caseOptions} loading={pendingAction === "upload"} onClose={() => setUploadOpen(false)} onSave={saveUpload} open={uploadOpen} />
-      <CreateDocumentModal caseDetail={caseDetail} caseOptions={caseOptions} loading={pendingAction === "generate"} onClose={() => setCreateOpen(false)} onManageTemplates={() => setTemplateOpen(true)} onSave={saveGenerated} open={createOpen} templates={templates} />
-      <TemplateBuilderModal loading={pendingAction === "template"} onClose={() => setTemplateOpen(false)} onSave={saveTemplate} open={templateOpen} />
+      </aside>
+
+      <UploadDocumentModal open={isUploadOpen} onClose={() => setIsUploadOpen(false)} onSave={handleUpload} />
+      <GenerateDocumentModal caseDetail={caseDetail} caseOptions={caseOptions} open={isGenerateOpen} onClose={() => setIsGenerateOpen(false)} onSave={handleGenerate} templates={templates} />
+      <TemplateBuilderModal open={isTemplateOpen} onClose={() => setIsTemplateOpen(false)} onSave={handleCreateTemplate} />
     </section>
   );
 }
@@ -425,7 +476,36 @@ function DocumentRow({
   );
 }
 
-function FilterSection({ label, onChange, options, value }: { label: string; onChange: (value: string) => void; options: Array<{ value: string; label: string }>; value: string }) {
+function DetailBlock({ label, value }: { label: string; value: string }) {
+  return <div className="documents-detail-block"><span>{label}</span><strong>{value}</strong></div>;
+}
+
+function DrawerCloseIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function TemplateLibrary({
+  caseDetail,
+  onGenerate,
+  onNewTemplate,
+  templates,
+}: {
+  caseDetail?: CaseDetail | null;
+  onGenerate: () => void;
+  onNewTemplate: () => void;
+  templates: DocumentTemplate[];
+}) {
+  const [statusFilter, setStatusFilter] = useState<DocumentTemplateStatus | "all">("all");
+  const visibleTemplates = templates.filter((template) => {
+    if (statusFilter !== "all" && template.status !== statusFilter) return false;
+    if (!caseDetail) return true;
+    return template.caseTypes.includes(caseDetail.caseType) || template.practiceAreas.includes(caseDetail.practiceArea);
+  });
+
   return (
     <div className="documents-filter-section">
       <p className="documents-filter-label">{label}</p>
