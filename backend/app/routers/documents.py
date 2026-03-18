@@ -21,12 +21,10 @@ from app.schemas.document import (
 from app.services.document_service import (
     connect_provider,
     create_template,
-    confirm_document_upload,
     generate_from_template,
     get_document,
     get_template,
     get_workspace,
-    initiate_document_upload,
     list_document_versions,
     list_provider_statuses,
     list_templates,
@@ -52,21 +50,17 @@ async def case_documents(case_id: str) -> list[DocumentRecord]:
 
 @router.post("/cases/{case_id}/documents/upload-initiate", response_model=UploadInitiateResponse)
 async def initiate_upload(case_id: str, payload: UploadInitiateRequest) -> UploadInitiateResponse:
-    document_id, storage_key = initiate_document_upload(case_id, payload)
+    document_id = f"{case_id}-pending-upload"
     return UploadInitiateResponse(
         document_id=document_id,
         upload_url=f"https://uploads.example/{document_id}",
-        storage_key=storage_key,
+        storage_key=f"firms/demo/cases/{case_id}/documents/{payload.file_name}",
     )
 
 
 @router.post("/cases/{case_id}/documents/{doc_id}/confirm", response_model=UploadConfirmResponse)
 async def confirm_upload(case_id: str, doc_id: str, payload: UploadConfirmRequest) -> UploadConfirmResponse:
-    result = confirm_document_upload(case_id, doc_id, payload)
-    if not result:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Document not found")
-    document_id, version_id = result
-    return UploadConfirmResponse(document_id=document_id, version_id=version_id, ocr_status="processing")
+    return UploadConfirmResponse(document_id=doc_id, version_id=f"{doc_id}-v1", ocr_status="pending")
 
 
 @router.get("/documents/{document_id}", response_model=DocumentRecord)

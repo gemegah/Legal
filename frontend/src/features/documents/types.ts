@@ -5,8 +5,6 @@ export type DocumentSyncStatus = "idle" | "syncing" | "out_of_date" | "error";
 export type ClientRequestStatus = "none" | "requested" | "uploaded" | "fulfilled" | "cancelled";
 export type DocumentTemplateStatus = "draft" | "active";
 export type DocumentOutputTarget = "word" | "google_docs" | "legalos";
-export type DocumentWorkflowStatus = "ready" | "processing" | "attention" | "client_shared" | "client_requested";
-export type DocumentDateFilter = "all" | "today" | "last_7_days" | "last_30_days" | "older";
 
 export interface DocumentHighlight {
   title?: string[];
@@ -59,10 +57,7 @@ export interface DocumentRecord {
   caseTitle: string;
   clientName: string;
   title: string;
-  fileName: string;
-  fileExtension: string;
   documentType: string;
-  status: DocumentWorkflowStatus;
   sourceKind: DocumentSourceKind;
   latestVersionNumber: number;
   ocrStatus: DocumentOcrStatus;
@@ -117,9 +112,13 @@ export interface DocumentProviderStatus {
 
 export interface DocumentSearchFilters {
   query: string;
-  status: string;
-  date: DocumentDateFilter;
   caseId: string;
+  documentType: string;
+  sourceKind: string;
+  aiStatus: string;
+  ocrStatus: string;
+  sharedState: string;
+  requestState: string;
 }
 
 export interface DocumentFacetOption {
@@ -129,7 +128,10 @@ export interface DocumentFacetOption {
 
 export interface DocumentWorkspaceFacets {
   caseOptions: DocumentFacetOption[];
-  statusOptions: DocumentFacetOption[];
+  documentTypeOptions: DocumentFacetOption[];
+  sourceOptions: DocumentFacetOption[];
+  aiStatusOptions: DocumentFacetOption[];
+  requestOptions: DocumentFacetOption[];
 }
 
 export interface DocumentWorkspaceData {
@@ -137,50 +139,4 @@ export interface DocumentWorkspaceData {
   templates: DocumentTemplate[];
   providers: DocumentProviderStatus[];
   facets: DocumentWorkspaceFacets;
-}
-
-export interface UploadInitiateRequest {
-  title: string;
-  document_type: string;
-  file_name: string;
-}
-
-export interface UploadInitiateResponse {
-  document_id: string;
-  upload_url: string;
-  storage_key: string;
-}
-
-export interface UploadConfirmRequest {
-  storage_key: string;
-  checksum_sha256: string;
-  mime_type: string;
-  file_size_bytes: number;
-}
-
-export interface UploadConfirmResponse {
-  document_id: string;
-  version_id: string;
-  ocr_status: DocumentOcrStatus;
-}
-
-export interface ShareRequest {
-  is_client_shared: boolean;
-}
-
-export interface ClientUploadRequest {
-  status: ClientRequestStatus;
-}
-
-export interface DocumentTemplateCreateRequest {
-  name: string;
-  category: string;
-  sourceKind: DocumentTemplate["sourceKind"];
-  status: DocumentTemplateStatus;
-}
-
-export interface DocumentTemplateGenerateRequest {
-  caseId: string;
-  title: string;
-  outputTarget: DocumentOutputTarget;
 }

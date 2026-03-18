@@ -1,7 +1,7 @@
 # Frontend Implementation Checklist
 
 This checklist mirrors the Linear project `LegalOS Frontend MVP` and is grouped into the same three frontend tracks.
-Last cross-checked against the current frontend routes/components: 2026-03-16.
+Last cross-checked against the current frontend routes/components: 2026-03-09.
 
 Status rule:
 - `[x]` means the surface is implemented and reflected in current routes/components.
@@ -26,15 +26,15 @@ Current UI-completion order for dashboard: `SPE-14` -> `SPE-15` -> `SPE-16` -> `
 - [x] `SPE-13` Build shared calendar and deadline management UI
 - [ ] `SPE-14` Implement document center and case document workflows
 - [x] `SPE-15` Implement billing workspace for time, expenses, invoices, and payments
-- [x] `SPE-16` Build notes and audit interfaces
+- [ ] `SPE-16` Build notes and audit interfaces
 - [ ] `SPE-17` Implement AI suggestion review flows in practitioner UI
 - [x] `SPE-18` Build practitioner settings, team, and account screens
 - [ ] `SPE-19` Complete dashboard-wide accessibility, responsiveness, and PWA polish
 
 Current dashboard screen status:
 - Built for MVP: app shell, dashboard home, cases list/detail, tasks, calendar, billing workspace, invoice detail, case notes, case audit.
-- Hidden/deferred: messages code remains in the repo, but the practitioner route is not shipped in nav and currently returns `notFound()`.
-- Partial/mock-backed only: documents, case documents.
+- Prototype/backlog only: message center exists in code but is not part of MVP scope.
+- Starter/placeholder only: documents, case documents.
 
 ## 2. Customer Portal
 

@@ -23,8 +23,6 @@ def test_document_detail_route() -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["title"] == "Reply to Notice of Preliminary Objection"
-    assert payload["fileName"] == "reply-preliminary-objection.docx"
-    assert payload["status"] == "ready"
     assert payload["versions"]
 
 
@@ -64,36 +62,3 @@ def test_can_create_template_and_generate_document() -> None:
 
     assert generate_response.status_code == 200
     assert generate_response.json()["title"] == "Generated Advice Draft"
-
-
-def test_upload_initiate_and_confirm_create_pending_document() -> None:
-    client = TestClient(app)
-
-    initiate_response = client.post(
-        "/api/v1/cases/case-0041/documents/upload-initiate",
-        json={
-            "title": "Registry Scan",
-            "document_type": "Court Notice",
-            "file_name": "registry-scan.pdf",
-        },
-    )
-
-    assert initiate_response.status_code == 200
-    initiated = initiate_response.json()
-
-    confirm_response = client.post(
-        f"/api/v1/cases/case-0041/documents/{initiated['document_id']}/confirm",
-        json={
-            "storage_key": initiated["storage_key"],
-            "checksum_sha256": "starter-checksum",
-            "mime_type": "application/pdf",
-            "file_size_bytes": 1024,
-        },
-    )
-
-    assert confirm_response.status_code == 200
-    detail_response = client.get(f"/api/v1/documents/{initiated['document_id']}")
-    assert detail_response.status_code == 200
-    detail = detail_response.json()
-    assert detail["fileName"] == "registry-scan.pdf"
-    assert detail["status"] == "processing"

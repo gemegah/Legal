@@ -1,6 +1,6 @@
 # LegalOS Design System Handoff
 
-Last updated: 2026-03-16
+Last updated: 2026-03-11
 
 This document is the practitioner-first UI handoff for LegalOS. It replaces the earlier token stub with a production-ready design-system specification grounded in three sources of truth:
 
@@ -75,10 +75,10 @@ Partial surfaces that must be documented truthfully as incomplete:
 | Invoice detail | Implemented | Fully specified |
 | Notes | Implemented | Fully specified as case sub-workspace |
 | Audit | Implemented | Fully specified as case sub-workspace |
-| Messages | Deferred / hidden | Code remains in the repo, but the practitioner route is not shipped in nav and currently returns `notFound()` |
+| Messages | Prototype only | Code exists, but this surface is deferred to V2 and is not part of MVP handoff scope |
 | Settings | Implemented | Fully specified |
-| Documents center | Partial implementation | Mock-backed workspace is shipped, but full backend integration and completion criteria are still open |
-| Case documents | Partial implementation | Case-scoped document workflow is shipped on the same mock-backed pattern, but still not complete enough to mark done |
+| Documents center | Placeholder | Partial pattern only |
+| Case documents | Placeholder | Partial pattern only |
 | Portal surfaces | Starter only | Shared tokens plus timeline-first portal guidance; client messaging stays deferred |
 | Auth surfaces | Starter only | Shared tokens only |
 
@@ -576,13 +576,10 @@ The system should map toward shadcn primitives where a standard primitive exists
 
 ### 6.11 Deferred messages workspace (V2 backlog)
 
-This surface remains in the repo, but it is not part of the shipped practitioner experience.
+This surface exists in code as prototype/backlog work only.
 
 - MVP rule:
   - do not treat messages workspace as part of the current handoff target
-- Code truth:
-  - the practitioner route currently returns `notFound()`
-  - the primary sidebar and topbar no longer expose messages as an active shipped workspace
 - V2 direction:
   - if revived later, redesign it separately from the v1 portal timeline
 - Current guidance:
@@ -858,8 +855,7 @@ This workspace is deferred to V2.
 - MVP expectation:
   - do not design new product work around the messages workspace
 - Code truth:
-  - existing implementation can remain in the repo as deferred backlog code
-  - the practitioner route currently returns `notFound()` and is not exposed in the shipped nav
+  - existing implementation can remain in the repo as prototype/backlog only
 - Design implication:
   - active v1 communication guidance should focus on the derived client timeline, not conversation UI
 
