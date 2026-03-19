@@ -9,26 +9,10 @@ import { cn, formatDateTime, formatRelativeDate } from "@/lib/utils";
 
 type AccountTab = "profile" | "security" | "preferences";
 
-const accountTabs: Array<{
-  id: AccountTab;
-  label: string;
-  // description: string;
-}> = [
-  {
-    id: "profile",
-    label: "Profile",
-    // description: "Identity shown across the practitioner workspace.",
-  },
-  {
-    id: "security",
-    label: "Security",
-    // description: "Password posture, MFA, and recent sessions.",
-  },
-  {
-    id: "preferences",
-    label: "Preferences",
-    // description: "Notification signal and workflow comfort.",
-  },
+const accountTabs: Array<{ id: AccountTab; label: string }> = [
+  { id: "profile", label: "Profile" },
+  { id: "security", label: "Security" },
+  { id: "preferences", label: "Preferences" },
 ];
 
 export function AccountSettingsClient({ initialData }: { initialData: AccountSettingsData }) {
@@ -161,39 +145,37 @@ export function AccountSettingsClient({ initialData }: { initialData: AccountSet
     <div className="settings-screen settings-account-screen">
       {feedback ? <div className="settings-feedback">{feedback}</div> : null}
 
-      <div className="surface-card settings-account-shell">
-        <div className="settings-account-head">
-          <div aria-label="Account sections" className="settings-account-tabs" role="tablist">
-            {accountTabs.map((tab, index) => (
-              <button
-                aria-controls={`${tabsId}-${tab.id}-panel`}
-                aria-selected={activeTab === tab.id}
-                className={cn("settings-account-tab", activeTab === tab.id && "is-active")}
-                id={`${tabsId}-${tab.id}-tab`}
-                key={tab.id}
-                onKeyDown={(event) => handleTabKeyDown(event, index)}
-                onClick={() => setActiveTab(tab.id)}
-                ref={(element) => {
-                  tabRefs.current[index] = element;
-                }}
-                role="tab"
-                tabIndex={activeTab === tab.id ? 0 : -1}
-                type="button"
-              >
-                <strong>{tab.label}</strong>
-              </button>
-            ))}
-          </div>
-          <div className="settings-account-head-actions">
-            <div className="settings-screen-badges">
-              <Badge tone="success">{initialData.viewer.role}</Badge>
-              <Badge tone={security.mfaEnabled ? "success" : "warning"}>
-                {security.mfaEnabled ? "MFA on" : "MFA off"}
-              </Badge>
-            </div>
-          </div>
+      <div className="settings-practice-nav">
+        <div aria-label="Account sections" className="settings-account-tabs" role="tablist">
+          {accountTabs.map((tab, index) => (
+            <button
+              aria-controls={`${tabsId}-${tab.id}-panel`}
+              aria-selected={activeTab === tab.id}
+              className={cn("settings-account-tab", activeTab === tab.id && "is-active")}
+              id={`${tabsId}-${tab.id}-tab`}
+              key={tab.id}
+              onKeyDown={(event) => handleTabKeyDown(event, index)}
+              onClick={() => setActiveTab(tab.id)}
+              ref={(element) => {
+                tabRefs.current[index] = element;
+              }}
+              role="tab"
+              tabIndex={activeTab === tab.id ? 0 : -1}
+              type="button"
+            >
+              <strong>{tab.label}</strong>
+            </button>
+          ))}
         </div>
+        <div className="settings-screen-badges">
+          <Badge tone="success">{initialData.viewer.role}</Badge>
+          <Badge tone={security.mfaEnabled ? "success" : "warning"}>
+            {security.mfaEnabled ? "MFA on" : "MFA off"}
+          </Badge>
+        </div>
+      </div>
 
+      <div className="settings-account-shell">
         <div
           aria-labelledby={activeTabButtonId}
           className="settings-account-stage"
@@ -420,12 +402,13 @@ export function AccountSettingsClient({ initialData }: { initialData: AccountSet
             </div>
           ) : null}
         </div>
+
         <div className="settings-account-action-row">
-              <Button variant="ghost" onClick={resetActiveTab}>
-                Cancel
-              </Button>
-              <Button onClick={saveActiveTab}>Stage changes</Button>
-            </div>
+          <Button variant="ghost" onClick={resetActiveTab}>
+            Cancel
+          </Button>
+          <Button onClick={saveActiveTab}>Stage changes</Button>
+        </div>
       </div>
 
       <Modal
