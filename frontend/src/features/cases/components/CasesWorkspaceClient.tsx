@@ -1,6 +1,7 @@
 "use client";
 
 import { useDeferredValue, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { CaseCard } from "@/components/case/CaseCard";
 import { CaseTable } from "@/components/case/CaseTable";
@@ -28,11 +29,17 @@ export function CasesWorkspaceClient({
   initialCases,
   initialStats,
 }: CasesWorkspaceClientProps) {
+  const router = useRouter();
   const [activeFilter, setActiveFilter] = useState<CaseListFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [assignedToMeOnly, setAssignedToMeOnly] = useState(false);
+  const [practiceAreaFilter, setPracticeAreaFilter] = useState("");
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const query = deferredSearchQuery.trim().toLowerCase();
+
+  const practiceAreas = Array.from(
+    new Set(initialCases.map((c) => c.practiceArea).filter(Boolean))
+  ).sort();
 
   const filteredCases = initialCases.filter((item) => {
     if (activeFilter !== "all" && item.status !== activeFilter) {
@@ -40,6 +47,10 @@ export function CasesWorkspaceClient({
     }
 
     if (assignedToMeOnly && !item.assignedToMe) {
+      return false;
+    }
+
+    if (practiceAreaFilter && item.practiceArea !== practiceAreaFilter) {
       return false;
     }
 
@@ -55,6 +66,29 @@ export function CasesWorkspaceClient({
     ].some((value) => value.toLowerCase().includes(query));
   });
 
+  function handleExport() {
+    const headers = ["Reference", "Title", "Client", "Practice Area", "Status", "Next Deadline", "Unpaid Balance"];
+    const rows = filteredCases.map((c) => [
+      c.reference,
+      c.title,
+      c.clientName,
+      c.practiceArea,
+      c.status,
+      c.nextDeadlineAt ?? "",
+      formatGHS(c.unpaidBalanceGhs),
+    ]);
+    const csv = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(","))
+      .join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cases.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
   return (
     <section className="case-workspace">
       <div className="surface-card case-workspace-hero">
@@ -67,10 +101,10 @@ export function CasesWorkspaceClient({
         </div>
 
         <div className="case-workspace-actions">
-          <button className="btn btn-ghost" type="button">
+          <button className="btn btn-ghost" onClick={handleExport} type="button">
             Export
           </button>
-          <button className="btn btn-primary" type="button">
+          <button className="btn btn-primary" onClick={() => router.push("/cases/new")} type="button">
             + New Case
           </button>
         </div>
@@ -139,9 +173,18 @@ export function CasesWorkspaceClient({
               Assigned to Me
             </button>
 
-            <button className="btn btn-ghost case-filter-button" type="button">
-              Practice Area
-            </button>
+            <label className="btn btn-ghost case-filter-button filter-select-field">
+              <FilterIcon />
+              <select
+                onChange={(e) => setPracticeAreaFilter(e.target.value)}
+                value={practiceAreaFilter}
+              >
+                <option value="">All Areas</option>
+                {practiceAreas.map((area) => (
+                  <option key={area} value={area}>{area}</option>
+                ))}
+              </select>
+            </label>
           </div>
         </div>
 
@@ -178,6 +221,16 @@ function StatCard({
       <p className={`case-workspace-stat-value is-${tone}`}>{value}</p>
       <p className="case-workspace-copy">{subtext}</p>
     </div>
+  );
+}
+
+function FilterIcon() {
+  return (
+    <svg aria-hidden="true" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" viewBox="0 0 16 16">
+      <line x1="2" x2="14" y1="4" y2="4" />
+      <line x1="4" x2="12" y1="8" y2="8" />
+      <line x1="6" x2="10" y1="12" y2="12" />
+    </svg>
   );
 }
 

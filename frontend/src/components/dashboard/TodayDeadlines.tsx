@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export interface DeadlineItem {
   time: string;
   label: string;
@@ -22,7 +24,7 @@ export function TodayDeadlines({ items }: TodayDeadlinesProps) {
     <section className="surface-card panel-card">
       <div className="panel-header">
         <h2 className="section-title">Today's Deadlines</h2>
-        <span className="panel-link">View calendar</span>
+        <Link className="panel-link" href="/calendar">View calendar</Link>
       </div>
 
       <div className="stack-list">

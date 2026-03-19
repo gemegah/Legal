@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export interface RecentPaymentItem {
   client: string;
   amount: string;
@@ -15,7 +17,7 @@ export function RecentPayments({ items }: RecentPaymentsProps) {
     <section className="surface-card panel-card">
       <div className="panel-header">
         <h2 className="section-title">Recent Payments</h2>
-        <span className="panel-link">AR report</span>
+        <Link className="panel-link" href="/billing">AR report</Link>
       </div>
 
       <div className="payments-list">

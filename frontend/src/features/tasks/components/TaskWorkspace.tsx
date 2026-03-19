@@ -408,6 +408,7 @@ function TaskToolbar({
         </label>
 
         <label className="task-inline-select">
+          <FilterIcon />
           <span>Due</span>
           <select
             onChange={(event) => onDueWindowChange(event.target.value as TaskDueWindow)}
@@ -423,6 +424,7 @@ function TaskToolbar({
 
         {canFilterByCase ? (
           <label className="task-inline-select">
+            <FilterIcon />
             <span>Case</span>
             <select onChange={(event) => onCaseChange(event.target.value)} value={caseId ?? ""}>
               <option value="">All cases</option>
@@ -1048,6 +1050,16 @@ function toLocalInputDate(value: string): string {
 }
 
 // ---------- inline SVG icons ----------
+
+function FilterIcon() {
+  return (
+    <svg aria-hidden="true" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" viewBox="0 0 16 16">
+      <line x1="2" x2="14" y1="4" y2="4" />
+      <line x1="4" x2="12" y1="8" y2="8" />
+      <line x1="6" x2="10" y1="12" y2="12" />
+    </svg>
+  );
+}
 
 function SearchIcon() {
   return (

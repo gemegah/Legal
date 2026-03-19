@@ -34,6 +34,7 @@ export interface CalendarEventItem {
   status: CalendarEventStatus;
   urgency: CalendarUrgency;
   location: string;
+  meetingUrl?: string;
   source: "manual" | "ai";
   reminders: CalendarReminder[];
 }

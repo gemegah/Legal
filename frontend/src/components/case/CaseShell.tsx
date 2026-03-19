@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 
 import type {
@@ -29,6 +29,7 @@ interface CaseTab {
 interface ActionConfig {
   label: string;
   variant: "primary" | "accent" | "ghost";
+  tab?: string;
 }
 
 const currentUserRole: PractitionerRole = "admin";
@@ -50,24 +51,24 @@ function buildTabs(caseId: string): CaseTab[] {
 const roleActions: Record<PractitionerRole, ActionConfig[]> = {
   admin: [
     { label: "Edit Case", variant: "primary" },
-    { label: "Add Task", variant: "ghost" },
+    { label: "Add Task", variant: "ghost", tab: "tasks" },
     { label: "Log Time", variant: "ghost" },
-    { label: "Upload Document", variant: "ghost" },
+    { label: "Upload Document", variant: "ghost", tab: "documents" },
     { label: "Request AI Summary", variant: "ghost" },
     { label: "Archive Case", variant: "accent" },
   ],
   lawyer: [
     { label: "Edit Case", variant: "primary" },
-    { label: "Add Task", variant: "ghost" },
+    { label: "Add Task", variant: "ghost", tab: "tasks" },
     { label: "Log Time", variant: "ghost" },
-    { label: "Upload Document", variant: "ghost" },
+    { label: "Upload Document", variant: "ghost", tab: "documents" },
     { label: "Request AI Summary", variant: "accent" },
   ],
   staff: [
-    { label: "Add Task", variant: "primary" },
+    { label: "Add Task", variant: "primary", tab: "tasks" },
     { label: "Log Time", variant: "ghost" },
-    { label: "Upload Document", variant: "ghost" },
-    { label: "View Billing", variant: "ghost" },
+    { label: "Upload Document", variant: "ghost", tab: "documents" },
+    { label: "View Billing", variant: "ghost", tab: "billing" },
   ],
 };
 
@@ -78,6 +79,7 @@ export function CaseShell({
   showOverviewKpis,
 }: CaseShellProps) {
   const pathname = usePathname();
+  const router = useRouter();
 
   const tabs = buildTabs(caseId);
   const activeTab = getActiveTab(pathname, caseId);
@@ -128,6 +130,7 @@ export function CaseShell({
                 <button
                   className={cn("btn", getActionClassName(action.variant), "case-action-button")}
                   key={action.label}
+                  onClick={action.tab ? () => router.push(`/cases/${caseId}/${action.tab}`) : undefined}
                   type="button"
                 >
                   {action.label}

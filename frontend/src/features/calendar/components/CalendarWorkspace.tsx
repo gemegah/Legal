@@ -30,6 +30,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   CalendarIcon,
+  FilterIcon,
   SidebarIcon,
 } from "./calendar/Icons";
 
@@ -187,6 +188,7 @@ function CalendarWorkspace({
                 <ChevronRightIcon />
               </button>
               <label className="calendar-inline-select">
+                <FilterIcon />
                 <span>Focus</span>
                 <select
                   onChange={(event) => setTypeFilter(event.target.value as CalendarEventType | "all")}
