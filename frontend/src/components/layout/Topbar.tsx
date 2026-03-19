@@ -66,6 +66,7 @@ const mockNotifications = [
 export function Topbar() {
   const pathname = usePathname();
   const meta = routeMeta.find((entry) => entry.match(pathname)) ?? routeMeta[0];
+  const isTaskWorkspace = pathname === "/tasks" || pathname.endsWith("/tasks");
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -96,10 +97,12 @@ export function Topbar() {
       </div>
 
       <div className="topbar-actions">
-        <label className="topbar-search" aria-label="Search">
-          <SearchIcon />
-          <input type="search" placeholder="Search cases, clients..." />
-        </label>
+        {isTaskWorkspace ? null : (
+          <label className="topbar-search" aria-label="Search">
+            <SearchIcon />
+            <input type="search" placeholder="Search cases, clients..." />
+          </label>
+        )}
 
         <div className="topbar-dropdown-anchor" ref={notifRef}>
           <button

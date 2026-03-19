@@ -1,5 +1,10 @@
-import { redirect } from "next/navigation";
+import { SettingsOverview } from "@/features/settings/components/SettingsOverview";
+import { getSettingsWorkspace } from "@/features/settings/server/queries";
 
-export default function Page() {
-  redirect("/settings/practice");
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  const data = await getSettingsWorkspace();
+
+  return <SettingsOverview workspace={data} />;
 }

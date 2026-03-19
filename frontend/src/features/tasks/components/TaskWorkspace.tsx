@@ -362,9 +362,7 @@ function TaskToolbar({
             className={cn("task-chip-button", scope === "mine" && "is-active")}
             onClick={onAssignedScope}
             type="button"
-            style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}
           >
-            <PersonIcon />
             Assigned to Me
           </button>
           <TaskViewToggle onChange={onViewModeChange} value={viewMode} />
@@ -457,7 +455,6 @@ function TaskViewToggle({
           key={mode}
           onClick={() => onChange(mode)}
           type="button"
-          style={{display: 'flex', alignItems: 'center', justifyContent: 'center', gap: "4px", fontSize: "0.875rem", padding: "6px 10px"}}
         >
           {mode === "list" ? (
             <>
@@ -648,7 +645,7 @@ function TaskBoard({
           onDrop={() => onDropTask(column.status)}
         >
           <div className="task-board-column-head">
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+            <div className="task-board-column-summary">
               <BoardStatusDot status={column.status} />
               <div>
                 <p className="task-board-column-title">{column.label}</p>
@@ -674,11 +671,12 @@ function TaskBoard({
                   onDragStart={() => onDragStart(task.id)}
                 >
                   <div className="task-board-card-head">
-                    <DragHandleIcon />
-                    <TaskPriorityBadge priority={task.priority} />
-                    <button className="task-action-link" onClick={() => onEdit(task.id)} type="button">
-                      Edit
-                    </button>
+                    <div className="task-board-card-actions">
+                      <TaskPriorityBadge priority={task.priority} />
+                      <button className="task-action-link" onClick={() => onEdit(task.id)} type="button">
+                        Edit
+                      </button>
+                    </div>
                   </div>
 
                   <button className="task-inline-link task-board-card-title" onClick={() => onEdit(task.id)} type="button">
@@ -691,10 +689,10 @@ function TaskBoard({
                   </Link>
 
                   <div className="task-board-card-meta">
-                    <span style={{ display: "inline-flex", alignItems: "center", gap: "6px" }}>
+                    <span className="task-board-assignee">
                       <AssigneeAvatar name={task.assigneeName ?? null} />
                       {task.assigneeName ?? (
-                        <span style={{ color: "var(--color-ink-light)", fontStyle: "italic", fontSize: "0.8125rem" }}>
+                        <span className="task-board-unassigned">
                           Unassigned
                         </span>
                       )}
@@ -742,11 +740,8 @@ function TaskPriorityBadge({ priority }: { priority: TaskPriority }) {
 
 function TaskEmptyState({ copy, title }: { copy: string; title: string }) {
   return (
-    <div
-      className="task-empty-state"
-      style={{ alignItems: "center", textAlign: "center" }}
-    >
-      <EmptyTasksIcon />
+    <div className="task-empty-state">
+      {/* <EmptyTasksIcon /> */}
       <h3 className="section-title">{title}</h3>
       <p className="placeholder-copy">{copy}</p>
     </div>
@@ -1078,66 +1073,77 @@ function SearchIcon() {
   );
 }
 
-interface CaseOption {
-  id: string;
-  reference: string;
-  title: string;
-  clientName: string;
-}
-
-function PersonIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <circle cx="8" cy="5" r="3" stroke="currentColor" strokeWidth="1.5" />
-      <path d="M2 14c0-3.314 2.686-6 6-6s6 2.686 6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
 function ListIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <line x1="3" y1="5" x2="13" y2="5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="3" y1="8" x2="13" y2="8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="3" y1="11" x2="13" y2="11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="8" y1="6" x2="21" y2="6" />
+      <line x1="8" y1="12" x2="21" y2="12" />
+      <line x1="8" y1="18" x2="21" y2="18" />
+      <line x1="3" y1="6" x2="3.01" y2="6" />
+      <line x1="3" y1="12" x2="3.01" y2="12" />
+      <line x1="3" y1="18" x2="3.01" y2="18" />
     </svg>
   );
 }
 
 function KanbanIcon() {
   return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <rect x="2" y="3" width="4" height="10" rx="1" stroke="currentColor" strokeWidth="1.5" />
-      <rect x="10" y="3" width="4" height="7" rx="1" stroke="currentColor" strokeWidth="1.5" />
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="4" width="6" height="16" rx="1" />
+      <rect x="10" y="4" width="4" height="10" rx="1" />
+      <rect x="15" y="4" width="6" height="7" rx="1" />
     </svg>
   );
 }
 
-function DragHandleIcon() {
+function EmptyTasksIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
-      <circle cx="4" cy="3" r="1" fill="currentColor" />
-      <circle cx="8" cy="3" r="1" fill="currentColor" />
-      <circle cx="4" cy="6" r="1" fill="currentColor" />
-      <circle cx="8" cy="6" r="1" fill="currentColor" />
-      <circle cx="4" cy="9" r="1" fill="currentColor" />
-      <circle cx="8" cy="9" r="1" fill="currentColor" />
+    <svg
+      viewBox="0 0 24 24"
+      aria-hidden="true"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M9 3h6l1 2h4v14H4V5h4l1-2Z" />
+      <path d="M9 11h6" />
+      <path d="M9 15h4" />
     </svg>
   );
 }
 
 function AssigneeAvatar({ name }: { name: string | null }) {
-  const initials = name ? name.split(" ").map((part) => part[0]).slice(0, 2).join("").toUpperCase() : "?";
-  return <span className="task-assignee-avatar" aria-hidden="true">{initials}</span>;
+  const initials = (name ?? "Unassigned")
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0]?.toUpperCase() ?? "")
+    .join("");
+
+  return <span className="avatar-circle">{initials || "U"}</span>;
 }
 
-function EmptyTasksIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true">
-      <rect x="8" y="6" width="24" height="28" rx="3" stroke="currentColor" strokeWidth="1.5" />
-      <line x1="13" y1="14" x2="27" y2="14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="13" y1="20" x2="27" y2="20" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-      <line x1="13" y1="26" x2="21" y2="26" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
+interface CaseOption {
+  id: string;
+  reference: string;
+  title: string;
+  clientName: string;
 }
