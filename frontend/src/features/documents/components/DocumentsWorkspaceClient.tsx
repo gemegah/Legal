@@ -211,8 +211,8 @@ export function DocumentsWorkspaceClient({
   return (
     <section className={cn("documents-workspace", caseDetail && "is-case")}>
       <div className="surface-card documents-panel">
-        <div className="documents-panel-header">
-          <div className="documents-panel-copy">
+
+          {/* <div className="documents-panel-copy">
             <p className="eyebrow-label">{caseDetail ? "Case Documents" : "Document Center"}</p>
             <h2 className="case-title">{caseDetail ? `${caseDetail.reference} document workflow` : "Search-first document operations"}</h2>
             <p className="documents-panel-subcopy">
@@ -220,14 +220,14 @@ export function DocumentsWorkspaceClient({
                 ? "Upload, classify, generate, and share case documents with provider-aware authoring."
                 : "Search, upload, classify, and share documents across active cases with OCR, AI review, and template automation."}
             </p>
-          </div>
-          <div className="documents-panel-actions">
+          </div> */}
+          <div className="documents-panel-actions" style={{display: 'flex', alignSelf: 'end', paddingTop: 20, paddingRight: 20, paddingBottom: 12}}>
             <Button onClick={() => setIsUploadOpen(true)} variant="ghost">Upload</Button>
             <Button onClick={() => setIsGenerateOpen(true)}>Create from Template</Button>
             <Button onClick={() => handleProvider("word")} variant="ghost">Open in Word</Button>
             <Button onClick={() => handleProvider("google_docs")} variant="ghost">Open in Google Docs</Button>
           </div>
-        </div>
+
 
         <div className="documents-provider-strip" aria-label="Document provider status">
           {providers.map((provider) => (
@@ -276,8 +276,8 @@ export function DocumentsWorkspaceClient({
               ) : null}
               <FilterSelect label="Type" onChange={(value) => updateFilter("documentType", value)} options={facetValues(documents, "documentType")} value={filters.documentType} />
               <FilterSelect label="Source" onChange={(value) => updateFilter("sourceKind", value)} options={facetValues(documents, "sourceKind")} value={filters.sourceKind} />
-              <FilterSelect label="AI" onChange={(value) => updateFilter("aiStatus", value)} options={facetValues(documents, "aiStatus")} value={filters.aiStatus} />
-              <FilterSelect label="OCR" onChange={(value) => updateFilter("ocrStatus", value)} options={facetValues(documents, "ocrStatus")} value={filters.ocrStatus} />
+              {/* <FilterSelect label="AI" onChange={(value) => updateFilter("aiStatus", value)} options={facetValues(documents, "aiStatus")} value={filters.aiStatus} />
+              <FilterSelect label="OCR" onChange={(value) => updateFilter("ocrStatus", value)} options={facetValues(documents, "ocrStatus")} value={filters.ocrStatus} /> */}
               <FilterSelect label="Share" onChange={(value) => updateFilter("sharedState", value)} options={[{ value: "shared", label: "Shared" }, { value: "internal", label: "Internal only" }]} value={filters.sharedState} />
               <FilterSelect label="Requests" onChange={(value) => updateFilter("requestState", value)} options={facetValues(documents, "requestStatus").filter((item) => item.value !== "none")} value={filters.requestState} />
             </div>
@@ -502,8 +502,8 @@ function TemplateLibrary({
 
   return (
     <div className="documents-template-shell">
-      <div className="documents-template-toolbar">
-        <div className="documents-tabs">
+      <div className="documents-template-toolbar" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+        <div className="documents-tabs" style={{borderWidth: 0}}>
           <TabButton active={statusFilter === "all"} label="All" onClick={() => setStatusFilter("all")} />
           <TabButton active={statusFilter === "active"} label="Active" onClick={() => setStatusFilter("active")} />
           <TabButton active={statusFilter === "draft"} label="Draft" onClick={() => setStatusFilter("draft")} />

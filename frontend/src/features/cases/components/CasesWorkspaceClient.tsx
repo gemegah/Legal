@@ -57,16 +57,15 @@ export function CasesWorkspaceClient({
 
   return (
     <section className="case-workspace">
-      <div className="surface-card case-workspace-hero">
-        <div className="case-workspace-hero-copy">
+        {/* <div className="case-workspace-hero-copy">
           <p className="eyebrow-label">Practitioner Workspace</p>
           <h2 className="case-title">Case Workspace</h2>
           <p className="case-workspace-copy">
             Track case status, upcoming deadlines, and billing exposure from one shared queue.
           </p>
-        </div>
+        </div> */}
 
-        <div className="case-workspace-actions">
+        <div className="case-workspace-actions" style={{display: 'flex', alignSelf: 'end'}}>
           <button className="btn btn-ghost" type="button">
             Export
           </button>
@@ -74,7 +73,7 @@ export function CasesWorkspaceClient({
             + New Case
           </button>
         </div>
-      </div>
+
 
       <div className="case-workspace-stats">
         <StatCard

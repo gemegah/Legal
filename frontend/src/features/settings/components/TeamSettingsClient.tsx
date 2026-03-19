@@ -44,7 +44,7 @@ export function TeamSettingsClient({ initialData }: { initialData: TeamSettingsD
     setMembers((current) =>
       current.map((member) => (member.id === memberId ? { ...member, role } : member)),
     );
-    setFeedback("Role coverage updated.");
+    setFeedback("Role coverage was staged locally in this preview.");
   }
 
   function toggleMemberStatus(memberId: string) {
@@ -58,12 +58,12 @@ export function TeamSettingsClient({ initialData }: { initialData: TeamSettingsD
           : member,
       ),
     );
-    setFeedback("Access status updated. Historical work remains intact.");
+    setFeedback("Access status was staged locally in this preview. Historical work remains intact.");
   }
 
   function handleInvite() {
     if (!inviteName.trim() || !inviteEmail.trim()) {
-      setFeedback("Add a name and email before sending an invite.");
+      setFeedback("Add a name and email before staging an invite.");
       return;
     }
 
@@ -85,29 +85,11 @@ export function TeamSettingsClient({ initialData }: { initialData: TeamSettingsD
     setInviteEmail("");
     setInviteRole("staff");
     setInviteOpen(false);
-    setFeedback(`Invitation queued for ${next.fullName}.`);
+    setFeedback(`Invitation for ${next.fullName} was staged locally in this preview.`);
   }
 
   return (
-    <div className="settings-screen">
-      <div className="surface-card settings-screen-hero">
-        <div className="settings-screen-copy">
-          <p className="eyebrow-label">Team</p>
-          <h3 className="settings-screen-title">Keep the roster disciplined and the permission story obvious.</h3>
-          <p className="settings-screen-text">
-            The team screen should explain who has access, who is still pending, and where billing authority is more
-            sensitive than ordinary case collaboration.
-          </p>
-        </div>
-
-        <div className="settings-screen-badges">
-          <Badge tone={canManage ? "success" : "warning"}>
-            {canManage ? "Admin management enabled" : "Read-only roster"}
-          </Badge>
-          <Badge tone="info">{initialData.seatCount} seats planned</Badge>
-        </div>
-      </div>
-
+    <div className="settings-screen settings-screen-optimized">
       {feedback ? <div className="settings-feedback">{feedback}</div> : null}
 
       {!canManage ? (
@@ -348,7 +330,7 @@ export function TeamSettingsClient({ initialData }: { initialData: TeamSettingsD
             <Button variant="ghost" onClick={() => setInviteOpen(false)}>
               Cancel
             </Button>
-            <Button onClick={handleInvite}>Send invite</Button>
+            <Button onClick={handleInvite}>Stage invite</Button>
           </>
         }
       >

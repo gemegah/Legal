@@ -1,44 +1,84 @@
 "use client";
 
-import { useState } from "react";
+import type { KeyboardEvent } from "react";
+import { useId, useRef, useState } from "react";
 
 import { Badge, Button, Input } from "@/components/ui";
 import type { PracticeSettingsData } from "@/features/settings/types";
-import { formatGHS } from "@/lib/utils";
+import { cn, formatGHS } from "@/lib/utils";
+
+type PracticeSection = "identity" | "defaults" | "guardrails";
+
+const focusCards: Array<{
+  id: PracticeSection;
+  title: string;
+}> = [
+  {
+    id: "identity",
+    title: "Firm identity",
+  },
+  {
+    id: "defaults",
+    title: "Operational defaults",
+  },
+  {
+    id: "guardrails",
+    title: "Access boundary",
+  },
+];
 
 export function PracticeSettingsClient({ initialData }: { initialData: PracticeSettingsData }) {
+  const tabsId = useId();
+  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const [form, setForm] = useState(initialData.practice);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [activeSection, setActiveSection] = useState<PracticeSection>("identity");
   const canEdit = initialData.viewer.role === "admin";
+  const activePanelId = `${tabsId}-${activeSection}-panel`;
+  const activeTabButtonId = `${tabsId}-${activeSection}-tab`;
 
   function updateField<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((current) => ({ ...current, [key]: value }));
   }
 
   function saveSection(section: string) {
-    setFeedback(`${section} saved for ${initialData.firmName}.`);
+    setFeedback(`${section} was staged locally for ${initialData.firmName} in this preview.`);
+  }
+
+  function focusSection(index: number) {
+    const target = focusCards[index];
+    if (!target) return;
+    setActiveSection(target.id);
+    tabRefs.current[index]?.focus();
+  }
+
+  function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    if (event.key === "ArrowRight") {
+      event.preventDefault();
+      focusSection((index + 1) % focusCards.length);
+      return;
+    }
+
+    if (event.key === "ArrowLeft") {
+      event.preventDefault();
+      focusSection((index - 1 + focusCards.length) % focusCards.length);
+      return;
+    }
+
+    if (event.key === "Home") {
+      event.preventDefault();
+      focusSection(0);
+      return;
+    }
+
+    if (event.key === "End") {
+      event.preventDefault();
+      focusSection(focusCards.length - 1);
+    }
   }
 
   return (
-    <div className="settings-screen">
-      <div className="surface-card settings-screen-hero">
-        <div className="settings-screen-copy">
-          <p className="eyebrow-label">Practice Settings</p>
-          <h3 className="settings-screen-title">Shape how the firm presents itself and how reminders behave.</h3>
-          <p className="settings-screen-text">
-            This is the administrative layer for office identity, case reminder cadence, and the billing language
-            clients will keep seeing.
-          </p>
-        </div>
-
-        <div className="settings-screen-badges">
-          <Badge tone={canEdit ? "success" : "warning"}>
-            {canEdit ? "Admin controls enabled" : "Read-only for your role"}
-          </Badge>
-          <Badge tone="info">{form.timezone}</Badge>
-        </div>
-      </div>
-
+    <div className="settings-screen settings-screen-optimized">
       {feedback ? <div className="settings-feedback">{feedback}</div> : null}
 
       {!canEdit ? (
@@ -66,166 +106,221 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
         </div>
       </div>
 
-      <div className="settings-panel-grid">
-        <section className="surface-card settings-panel">
-          <div className="settings-panel-head">
-            <div>
-              <p className="settings-panel-kicker">Firm identity</p>
-              <h4 className="settings-panel-title">What practitioners and clients recognize first</h4>
-            </div>
-            <Button onClick={() => saveSection("Firm identity")} disabled={!canEdit} variant="ghost">
-              Save identity
-            </Button>
+      <section className="surface-card settings-panel">
+        <div className="settings-panel-head">
+          <div>
+            <p className="settings-panel-kicker">Practice sections</p>
           </div>
+          <Badge tone={canEdit ? "info" : "warning"}>{canEdit ? "Local preview" : "Review mode"}</Badge>
+        </div>
 
-          <div className="settings-form-grid">
-            <Input
-              label="Workspace name"
-              name="workspaceName"
-              value={form.workspaceName}
-              onChange={(event) => updateField("workspaceName", event.target.value)}
-              disabled={!canEdit}
-            />
-            <Input
-              label="Legal name"
-              name="legalName"
-              value={form.legalName}
-              onChange={(event) => updateField("legalName", event.target.value)}
-              disabled={!canEdit}
-            />
-            <Input
-              label="Primary email"
-              name="primaryEmail"
-              value={form.primaryEmail}
-              onChange={(event) => updateField("primaryEmail", event.target.value)}
-              disabled={!canEdit}
-            />
-            <Input
-              label="Primary phone"
-              name="primaryPhone"
-              value={form.primaryPhone}
-              onChange={(event) => updateField("primaryPhone", event.target.value)}
-              disabled={!canEdit}
-            />
-            <label className="ui-field">
-              <span className="ui-field-label">Timezone</span>
-              <select
-                className="settings-select"
-                value={form.timezone}
-                onChange={(event) => updateField("timezone", event.target.value)}
+        <div aria-label="Practice sections" className="settings-account-tabs" role="tablist">
+          {focusCards.map((card, index) => (
+            <button
+              aria-controls={`${tabsId}-${card.id}-panel`}
+              aria-selected={activeSection === card.id}
+              className={cn("settings-account-tab", activeSection === card.id && "is-active")}
+              id={`${tabsId}-${card.id}-tab`}
+              key={card.id}
+              onClick={() => setActiveSection(card.id)}
+              onKeyDown={(event) => handleTabKeyDown(event, index)}
+              ref={(element) => {
+                tabRefs.current[index] = element;
+              }}
+              role="tab"
+              tabIndex={activeSection === card.id ? 0 : -1}
+              type="button"
+            >
+              <strong>{card.title}</strong>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <div
+        aria-labelledby={activeTabButtonId}
+        className={cn(activeSection === "identity" ? "settings-practice-active-panel" : "settings-panel-grid")}
+        id={activePanelId}
+        role="tabpanel"
+        tabIndex={0}
+      >
+        {activeSection === "identity" ? (
+          <section className="surface-card settings-panel">
+            <div className="settings-panel-head">
+              <div>
+                <p className="settings-panel-kicker">Firm identity</p>
+                <h4 className="settings-panel-title">What practitioners and clients recognize first</h4>
+              </div>
+              <Button onClick={() => saveSection("Firm identity")} disabled={!canEdit} variant="ghost">
+                Stage identity
+              </Button>
+            </div>
+
+            <div className="settings-form-grid">
+              <Input
+                label="Workspace name"
+                name="workspaceName"
+                value={form.workspaceName}
+                onChange={(event) => updateField("workspaceName", event.target.value)}
                 disabled={!canEdit}
-              >
-                <option value="Africa/Accra">Africa/Accra</option>
-                <option value="UTC">UTC</option>
-              </select>
-            </label>
-            <label className="ui-field">
-              <span className="ui-field-label">Default case visibility</span>
-              <select
-                className="settings-select"
-                value={form.defaultCaseVisibility}
-                onChange={(event) => updateField("defaultCaseVisibility", event.target.value)}
+              />
+              <Input
+                label="Legal name"
+                name="legalName"
+                value={form.legalName}
+                onChange={(event) => updateField("legalName", event.target.value)}
                 disabled={!canEdit}
-              >
-                <option>Assigned team members plus admin oversight</option>
-                <option>Assigned team members only</option>
-                <option>Firm-wide practitioner visibility</option>
-              </select>
-            </label>
-          </div>
-        </section>
-
-        <section className="surface-card settings-panel">
-          <div className="settings-panel-head">
-            <div>
-              <p className="settings-panel-kicker">Reminder defaults</p>
-              <h4 className="settings-panel-title">Deadline language tuned for Ghana practice rhythm</h4>
-            </div>
-            <Button onClick={() => saveSection("Operational defaults")} disabled={!canEdit}>
-              Save defaults
-            </Button>
-          </div>
-
-          <div className="settings-form-grid">
-            <Input
-              label="Reminder cadence"
-              name="reminderCadence"
-              hint="Use a human-readable format that maps to filing and hearing reminders."
-              value={form.reminderCadence}
-              onChange={(event) => updateField("reminderCadence", event.target.value)}
-              disabled={!canEdit}
-            />
-            <label className="ui-field">
-              <span className="ui-field-label">Payment reminder mode</span>
-              <select
-                className="settings-select"
-                value={form.paymentReminderMode}
-                onChange={(event) => updateField("paymentReminderMode", event.target.value)}
+              />
+              <Input
+                label="Primary email"
+                name="primaryEmail"
+                value={form.primaryEmail}
+                onChange={(event) => updateField("primaryEmail", event.target.value)}
                 disabled={!canEdit}
-              >
-                <option>7d before due date and 3d after due date</option>
-                <option>3d before due date and 7d after due date</option>
-                <option>Due date only</option>
-              </select>
-            </label>
-          </div>
+              />
+              <Input
+                label="Primary phone"
+                name="primaryPhone"
+                value={form.primaryPhone}
+                onChange={(event) => updateField("primaryPhone", event.target.value)}
+                disabled={!canEdit}
+              />
+              <label className="ui-field">
+                <span className="ui-field-label">Timezone</span>
+                <select
+                  className="settings-select"
+                  value={form.timezone}
+                  onChange={(event) => updateField("timezone", event.target.value)}
+                  disabled={!canEdit}
+                >
+                  <option value="Africa/Accra">Africa/Accra</option>
+                  <option value="UTC">UTC</option>
+                </select>
+              </label>
+              <label className="ui-field">
+                <span className="ui-field-label">Default case visibility</span>
+                <select
+                  className="settings-select"
+                  value={form.defaultCaseVisibility}
+                  onChange={(event) => updateField("defaultCaseVisibility", event.target.value)}
+                  disabled={!canEdit}
+                >
+                  <option>Assigned team members plus admin oversight</option>
+                  <option>Assigned team members only</option>
+                  <option>Firm-wide practitioner visibility</option>
+                </select>
+              </label>
+            </div>
+          </section>
+        ) : null}
 
-          <label className="ui-field">
-            <span className="ui-field-label">Invoice footer</span>
-            <textarea
-              className="settings-textarea"
-              value={form.invoiceFooter}
-              onChange={(event) => updateField("invoiceFooter", event.target.value)}
-              disabled={!canEdit}
-            />
-          </label>
+        {activeSection === "defaults" ? (
+          <>
+            <section className="surface-card settings-panel">
+              <div className="settings-panel-head">
+                <div>
+                  <p className="settings-panel-kicker">Reminder defaults</p>
+                  <h4 className="settings-panel-title">Deadline language tuned for Ghana practice rhythm</h4>
+                </div>
+                <Button onClick={() => saveSection("Operational defaults")} disabled={!canEdit}>
+                  Stage defaults
+                </Button>
+              </div>
 
-          <div className="settings-footnote-grid">
-            <div className="settings-footnote-card">
-              <span>Payments</span>
-              <strong>GHS only</strong>
-              <small>Keep collection language aligned to the product's Ghana-first billing model.</small>
-            </div>
-            <div className="settings-footnote-card">
-              <span>Gateways</span>
-              <strong>Hubtel + Paystack</strong>
-              <small>Default copy should match the actual payment routes available in the product.</small>
-            </div>
-          </div>
-        </section>
+              <div className="settings-form-grid settings-form-grid-column">
+                <Input
+                  label="Reminder cadence"
+                  name="reminderCadence"
+                  hint="Use a human-readable format that maps to filing and hearing reminders."
+                  value={form.reminderCadence}
+                  onChange={(event) => updateField("reminderCadence", event.target.value)}
+                  disabled={!canEdit}
+                />
+                <label className="ui-field">
+                  <span className="ui-field-label">Payment reminder mode</span>
+                  <select
+                    className="settings-select"
+                    value={form.paymentReminderMode}
+                    onChange={(event) => updateField("paymentReminderMode", event.target.value)}
+                    disabled={!canEdit}
+                  >
+                    <option>7d before due date and 3d after due date</option>
+                    <option>3d before due date and 7d after due date</option>
+                    <option>Due date only</option>
+                  </select>
+                </label>
+              </div>
 
-        <section className="surface-card settings-panel">
-          <div className="settings-panel-head">
-            <div>
-              <p className="settings-panel-kicker">Access framing</p>
-              <h4 className="settings-panel-title">The line between firm defaults and individual preference</h4>
-            </div>
-          </div>
+              <label className="ui-field">
+                <span className="ui-field-label">Invoice footer</span>
+                <textarea
+                  className="settings-textarea"
+                  value={form.invoiceFooter}
+                  onChange={(event) => updateField("invoiceFooter", event.target.value)}
+                  disabled={!canEdit}
+                />
+              </label>
+            </section>
 
-          <div className="settings-rule-list">
-            <div className="settings-rule-item">
-              <strong>Admin-owned</strong>
-              <p>Firm identity, reminder cadence, user access, and billing defaults stay inside administrative control.</p>
-            </div>
-            <div className="settings-rule-item">
-              <strong>Practitioner-owned</strong>
-              <p>Personal profile, notification posture, and session hygiene live in the account screen.</p>
-            </div>
-            <div className="settings-rule-item">
-              <strong>Firm-safe by default</strong>
-              <p>Changes should never depend on a client-supplied firm identifier, and deactivated users keep history intact.</p>
-            </div>
-          </div>
-        </section>
+            <section className="surface-card settings-panel">
+              <div className="settings-footnote-grid">
+                <div className="settings-footnote-card">
+                  <span>Payments</span>
+                  <strong>GHS only</strong>
+                  <small>Keep collection language aligned to the product's Ghana-first billing model.</small>
+                </div>
+                <div className="settings-footnote-card">
+                  <span>Gateways</span>
+                  <strong>Hubtel + Paystack</strong>
+                  <small>Default copy should match the actual payment routes available in the product.</small>
+                </div>
+              </div>
+            </section>
+          </>
+        ) : null}
 
-        <section className="surface-card settings-panel settings-panel-accent">
-          <p className="settings-panel-kicker">Why this screen cases</p>
-          <h4 className="settings-panel-title">The details here become the firm's operating tone.</h4>
-          <p className="settings-screen-text">
-            If reminder timing is sloppy or collections language drifts, the product starts feeling improvised. This
-            screen should stay measured, clear, and visibly administrative.
-          </p>
-        </section>
+        {activeSection === "guardrails" ? (
+          <>
+            <section className="surface-card settings-panel">
+              <div className="settings-panel-head">
+                <div>
+                  <p className="settings-panel-kicker">Access framing</p>
+                  <h4 className="settings-panel-title">The line between firm defaults and individual preference</h4>
+                </div>
+              </div>
+
+              <div className="settings-rule-list">
+                <div className="settings-rule-item">
+                  <strong>Admin-owned</strong>
+                  <p>
+                    Firm identity, reminder cadence, user access, and billing defaults stay inside administrative
+                    control.
+                  </p>
+                </div>
+                <div className="settings-rule-item">
+                  <strong>Practitioner-owned</strong>
+                  <p>Personal profile, notification posture, and session hygiene live in the account screen.</p>
+                </div>
+                <div className="settings-rule-item">
+                  <strong>Firm-safe by default</strong>
+                  <p>
+                    Changes should never depend on a client-supplied firm identifier, and deactivated users keep history
+                    intact.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <section className="surface-card settings-panel settings-panel-accent">
+              <p className="settings-panel-kicker">Why this screen matters</p>
+              <h4 className="settings-panel-title">The details here become the firm's operating tone.</h4>
+              <p className="settings-screen-text">
+                If reminder timing is sloppy or collections language drifts, the product starts feeling improvised. This
+                screen should stay measured, clear, and visibly administrative.
+              </p>
+            </section>
+          </>
+        ) : null}
       </div>
     </div>
   );
