@@ -1,3 +1,8 @@
+"use client";
+
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
 import {
   AISuggestionsWidget,
   type AISuggestionPreview,
@@ -161,15 +166,27 @@ export function DashboardHome() {
 }
 
 function ActiveCasesTable({ items }: { items: DashboardCaseRow[] }) {
+  const [selectedType, setSelectedType] = useState("");
+  const router = useRouter();
+  const types = Array.from(new Set(items.map((item) => item.type))).sort();
+  const visibleItems = selectedType ? items.filter((item) => item.type === selectedType) : items;
+
   return (
     <section className="surface-card table-card">
       <div className="panel-header table-card-header">
         <h2 className="section-title">Active Cases</h2>
         <div className="inline-actions">
-          <button className="btn btn-ghost" type="button">
-            All Types
-          </button>
-          <button className="btn btn-primary" type="button">
+          <select
+            className="btn btn-ghost"
+            onChange={(e) => setSelectedType(e.target.value)}
+            value={selectedType}
+          >
+            <option value="">All Types</option>
+            {types.map((type) => (
+              <option key={type} value={type}>{type}</option>
+            ))}
+          </select>
+          <button className="btn btn-primary" onClick={() => router.push("/cases/new")} type="button">
             + New Case
           </button>
         </div>
@@ -186,7 +203,7 @@ function ActiveCasesTable({ items }: { items: DashboardCaseRow[] }) {
           <span aria-hidden="true" />
         </div>
 
-        {items.map((item) => {
+        {visibleItems.map((item) => {
           const isUrgent = item.deadline === "Feb 28" || item.deadline === "Mar 04";
 
           return (
@@ -211,6 +228,8 @@ function ActiveCasesTable({ items }: { items: DashboardCaseRow[] }) {
       <div className="table-footer">
         <span className="panel-link">View all 12 cases</span>
       </div>
+
+
     </section>
   );
 }
