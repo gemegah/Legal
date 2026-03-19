@@ -287,116 +287,6 @@ export function DocumentsWorkspaceClient({
   return (
     <section className={cn("documents-workspace", caseDetail && "is-case")}>
       <div className="surface-card documents-panel">
-<<<<<<< HEAD
-
-          {/* <div className="documents-panel-copy">
-            <p className="eyebrow-label">{caseDetail ? "Case Documents" : "Document Center"}</p>
-            <h2 className="case-title">{caseDetail ? `${caseDetail.reference} document workflow` : "Search-first document operations"}</h2>
-            <p className="documents-panel-subcopy">
-              {caseDetail
-                ? "Upload, classify, generate, and share case documents with provider-aware authoring."
-                : "Search, upload, classify, and share documents across active cases with OCR, AI review, and template automation."}
-            </p>
-          </div> */}
-          <div className="documents-panel-actions" style={{display: 'flex', alignSelf: 'end', paddingTop: 20, paddingRight: 20, paddingBottom: 12}}>
-            <Button onClick={() => setIsUploadOpen(true)} variant="ghost">Upload</Button>
-            <Button onClick={() => setIsGenerateOpen(true)}>Create from Template</Button>
-            <Button onClick={() => handleProvider("word")} variant="ghost">Open in Word</Button>
-            <Button onClick={() => handleProvider("google_docs")} variant="ghost">Open in Google Docs</Button>
-          </div>
-
-
-        <div className="documents-provider-strip" aria-label="Document provider status">
-          {providers.map((provider) => (
-            <div className="documents-provider-inline" key={provider.provider}>
-              <div className="documents-provider-inline-copy">
-                <span className="documents-provider-label">{provider.label}</span>
-                <span className={cn("workspace-pill", `is-${provider.status}`)}>{labelForProvider(provider.status)}</span>
-                <span className="case-inline-note">
-                  {provider.lastSyncedAt ? `Synced ${formatRelativeDate(provider.lastSyncedAt)}` : "No recent sync"}
-                </span>
-              </div>
-              {provider.status !== "connected" ? (
-                <Button onClick={() => handleProvider(provider.provider)} size="sm" variant="ghost">
-                  Connect
-                </Button>
-              ) : null}
-            </div>
-          ))}
-        </div>
-
-        {message ? <div className="documents-inline-alert">{message}</div> : null}
-
-        <div className="documents-tabs">
-          <TabButton active={activeTab === "all"} label="All Documents" onClick={() => setActiveTab("all")} />
-          <TabButton active={activeTab === "templates"} label="Templates" onClick={() => setActiveTab("templates")} />
-          <TabButton active={activeTab === "review"} label="Needs Review" onClick={() => setActiveTab("review")} />
-          <TabButton active={activeTab === "requests"} label="Requests" onClick={() => setActiveTab("requests")} />
-        </div>
-
-        {activeTab === "templates" ? (
-          <TemplateLibrary caseDetail={caseDetail} onGenerate={() => setIsGenerateOpen(true)} onNewTemplate={() => setIsTemplateOpen(true)} templates={templates} />
-        ) : (
-          <>
-            <div className="documents-filter-grid">
-              <label className="case-search-field documents-search-field" aria-label="Search documents">
-                <SearchIcon />
-                <input
-                  onChange={(event) => updateFilter("query", event.target.value)}
-                  placeholder={caseDetail ? "Search case documents..." : "Search documents, OCR text, tags..."}
-                  type="search"
-                  value={filters.query}
-                />
-              </label>
-              {!caseDetail ? (
-                <FilterSelect label="Case" onChange={(value) => updateFilter("caseId", value)} options={caseOptions} value={filters.caseId} />
-              ) : null}
-              <FilterSelect label="Type" onChange={(value) => updateFilter("documentType", value)} options={facetValues(documents, "documentType")} value={filters.documentType} />
-              <FilterSelect label="Source" onChange={(value) => updateFilter("sourceKind", value)} options={facetValues(documents, "sourceKind")} value={filters.sourceKind} />
-              {/* <FilterSelect label="AI" onChange={(value) => updateFilter("aiStatus", value)} options={facetValues(documents, "aiStatus")} value={filters.aiStatus} />
-              <FilterSelect label="OCR" onChange={(value) => updateFilter("ocrStatus", value)} options={facetValues(documents, "ocrStatus")} value={filters.ocrStatus} /> */}
-              <FilterSelect label="Share" onChange={(value) => updateFilter("sharedState", value)} options={[{ value: "shared", label: "Shared" }, { value: "internal", label: "Internal only" }]} value={filters.sharedState} />
-              <FilterSelect label="Requests" onChange={(value) => updateFilter("requestState", value)} options={facetValues(documents, "requestStatus").filter((item) => item.value !== "none")} value={filters.requestState} />
-            </div>
-
-            <div className="documents-table-shell">
-                <div className="documents-table-head">
-                  <span>Title</span>
-                  {!caseDetail ? <span>Case</span> : null}
-                  <span>Type</span>
-                  <span>Source</span>
-                  <span>Latest</span>
-                  <span>Shared / Request</span>
-                  <span>Updated</span>
-                  <span>Owner</span>
-                </div>
-
-                {filteredDocuments.length === 0 ? (
-                  <div className="documents-empty-state">
-                    <p className="section-title">No documents match the current workspace view.</p>
-                    <p className="placeholder-copy">Adjust your filters, create a document from a template, or upload a new file to populate the queue.</p>
-                  </div>
-                ) : (
-                  filteredDocuments.map((doc) => (
-                    <button
-                      className={cn("documents-row", selectedDocument?.id === doc.id && "is-selected")}
-                      key={doc.id}
-                      onClick={() => setSelectedDocumentId(doc.id)}
-                      onDoubleClick={() => pushMessage(doc.providerLink?.documentUrl ? "Opening provider-authored file." : "Opening LegalOS download.")}
-                      type="button"
-                    >
-                      <span><strong>{doc.title}</strong><small>{doc.tags.join(" - ")}</small></span>
-                      {!caseDetail ? <span>{doc.caseReference}<small>{doc.clientName}</small></span> : null}
-                      <span>{doc.documentType}</span>
-                      <span>{labelForSource(doc.sourceKind)}</span>
-                      <span>v{doc.latestVersionNumber}</span>
-                      <span>{doc.isClientShared ? "Shared" : "Internal"}<small>{labelForRequest(doc.requestStatus)}</small></span>
-                      <span>{formatRelativeDate(doc.updatedAt)}</span>
-                      <span>{doc.uploadedBy}</span>
-                    </button>
-                  ))
-                )}
-=======
         <div className="documents-shell-header">
           <div className="documents-shell-copy">
             <p className="eyebrow-label">{caseDetail ? "Case Documents" : "Document Center"}</p>
@@ -449,7 +339,6 @@ export function DocumentsWorkspaceClient({
                   Clear
                 </Button>
                 <Button onClick={() => { setFilters(draftFilters); setFilterOpen(false); }}>Apply filters</Button>
->>>>>>> 81e84e066009af2fee85762710f937943d479b6e
               </div>
             </div>
           ) : null}
@@ -538,65 +427,6 @@ function DocumentRow({
 
 function FilterSection({ label, onChange, options, value }: { label: string; onChange: (value: string) => void; options: Array<{ value: string; label: string }>; value: string }) {
   return (
-<<<<<<< HEAD
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-      <path d="M12 4L4 12M4 4l8 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function TemplateLibrary({
-  caseDetail,
-  onGenerate,
-  onNewTemplate,
-  templates,
-}: {
-  caseDetail?: CaseDetail | null;
-  onGenerate: () => void;
-  onNewTemplate: () => void;
-  templates: DocumentTemplate[];
-}) {
-  const [statusFilter, setStatusFilter] = useState<DocumentTemplateStatus | "all">("all");
-  const visibleTemplates = templates.filter((template) => {
-    if (statusFilter !== "all" && template.status !== statusFilter) return false;
-    if (!caseDetail) return true;
-    return template.caseTypes.includes(caseDetail.caseType) || template.practiceAreas.includes(caseDetail.practiceArea);
-  });
-
-  return (
-    <div className="documents-template-shell">
-      <div className="documents-template-toolbar" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-        <div className="documents-tabs" style={{borderWidth: 0}}>
-          <TabButton active={statusFilter === "all"} label="All" onClick={() => setStatusFilter("all")} />
-          <TabButton active={statusFilter === "active"} label="Active" onClick={() => setStatusFilter("active")} />
-          <TabButton active={statusFilter === "draft"} label="Draft" onClick={() => setStatusFilter("draft")} />
-        </div>
-        <div className="documents-template-actions">
-          <Button onClick={onNewTemplate} variant="ghost">New Template</Button>
-          <Button onClick={onGenerate}>Generate Document</Button>
-        </div>
-      </div>
-
-      <div className="documents-template-grid">
-        {visibleTemplates.map((template) => (
-          <div className="surface-card template-card" key={template.id}>
-            <div className="template-card-head">
-              <div>
-                <p className="eyebrow-label">{template.category}</p>
-                <h3 className="section-title">{template.name}</h3>
-              </div>
-              <span className={cn("workspace-pill", `is-${template.status}`)}>{template.status}</span>
-            </div>
-            <p className="placeholder-copy">{labelForSource(template.sourceKind)} - {template.defaultDocumentType} - {template.fields.length} mapped fields</p>
-            <div className="template-token-list">
-              {template.fields.map((field) => <span className="case-detail-chip" key={field.id}>{field.token}</span>)}
-            </div>
-            <div className="template-meta-grid">
-              <DetailBlock label="Owner" value={template.ownerName} />
-              <DetailBlock label="Updated" value={formatDate(template.updatedAt)} />
-            </div>
-          </div>
-=======
     <div className="documents-filter-section">
       <p className="documents-filter-label">{label}</p>
       <div className="documents-filter-options">
@@ -604,7 +434,6 @@ function TemplateLibrary({
           <button className={cn("documents-filter-option", value === option.value && "is-active")} key={option.value} onClick={() => onChange(option.value)} type="button">
             {option.label}
           </button>
->>>>>>> 81e84e066009af2fee85762710f937943d479b6e
         ))}
       </div>
     </div>
