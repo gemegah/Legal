@@ -9,22 +9,10 @@ import { cn, formatGHS } from "@/lib/utils";
 
 type PracticeSection = "identity" | "defaults" | "guardrails";
 
-const focusCards: Array<{
-  id: PracticeSection;
-  title: string;
-}> = [
-  {
-    id: "identity",
-    title: "Firm identity",
-  },
-  {
-    id: "defaults",
-    title: "Operational defaults",
-  },
-  {
-    id: "guardrails",
-    title: "Access boundary",
-  },
+const sections: Array<{ id: PracticeSection; title: string }> = [
+  { id: "identity", title: "Firm identity" },
+  { id: "defaults", title: "Operational defaults" },
+  { id: "guardrails", title: "Access boundary" },
 ];
 
 export function PracticeSettingsClient({ initialData }: { initialData: PracticeSettingsData }) {
@@ -46,7 +34,7 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
   }
 
   function focusSection(index: number) {
-    const target = focusCards[index];
+    const target = sections[index];
     if (!target) return;
     setActiveSection(target.id);
     tabRefs.current[index]?.focus();
@@ -55,25 +43,22 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
   function handleTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     if (event.key === "ArrowRight") {
       event.preventDefault();
-      focusSection((index + 1) % focusCards.length);
+      focusSection((index + 1) % sections.length);
       return;
     }
-
     if (event.key === "ArrowLeft") {
       event.preventDefault();
-      focusSection((index - 1 + focusCards.length) % focusCards.length);
+      focusSection((index - 1 + sections.length) % sections.length);
       return;
     }
-
     if (event.key === "Home") {
       event.preventDefault();
       focusSection(0);
       return;
     }
-
     if (event.key === "End") {
       event.preventDefault();
-      focusSection(focusCards.length - 1);
+      focusSection(sections.length - 1);
     }
   }
 
@@ -88,54 +73,48 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
         </div>
       ) : null}
 
-      <div className="settings-stat-grid">
-        <div className="surface-card settings-stat-card">
-          <span>Firm seats</span>
-          <strong>{initialData.seatCount}</strong>
-          <small>Current practitioner capacity for the workspace.</small>
-        </div>
-        <div className="surface-card settings-stat-card">
-          <span>Active cases</span>
-          <strong>{initialData.activeCases}</strong>
-          <small>Live work currently affected by reminder and access defaults.</small>
-        </div>
-        <div className="surface-card settings-stat-card">
-          <span>Collections target</span>
-          <strong>{formatGHS(initialData.monthlyCollectionsTargetGhs)}</strong>
-          <small>Monthly working target for the billing posture behind this workspace.</small>
-        </div>
-      </div>
-
-      <section className="surface-card settings-panel">
-        <div className="settings-panel-head">
-          <div>
-            <p className="settings-panel-kicker">Practice sections</p>
+        <div className="settings-screen-hero-rail">
+          <div className="surface-card settings-stat-card">
+            <span>Firm seats</span>
+            <strong>{initialData.seatCount}</strong>
+            <small>Current practitioner capacity.</small>
           </div>
-          <Badge tone={canEdit ? "info" : "warning"}>{canEdit ? "Local preview" : "Review mode"}</Badge>
+          <div className="surface-card settings-stat-card">
+            <span>Active cases</span>
+            <strong>{initialData.activeCases}</strong>
+            <small>Live work in scope for defaults.</small>
+          </div>
+          <div className="surface-card settings-stat-card">
+            <span>Collections target</span>
+            <strong>{formatGHS(initialData.monthlyCollectionsTargetGhs)}</strong>
+            <small>Monthly billing target.</small>
+          </div>
         </div>
 
+      <div className="settings-practice-nav">
         <div aria-label="Practice sections" className="settings-account-tabs" role="tablist">
-          {focusCards.map((card, index) => (
+          {sections.map((section, index) => (
             <button
-              aria-controls={`${tabsId}-${card.id}-panel`}
-              aria-selected={activeSection === card.id}
-              className={cn("settings-account-tab", activeSection === card.id && "is-active")}
-              id={`${tabsId}-${card.id}-tab`}
-              key={card.id}
-              onClick={() => setActiveSection(card.id)}
+              aria-controls={`${tabsId}-${section.id}-panel`}
+              aria-selected={activeSection === section.id}
+              className={cn("settings-account-tab", activeSection === section.id && "is-active")}
+              id={`${tabsId}-${section.id}-tab`}
+              key={section.id}
+              onClick={() => setActiveSection(section.id)}
               onKeyDown={(event) => handleTabKeyDown(event, index)}
               ref={(element) => {
                 tabRefs.current[index] = element;
               }}
               role="tab"
-              tabIndex={activeSection === card.id ? 0 : -1}
+              tabIndex={activeSection === section.id ? 0 : -1}
               type="button"
             >
-              <strong>{card.title}</strong>
+              <strong>{section.title}</strong>
             </button>
           ))}
         </div>
-      </section>
+        <Badge tone={canEdit ? "info" : "warning"}>{canEdit ? "Local preview" : "Review mode"}</Badge>
+      </div>
 
       <div
         aria-labelledby={activeTabButtonId}
@@ -149,14 +128,14 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
             <div className="settings-panel-head">
               <div>
                 <p className="settings-panel-kicker">Firm identity</p>
-                <h4 className="settings-panel-title">What practitioners and clients recognize first</h4>
+                <h4 className="settings-panel-title">What practitioners and clients recognise first</h4>
               </div>
-              <Button onClick={() => saveSection("Firm identity")} disabled={!canEdit} variant="ghost">
+              <Button onClick={() => saveSection("Firm identity")} disabled={!canEdit}>
                 Stage identity
               </Button>
             </div>
 
-            <div className="settings-form-grid">
+            <div className="settings-form-grid settings-form-grid-column">
               <Input
                 label="Workspace name"
                 name="workspaceName"
@@ -171,6 +150,9 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
                 onChange={(event) => updateField("legalName", event.target.value)}
                 disabled={!canEdit}
               />
+            </div>
+
+            <div className="settings-form-grid">
               <Input
                 label="Primary email"
                 name="primaryEmail"
@@ -262,17 +244,17 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
               </label>
             </section>
 
-            <section className="surface-card settings-panel">
-              <div className="settings-footnote-grid">
-                <div className="settings-footnote-card">
-                  <span>Payments</span>
+            <section className="surface-card settings-panel settings-panel-accent">
+              <p className="settings-panel-kicker">Billing constraints</p>
+              <h4 className="settings-panel-title">Fixed by the Ghana-first billing model</h4>
+              <div className="settings-rule-list">
+                <div className="settings-rule-item">
                   <strong>GHS only</strong>
-                  <small>Keep collection language aligned to the product's Ghana-first billing model.</small>
+                  <p>Keep collection language aligned to the product's Ghana-first billing model.</p>
                 </div>
-                <div className="settings-footnote-card">
-                  <span>Gateways</span>
+                <div className="settings-rule-item">
                   <strong>Hubtel + Paystack</strong>
-                  <small>Default copy should match the actual payment routes available in the product.</small>
+                  <p>Default copy should match the actual payment routes available in the product.</p>
                 </div>
               </div>
             </section>
