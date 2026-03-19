@@ -1,7 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+
+import { CaseTable } from "@/components/case/CaseTable";
+import { listMockCases } from "@/features/cases/data/mock";
+import type { CaseListItem } from "@/features/cases/types";
 
 import {
   AISuggestionsWidget,
@@ -10,16 +15,6 @@ import {
 import { RecentPayments, type RecentPaymentItem } from "./RecentPayments";
 import { StatCards, type DashboardStat } from "./StatCards";
 import { TodayDeadlines, type DeadlineItem } from "./TodayDeadlines";
-
-interface DashboardCaseRow {
-  id: string;
-  title: string;
-  type: string;
-  status: "active" | "pending" | "closed";
-  deadline: string;
-  lawyer: string;
-  unpaid: string;
-}
 
 const stats: DashboardStat[] = [
   { label: "Active Cases", value: "12", subtext: "+2 this week", tone: "default" },
@@ -33,27 +28,27 @@ const deadlines: DeadlineItem[] = [
     time: "09:00",
     label: "Hearing - Asante v. Mensah Industries",
     type: "hearing",
-    case: "CAS-0041",
+    case: "CAS-2026-014",
     urgent: true,
   },
   {
     time: "12:00",
-    label: "Filing deadline - GCB Bank affidavit",
+    label: "Filing deadline - Ayitey Employment",
     type: "filing",
-    case: "CAS-0035",
+    case: "CAS-2026-007",
     urgent: true,
   },
   {
     time: "14:30",
-    label: "Client call - Accra Properties Ltd",
+    label: "Client call - Volta Ridge Developers",
     type: "meeting",
-    case: "CAS-0039",
+    case: "CAS-2026-009",
   },
   {
     time: "16:00",
-    label: "Invoice review - Darko brief",
+    label: "Invoice review - CediCore brief",
     type: "billing",
-    case: "CAS-0037",
+    case: "CAS-2026-006",
   },
 ];
 
@@ -61,14 +56,14 @@ const aiSuggestions: AISuggestionPreview[] = [
   {
     id: 1,
     category: "deadline",
-    label: "Court order uploaded to CAS-0041",
+    label: "Court order uploaded to CAS-2026-014",
     suggestion:
       "2 new deadlines extracted for review: hearing on Mar 15 and filing on Mar 22.",
   },
   {
     id: 2,
     category: "invoice",
-    label: "Invoice draft ready for CAS-0035",
+    label: "Invoice draft ready for CAS-2026-007",
     suggestion:
       "4 time entries were grouped into a GHS 6,500 draft with a billing narrative.",
   },
@@ -98,53 +93,7 @@ const recentPayments: RecentPaymentItem[] = [
   },
 ];
 
-const cases: DashboardCaseRow[] = [
-  {
-    id: "CAS-0041",
-    title: "Asante v. Mensah Industries Ltd",
-    type: "Commercial Litigation",
-    status: "active",
-    deadline: "Feb 28",
-    lawyer: "K. Boateng",
-    unpaid: "GHS 4,200",
-  },
-  {
-    id: "CAS-0039",
-    title: "Re: Accra Properties Ltd Acquisition",
-    type: "Conveyancing",
-    status: "active",
-    deadline: "Mar 04",
-    lawyer: "A. Owusu",
-    unpaid: "GHS 0",
-  },
-  {
-    id: "CAS-0037",
-    title: "Republic v. Kwame Darko",
-    type: "Criminal Defence",
-    status: "pending",
-    deadline: "Mar 12",
-    lawyer: "K. Boateng",
-    unpaid: "GHS 1,800",
-  },
-  {
-    id: "CAS-0035",
-    title: "GCB Bank Employment Dispute",
-    type: "Employment",
-    status: "active",
-    deadline: "Mar 19",
-    lawyer: "E. Nkrumah",
-    unpaid: "GHS 6,500",
-  },
-  {
-    id: "CAS-0033",
-    title: "Ofori Family Estate",
-    type: "Probate",
-    status: "closed",
-    deadline: "-",
-    lawyer: "A. Owusu",
-    unpaid: "GHS 0",
-  },
-];
+const previewCases: CaseListItem[] = listMockCases().slice(0, 5);
 
 export function DashboardHome() {
   return (
@@ -160,76 +109,57 @@ export function DashboardHome() {
         </div>
       </section>
 
-      <ActiveCasesTable items={cases} />
+      <ActiveCasesTable items={previewCases} />
     </div>
   );
 }
 
-function ActiveCasesTable({ items }: { items: DashboardCaseRow[] }) {
+function ActiveCasesTable({ items }: { items: CaseListItem[] }) {
   const [selectedType, setSelectedType] = useState("");
   const router = useRouter();
-  const types = Array.from(new Set(items.map((item) => item.type))).sort();
-  const visibleItems = selectedType ? items.filter((item) => item.type === selectedType) : items;
+  const types = Array.from(new Set(items.map((item) => item.caseType))).sort();
+  const visibleItems = selectedType
+    ? items.filter((item) => item.caseType === selectedType)
+    : items;
 
   return (
-    <section className="surface-card table-card">
+    <section className="table-card">
       <div className="panel-header table-card-header">
         <h2 className="section-title">Active Cases</h2>
         <div className="inline-actions">
-          <select
-            className="btn btn-ghost"
-            onChange={(e) => setSelectedType(e.target.value)}
-            value={selectedType}
-          >
-            <option value="">All Types</option>
-            {types.map((type) => (
-              <option key={type} value={type}>{type}</option>
-            ))}
-          </select>
+          <label className="btn btn-ghost filter-select-field">
+            <FilterIcon />
+            <select
+              onChange={(e) => setSelectedType(e.target.value)}
+              value={selectedType}
+            >
+              <option value="">All Types</option>
+              {types.map((type) => (
+                <option key={type} value={type}>{type}</option>
+              ))}
+            </select>
+          </label>
           <button className="btn btn-primary" onClick={() => router.push("/cases/new")} type="button">
             + New Case
           </button>
         </div>
       </div>
 
-      <div className="data-table">
-        <div className="table-row table-head">
-          <span>Ref</span>
-          <span>Case</span>
-          <span>Type</span>
-          <span>Status</span>
-          <span>Deadline</span>
-          <span>Unpaid</span>
-          <span aria-hidden="true" />
-        </div>
-
-        {visibleItems.map((item) => {
-          const isUrgent = item.deadline === "Feb 28" || item.deadline === "Mar 04";
-
-          return (
-            <div className="table-row table-body" key={item.id}>
-              <span className="table-ref">{item.id}</span>
-              <div>
-                <p className="row-title">{item.title}</p>
-                <p className="row-meta">{item.lawyer}</p>
-              </div>
-              <span className="table-copy">{item.type}</span>
-              <span className={`status-pill status-${item.status}`}>{item.status}</span>
-              <span className={`table-copy${isUrgent ? " is-urgent" : ""}`}>
-                {item.deadline}
-              </span>
-              <span className="table-copy">{item.unpaid}</span>
-              <span className="table-chevron">{">"}</span>
-            </div>
-          );
-        })}
-      </div>
+      <CaseTable items={visibleItems} />
 
       <div className="table-footer">
-        <span className="panel-link">View all 12 cases</span>
+        <Link className="panel-link" href="/cases">View all cases</Link>
       </div>
-
-
     </section>
+  );
+}
+
+function FilterIcon() {
+  return (
+    <svg aria-hidden="true" fill="none" stroke="currentColor" strokeLinecap="round" strokeWidth="1.5" viewBox="0 0 16 16">
+      <line x1="2" x2="14" y1="4" y2="4" />
+      <line x1="4" x2="12" y1="8" y2="8" />
+      <line x1="6" x2="10" y1="12" y2="12" />
+    </svg>
   );
 }

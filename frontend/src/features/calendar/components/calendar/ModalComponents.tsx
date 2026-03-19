@@ -59,10 +59,12 @@ export function EventDetailModal({
               <div className="avatar-circle">ML</div>
             </div>
             <span className="attendee-count">3 members</span>
-            <button className="btn-join" type="button">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{width: 14, height: 14}}><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
-              Join Meeting
-            </button>
+            {event.meetingUrl ? (
+              <a className="btn-join" href={event.meetingUrl} rel="noopener noreferrer" target="_blank">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{width: 14, height: 14}}><path d="m22 8-6 4 6 4V8Z"/><rect width="14" height="12" x="2" y="6" rx="2" ry="2"/></svg>
+                Join Meeting
+              </a>
+            ) : null}
           </div>
 
           {/* Info Rows */}

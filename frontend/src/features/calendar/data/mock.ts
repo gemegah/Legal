@@ -37,6 +37,7 @@ const mockEvents: CalendarEventItem[] = [
     status: "confirmed",
     urgency: "normal",
     location: "Litigation pod",
+    meetingUrl: "https://meet.google.com/ufj-tzvt-viy",
     source: "manual",
     reminders: [{ id: "evt-002-rem-1", label: "30 minutes before", offsetMinutes: 30, channels: ["in_app"] }],
   },
