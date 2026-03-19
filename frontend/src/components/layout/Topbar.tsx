@@ -44,6 +44,7 @@ export function Topbar() {
   const pathname = usePathname();
   const meta =
     routeMeta.find((entry) => entry.match(pathname)) ?? routeMeta[0];
+  const isTaskWorkspace = pathname === "/tasks" || pathname.endsWith("/tasks");
 
   return (
     <header className="app-topbar">
@@ -53,10 +54,12 @@ export function Topbar() {
       </div>
 
       <div className="topbar-actions">
-        <label className="topbar-search" aria-label="Search">
-          <SearchIcon />
-          <input type="search" placeholder="Search cases, clients..." />
-        </label>
+        {isTaskWorkspace ? null : (
+          <label className="topbar-search" aria-label="Search">
+            <SearchIcon />
+            <input type="search" placeholder="Search cases, clients..." />
+          </label>
+        )}
 
         <button className="icon-button" type="button" aria-label="Notifications">
           <BellIcon />
