@@ -2,12 +2,16 @@
 @import "./foundation.css";
 
 .app-shell {
-  display: flex;
   height: 100vh;
   overflow: hidden;
   background: var(--color-bg);
 }
 .app-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  height: 100vh;
   width: var(--sidebar-width);
   flex-shrink: 0;
   display: flex;
@@ -16,7 +20,7 @@
   padding: var(--space-4) 10px;
   background: var(--color-forest);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
-  overflow-y: auto;
+  overflow: hidden;
 }
 .brand-block {
   padding: 4px 8px 18px;
@@ -138,7 +142,9 @@
 }
 .app-main {
   display: flex;
-  flex: 1;
+  width: calc(100vw - var(--sidebar-width));
+  height: 100vh;
+  margin-left: var(--sidebar-width);
   min-width: 0;
   min-height: 0;
   flex-direction: column;
@@ -1383,6 +1389,7 @@
   display: flex;
   align-items: center;
   gap: 2px;
+  min-height: 34px;
   padding: 3px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-pill);
@@ -1390,12 +1397,16 @@
 }
 
 .task-view-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
   min-height: 30px;
   padding: 0 12px;
   border-radius: var(--radius-pill);
   color: var(--color-ink-mid);
   cursor: pointer;
-  font-size: var(--text-sm);
+  font-size: 0.875rem;
   font-weight: 500;
   transition: var(--transition-fast);
 }
@@ -1407,8 +1418,11 @@
 
 /* Assigned to Me chip */
 .task-chip-button {
-  min-height: 32px;
-  padding: 0 13px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 0 14px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--color-border);
   background: transparent;
@@ -1655,8 +1669,9 @@
 .task-empty-state {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 28px 22px;
+  align-items: center;
+  gap: 8px;
+  padding: 24px 22px;
   border: 1px dashed rgba(201, 150, 58, 0.3);
   border-radius: var(--radius-lg);
   background: linear-gradient(
@@ -1664,6 +1679,7 @@
     rgba(253, 243, 224, 0.4),
     rgba(255, 255, 255, 0.9)
   );
+  text-align: center;
 }
 
 .task-card-stack {
@@ -1715,16 +1731,18 @@
 .task-board-shell {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
+  padding: 16px 20px 20px;
   overflow-x: auto;
+  align-items: start;
 }
 
 .task-board-column {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   min-width: 260px;
-  padding: 14px;
+  padding: 16px;
   border: 1px solid var(--color-border);
   border-radius: var(--radius-lg);
   background: linear-gradient(
@@ -1751,12 +1769,24 @@
 }
 
 .task-board-column-head,
-.task-board-card-head,
 .task-board-card-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+}
+
+.task-board-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.task-board-column-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .task-board-column-title {
@@ -1775,15 +1805,15 @@
 .task-board-column-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   min-height: 300px;
 }
 
 .task-board-card {
   display: flex;
   flex-direction: column;
-  gap: 10px;
-  padding: 14px;
+  gap: 12px;
+  padding: 16px;
   border: 1px solid rgba(11, 45, 30, 0.08);
   border-radius: 10px;
   background: var(--color-white);
@@ -1795,13 +1825,36 @@
   cursor: grabbing;
 }
 
+.task-board-card-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-left: auto;
+}
+
 .task-board-card-title {
   font-size: 0.9375rem;
+  line-height: 1.4;
 }
 
 .task-board-card-meta {
   color: var(--color-ink-light);
   font-size: var(--text-sm);
+  padding-top: 4px;
+  flex-wrap: wrap;
+}
+
+.task-board-assignee {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.task-board-unassigned {
+  color: var(--color-ink-light);
+  font-size: 0.8125rem;
+  font-style: italic;
 }
 
 .task-board-empty {
@@ -3219,7 +3272,18 @@
     overflow: visible;
   }
   .app-sidebar {
+    position: static;
+    top: auto;
+    left: auto;
+    bottom: auto;
+    height: auto;
     width: 100%;
+    overflow: visible;
+  }
+  .app-main {
+    width: 100%;
+    height: auto;
+    margin-left: 0;
   }
   .calendar-board-shell {
     display: none;
