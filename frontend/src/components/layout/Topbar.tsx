@@ -2,11 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 const routeMeta = [
   {
-    match: (pathname: string) => pathname === "/",
+    match: (pathname: string) => pathname === "/dashboard",
     title: "Good morning, Kwame.",
     subtitle: "Thursday, 27 February 2025 - 4 items need attention today",
   },
@@ -65,6 +65,7 @@ const mockNotifications = [
 
 export function Topbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const meta = routeMeta.find((entry) => entry.match(pathname)) ?? routeMeta[0];
   const isTaskWorkspace = pathname === "/tasks" || pathname.endsWith("/tasks");
 
@@ -88,6 +89,12 @@ export function Topbar() {
   }, []);
 
   const unreadCount = mockNotifications.filter((n) => n.unread).length;
+
+  function handleSignOut() {
+    setProfileOpen(false);
+    setNotifOpen(false);
+    router.replace("/login");
+  }
 
   return (
     <header className="app-topbar">
@@ -160,7 +167,7 @@ export function Topbar() {
                   </Link>
                 </li>
                 <li>
-                  <button className="profile-menu-item is-danger" type="button">
+                  <button className="profile-menu-item is-danger" onClick={handleSignOut} type="button">
                     Sign Out
                   </button>
                 </li>

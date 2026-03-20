@@ -11,7 +11,7 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-  { href: "/", label: "Dashboard", icon: DashboardIcon },
+  { href: "/dashboard", label: "Dashboard", icon: DashboardIcon },
   { href: "/cases", label: "Cases", icon: CasesIcon },
   { href: "/tasks", label: "Tasks", icon: TaskIcon },
   { href: "/calendar", label: "Calendar", icon: CalendarIcon },
@@ -74,10 +74,6 @@ export function Sidebar() {
 }
 
 function isActive(pathname: string, href: string) {
-  if (href === "/") {
-    return pathname === "/";
-  }
-
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 

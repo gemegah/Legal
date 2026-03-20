@@ -1,8 +1,19 @@
+"use client";
+
 import Link from "next/link";
+import type { FormEvent } from "react";
+import { useRouter } from "next/navigation";
 
 import { Badge, Button, Input } from "@/components/ui";
 
 export default function Page() {
+  const router = useRouter();
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    router.push("/dashboard");
+  }
+
   return (
     <main className="auth-shell">
       <section className="auth-panel auth-panel-primary">
@@ -32,7 +43,7 @@ export default function Page() {
             </p>
           </div>
 
-          <form className="auth-form">
+          <form className="auth-form" onSubmit={handleSubmit}>
             <Input autoComplete="email" label="Work email" name="email" placeholder="partner@akosialaw.com" type="email" />
             <Input
               autoComplete="current-password"
@@ -42,7 +53,7 @@ export default function Page() {
               placeholder="Enter your password"
               type="password"
             />
-            <Button variant="primary">Continue to dashboard</Button>
+            <Button type="submit" variant="primary">Continue to dashboard</Button>
           </form>
 
           <div className="starter-actions">

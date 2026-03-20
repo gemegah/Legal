@@ -98,6 +98,24 @@ const previewCases: CaseListItem[] = listMockCases().slice(0, 5);
 export function DashboardHome() {
   return (
     <div className="dashboard-shell">
+      <section className="panel-card surface-card">
+        <div className="panel-header">
+          <div>
+            <p className="eyebrow-label">Workspace ready</p>
+            <h2 className="section-title">Everything due today is already in view.</h2>
+            <p className="muted-copy">
+              Review deadlines, billing activity, and AI suggestions, or sign out to return to the staff login screen.
+            </p>
+          </div>
+
+          <div className="button-row">
+            <Link className="btn btn-ghost" href="/login">
+              Sign Out
+            </Link>
+          </div>
+        </div>
+      </section>
+
       <StatCards items={stats} />
 
       <section className="dashboard-grid">
