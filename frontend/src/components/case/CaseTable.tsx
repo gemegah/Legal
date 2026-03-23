@@ -39,7 +39,7 @@ export function CaseTable({ items }: CaseTableProps) {
             <span className="table-ref">{item.reference}</span>
             <div className="case-list-primary">
               <p className="row-title">{item.title}</p>
-              <p className="row-meta">{item.caseType}</p>
+              <p className="row-meta">{item.caseType} &nbsp;·&nbsp; {item.practiceArea}</p>
             </div>
             <span className="table-copy">{item.clientName}</span>
             <span className="table-copy">{item.leadLawyerName}</span>

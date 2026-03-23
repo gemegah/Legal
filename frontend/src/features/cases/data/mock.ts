@@ -43,7 +43,7 @@ const mockCases: CaseListItem[] = [
     leadLawyerName: "Kweku Biney",
     nextDeadlineAt: "2026-03-05T14:00:00Z",
     unpaidBalanceGhs: 0,
-    assignedToMe: true,
+    assignedToMe: false,
   },
   {
     id: "case-2026-007",
@@ -121,7 +121,7 @@ const mockCases: CaseListItem[] = [
     leadLawyerName: "Naa Korkor Abbey",
     nextDeadlineAt: "2026-03-08T13:00:00Z",
     unpaidBalanceGhs: 9900,
-    assignedToMe: true,
+    assignedToMe: false,
   },
   {
     id: "case-2026-001",
