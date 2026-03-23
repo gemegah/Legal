@@ -1,8 +1,5 @@
-"use client";
-
 import type { ReactElement } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 
 interface NavItem {
   href: string;
@@ -19,8 +16,8 @@ const navItems: NavItem[] = [
   { href: "/billing", label: "Billing", icon: BillingIcon },
 ];
 
-export function Sidebar() {
-  const pathname = usePathname();
+export function Sidebar({ activeHref }: { activeHref: string }) {
+  const pathname = activeHref;
 
   return (
     <aside className="app-sidebar">

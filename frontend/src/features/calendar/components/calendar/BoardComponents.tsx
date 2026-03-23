@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { cn, formatDate } from "@/lib/utils";
 import type { CalendarEventItem } from "@/features/calendar/types";
 import { 
@@ -47,7 +47,7 @@ export function WeekBoard({
             const hour = hourStart + i;
             const isNowInHour = isNowMarkerInHour(hour);
             return (
-              <div className="calendar-time-slot" key={i}>
+              <div className="calendar-time-slot" key={hourStart + i}>
                 {formatHourLabel(hour)}
                 {isNowInHour && (
                   <div className="calendar-time-marker-now" style={{ top: `${(nowMarker.getUTCMinutes() / 60) * 100}%` }}>
@@ -89,26 +89,31 @@ export function DayColumn({
     ? ((nowMarker.getUTCHours() + nowMarker.getUTCMinutes() / 60 - hourStart) / hourCount) * 100 
     : null;
 
-  const eventLanes: Record<string, number> = {};
-  const sorted = [...events].sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime());
+  const { eventLanes, maxLanes } = useMemo(() => {
+    const parsed = new Map(
+      events.map((e) => [e.id, { start: new Date(e.startsAt).getTime(), end: new Date(e.endsAt).getTime() }])
+    );
+    const sorted = [...events].sort((a, b) => parsed.get(a.id)!.start - parsed.get(b.id)!.start);
+    const lanes: Record<string, number> = {};
 
-  sorted.forEach((event) => {
-    let lane = 0;
-    while (true) {
-      const collision = sorted.find((other) => {
-        if (eventLanes[other.id] !== lane) return false;
-        if (other.id === event.id) return false;
-        return (
-          new Date(event.startsAt) < new Date(other.endsAt) && new Date(event.endsAt) > new Date(other.startsAt)
-        );
-      });
-      if (!collision) break;
-      lane++;
-    }
-    eventLanes[event.id] = lane;
-  });
+    sorted.forEach((event) => {
+      const { start, end } = parsed.get(event.id)!;
+      let lane = 0;
+      while (true) {
+        const collision = sorted.find((other) => {
+          if (lanes[other.id] !== lane) return false;
+          if (other.id === event.id) return false;
+          const o = parsed.get(other.id)!;
+          return start < o.end && end > o.start;
+        });
+        if (!collision) break;
+        lane++;
+      }
+      lanes[event.id] = lane;
+    });
 
-  const maxLanes = Math.max(0, ...Object.values(eventLanes)) + 1;
+    return { eventLanes: lanes, maxLanes: Math.max(0, ...Object.values(lanes)) + 1 };
+  }, [events]);
 
   return (
     <div className={cn("calendar-vertical-content", isToday && "is-today")}>
@@ -180,7 +185,7 @@ export function DayBoard({
             const hour = hourStart + i;
             const isNowInHour = isNowMarkerInHour(hour) && isSameDay(day, nowMarker);
             return (
-              <div className="calendar-time-slot" key={i}>
+              <div className="calendar-time-slot" key={hourStart + i}>
                 {formatHourLabel(hour)}
                 {isNowInHour && (
                   <div className="calendar-time-marker-now" style={{ top: `${(nowMarker.getUTCMinutes() / 60) * 100}%` }}>

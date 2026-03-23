@@ -30,7 +30,7 @@ export function TodayDeadlines({ items }: TodayDeadlinesProps) {
       <div className="stack-list">
         {items.map((item) => (
           <div
-            key={`${item.time}-${item.label}`}
+            key={`${item.case}-${item.time}-${item.label}`}
             className={`deadline-row${item.urgent ? " is-urgent" : ""}`}
           >
             <div className="deadline-time">{item.time}</div>

@@ -31,6 +31,40 @@ export default function Page() {
           <li>AI drafts remain review-first and clearly separated from saved records.</li>
           <li>Client billing and document access stay tied to the same case audit trail.</li>
         </ul>
+
+        {/* Bottom-right radial vignette */}
+        <div className="auth-panel-vignette" />
+
+        {/* Decorative compass-rose / legal-seal motif */}
+        <div className="auth-decoration" aria-hidden="true">
+          <svg viewBox="0 0 480 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Outer ring */}
+            <circle cx="240" cy="240" r="230" stroke="currentColor" strokeWidth="0.8" />
+            {/* Mid ring */}
+            <circle cx="240" cy="240" r="180" stroke="currentColor" strokeWidth="0.5" />
+            {/* Inner ring */}
+            <circle cx="240" cy="240" r="120" stroke="currentColor" strokeWidth="0.5" />
+            {/* Small center ring */}
+            <circle cx="240" cy="240" r="48" stroke="currentColor" strokeWidth="0.8" />
+            {/* Center dot */}
+            <circle cx="240" cy="240" r="3" fill="currentColor" />
+            {/* Cardinal radial lines */}
+            <line x1="240" y1="10" x2="240" y2="470" stroke="currentColor" strokeWidth="0.5" />
+            <line x1="10" y1="240" x2="470" y2="240" stroke="currentColor" strokeWidth="0.5" />
+            {/* Diagonal cardinal lines */}
+            <line x1="77" y1="77" x2="403" y2="403" stroke="currentColor" strokeWidth="0.4" />
+            <line x1="403" y1="77" x2="77" y2="403" stroke="currentColor" strokeWidth="0.4" />
+            {/* Tick marks at 30-degree intervals on outer ring */}
+            {[0, 30, 60, 90, 120, 150, 180, 210, 240, 270, 300, 330].map((deg) => {
+              const rad = (deg * Math.PI) / 180;
+              const x1 = 240 + 230 * Math.cos(rad - Math.PI / 2);
+              const y1 = 240 + 230 * Math.sin(rad - Math.PI / 2);
+              const x2 = 240 + 218 * Math.cos(rad - Math.PI / 2);
+              const y2 = 240 + 218 * Math.sin(rad - Math.PI / 2);
+              return <line key={deg} x1={x1} y1={y1} x2={x2} y2={y2} stroke="currentColor" strokeWidth="0.8" />;
+            })}
+          </svg>
+        </div>
       </section>
 
       <section className="auth-panel auth-panel-secondary">

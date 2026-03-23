@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { CaseCard } from "@/components/case/CaseCard";
@@ -37,9 +37,10 @@ export function CasesWorkspaceClient({
   const deferredSearchQuery = useDeferredValue(searchQuery);
   const query = deferredSearchQuery.trim().toLowerCase();
 
-  const practiceAreas = Array.from(
-    new Set(initialCases.map((c) => c.practiceArea).filter(Boolean))
-  ).sort();
+  const practiceAreas = useMemo(
+    () => Array.from(new Set(initialCases.map((c) => c.practiceArea).filter(Boolean))).sort(),
+    [initialCases]
+  );
 
   const filteredCases = initialCases.filter((item) => {
     if (activeFilter !== "all" && item.status !== activeFilter) {

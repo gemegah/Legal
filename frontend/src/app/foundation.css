@@ -260,7 +260,81 @@ button { background: none; border: none; }
   gap: 22px;
 }
 .auth-panel-primary {
-  color: rgba(255, 255, 255, 0.88);
+  color: rgba(255, 255, 255, 0.96);
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at top left, rgba(201, 150, 58, 0.18), transparent 38%),
+    linear-gradient(145deg, rgba(22, 72, 46, 1) 0%, rgba(32, 90, 58, 0.98) 60%, rgba(18, 58, 38, 1) 100%);
+}
+
+/* Dot-grid artistic layer */
+.auth-panel-primary::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, rgba(201, 150, 58, 0.35) 1.5px, transparent 1.5px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Diagonal hatching layer */
+.auth-panel-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    -52deg,
+    rgba(201, 150, 58, 0.12) 0px,
+    rgba(201, 150, 58, 0.12) 1px,
+    transparent 1px,
+    transparent 44px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Lift content children above the pseudo-element layers.
+   Decorative divs (.auth-decoration, .auth-panel-vignette) are
+   excluded — they manage their own absolute positioning. */
+.auth-panel-primary > *:not(.auth-decoration):not(.auth-panel-vignette) {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure all text inside the primary panel is readable on the lighter green */
+.auth-panel-primary .starter-copy {
+  color: rgba(255, 255, 255, 0.78);
+}
+.auth-panel-primary .starter-list li {
+  color: rgba(255, 255, 255, 0.72);
+}
+.auth-panel-primary .starter-list li::before {
+  background: rgba(201, 150, 58, 0.7);
+  border-color: rgba(201, 150, 58, 0.4);
+}
+
+/* Decorative compass-rose motif */
+.auth-decoration {
+  position: absolute;
+  bottom: -80px;
+  right: -80px;
+  width: 480px;
+  height: 480px;
+  color: rgba(201, 150, 58, 0.22);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Bottom-right radial vignette — adds depth to the lower corner */
+.auth-panel-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 100% 100%, rgba(0, 0, 0, 0.28) 0%, transparent 60%);
+  pointer-events: none;
+  z-index: 0;
 }
 .auth-brand {
   color: var(--color-gold-light);
@@ -289,18 +363,65 @@ button { background: none; border: none; }
 .landing-shell {
   min-height: 100vh;
   padding: 26px 22px 0;
+  position: relative;
+  overflow: hidden;
   background:
     linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(250, 248, 243, 1)),
     radial-gradient(circle at top right, rgba(42, 165, 196, 0.1), transparent 24%),
     radial-gradient(circle at left top, rgba(201, 150, 58, 0.1), transparent 22%);
 }
 
+/* Legal document ruling lines */
+.landing-shell::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    180deg,
+    transparent 0px,
+    transparent 47px,
+    rgba(11, 45, 30, 0.028) 47px,
+    rgba(11, 45, 30, 0.028) 48px
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Scales of justice — top-right anchor */
+.landing-bg-scales {
+  position: absolute;
+  top: -40px;
+  right: -80px;
+  width: 640px;
+  height: 720px;
+  color: rgba(11, 45, 30, 0.055);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Section mark — lower-left typographic accent */
+.landing-bg-section-mark {
+  position: absolute;
+  bottom: 18%;
+  left: -20px;
+  font-family: var(--font-display);
+  font-size: 420px;
+  font-weight: 500;
+  line-height: 1;
+  color: rgba(201, 150, 58, 0.045);
+  pointer-events: none;
+  user-select: none;
+  z-index: 0;
+}
+
 .landing-frame {
+  position: relative;
+  z-index: 1;
   width: min(1220px, 100%);
   margin: 0 auto;
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 40px;
 }
 
 .landing-showcase-section,
@@ -398,7 +519,7 @@ button { background: none; border: none; }
   grid-template-columns: minmax(0, 1.05fr) minmax(420px, 0.95fr);
   gap: 28px;
   align-items: center;
-  padding: 24px 6px 6px;
+  padding: 56px 6px 24px;
 }
 
 .landing-hero-copy {
@@ -755,7 +876,7 @@ button { background: none; border: none; }
 .landing-cta-band,
 .landing-footer-inner {
   border-radius: 30px;
-  padding: 30px;
+  padding: 48px;
 }
 
 .landing-performance-section,
@@ -1319,7 +1440,7 @@ button { background: none; border: none; }
   .landing-cta-band,
   .landing-footer-inner,
   .landing-stage-card {
-    padding: 22px;
+    padding: 28px;
   }
   .landing-nav,
   .landing-section-head,

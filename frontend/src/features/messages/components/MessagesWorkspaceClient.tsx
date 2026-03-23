@@ -475,8 +475,8 @@ export function MessagesWorkspaceClient({ initialData }: { initialData: Messages
                     <div className="messages-meta-card">
                       <h4 className="section-title">Linked references</h4>
                       <div className="messages-reference-list">
-                        {selectedThread.linkedDocumentLabels.map((label) => (
-                          <span className="messages-chip" key={label}>
+                        {selectedThread.linkedDocumentLabels.map((label, i) => (
+                          <span className="messages-chip" key={`${label}-${i}`}>
                             {label}
                           </span>
                         ))}

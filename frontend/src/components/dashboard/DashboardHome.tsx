@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -135,7 +135,7 @@ export function DashboardHome() {
 function ActiveCasesTable({ items }: { items: CaseListItem[] }) {
   const [selectedType, setSelectedType] = useState("");
   const router = useRouter();
-  const types = Array.from(new Set(items.map((item) => item.caseType))).sort();
+  const types = useMemo(() => Array.from(new Set(items.map((item) => item.caseType))).sort(), [items]);
   const visibleItems = selectedType
     ? items.filter((item) => item.caseType === selectedType)
     : items;

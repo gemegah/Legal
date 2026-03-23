@@ -130,9 +130,7 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
                 <p className="settings-panel-kicker">Firm identity</p>
                 <h4 className="settings-panel-title">What practitioners and clients recognise first</h4>
               </div>
-              <Button onClick={() => saveSection("Firm identity")} disabled={!canEdit}>
-                Stage identity
-              </Button>
+              
             </div>
 
             <div className="settings-form-grid settings-form-grid-column">
@@ -193,6 +191,9 @@ export function PracticeSettingsClient({ initialData }: { initialData: PracticeS
                 </select>
               </label>
             </div>
+            <Button onClick={() => saveSection("Firm identity")} disabled={!canEdit}>
+                Stage identity
+              </Button>
           </section>
         ) : null}
 

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 
 const routeMeta = [
@@ -75,18 +75,19 @@ export function Topbar() {
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
-        setNotifOpen(false);
-      }
-      if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setProfileOpen(false);
-      }
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (notifRef.current && !notifRef.current.contains(e.target as Node)) {
+      setNotifOpen(false);
     }
+    if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+      setProfileOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
+  }, [handleClickOutside]);
 
   const unreadCount = mockNotifications.filter((n) => n.unread).length;
 

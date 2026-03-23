@@ -160,6 +160,49 @@ const footerColumns = [
 export default function HomePage() {
   return (
     <main className="landing-shell">
+
+      {/* Scales of Justice — geometric background motif */}
+      <div className="landing-bg-scales" aria-hidden="true">
+        <svg viewBox="0 0 640 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+          {/* Top ornament ring */}
+          <circle cx="320" cy="90" r="18" stroke="currentColor" strokeWidth="1.5" />
+          <circle cx="320" cy="90" r="8" fill="currentColor" />
+          {/* Central pole */}
+          <line x1="320" y1="108" x2="320" y2="600" stroke="currentColor" strokeWidth="2" />
+          {/* Balance arm */}
+          <line x1="100" y1="210" x2="540" y2="210" stroke="currentColor" strokeWidth="1.8" />
+          {/* Pivot cap */}
+          <circle cx="320" cy="210" r="7" fill="currentColor" />
+          {/* Left suspension lines */}
+          <line x1="120" y1="210" x2="100" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
+          <line x1="100" y1="210" x2="80" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
+          <line x1="140" y1="210" x2="120" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
+          {/* Right suspension lines */}
+          <line x1="500" y1="210" x2="520" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
+          <line x1="520" y1="210" x2="540" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
+          <line x1="480" y1="210" x2="500" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
+          {/* Left pan */}
+          <path d="M55 362 Q100 382 145 362" stroke="currentColor" strokeWidth="1.8" fill="none" />
+          <line x1="55" y1="362" x2="145" y2="362" stroke="currentColor" strokeWidth="1" />
+          {/* Right pan */}
+          <path d="M475 362 Q520 382 565 362" stroke="currentColor" strokeWidth="1.8" fill="none" />
+          <line x1="475" y1="362" x2="565" y2="362" stroke="currentColor" strokeWidth="1" />
+          {/* Base plinth */}
+          <line x1="220" y1="600" x2="420" y2="600" stroke="currentColor" strokeWidth="2" />
+          <line x1="240" y1="620" x2="400" y2="620" stroke="currentColor" strokeWidth="1.5" />
+          <line x1="260" y1="636" x2="380" y2="636" stroke="currentColor" strokeWidth="1" />
+          {/* Outer decorative rings on balance arm ends */}
+          <circle cx="100" cy="210" r="6" stroke="currentColor" strokeWidth="1.2" fill="none" />
+          <circle cx="540" cy="210" r="6" stroke="currentColor" strokeWidth="1.2" fill="none" />
+          {/* Radial etching on pans */}
+          <circle cx="100" cy="370" r="30" stroke="currentColor" strokeWidth="0.7" fill="none" />
+          <circle cx="520" cy="370" r="30" stroke="currentColor" strokeWidth="0.7" fill="none" />
+        </svg>
+      </div>
+
+      {/* Section mark — typographic legal accent */}
+      <div className="landing-bg-section-mark" aria-hidden="true">§</div>
+
       <div className="landing-frame">
         <header className="landing-nav">
           <Link className="landing-brand" href="/">
