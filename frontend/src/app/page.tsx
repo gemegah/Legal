@@ -1,53 +1,39 @@
 import Link from "next/link";
 
-import { Badge } from "@/components/ui";
-
 const navItems = [
   { href: "#platform", label: "Platform" },
   { href: "#proof", label: "Proof" },
-  // { href: "#workflow", label: "Workflow" },
-  // { href: "#plans", label: "Plans" },
+  { href: "#how-it-works", label: "How it works" },
+  { href: "#testimonial", label: "Customers" },
 ];
 
-const trustMarks = ["Boateng & Co.", "Afenyo Legal", "Meridian Counsel", "Accra Capital", "Case-ready teams"];
+const trustFirms = [
+  "Boateng & Co.",
+  "Afenyo Legal",
+  "Meridian Counsel",
+  "Accra Capital",
+  "Ofori & Associates",
+];
 
-const capabilityCards = [
+const capabilityItems = [
   {
-    eyebrow: "Matter control",
-    title: "Deadlines, filings, and billing live inside the same case.",
+    eyebrow: "Matter workspace",
+    title: "Every case detail lives in one operating layer.",
     copy:
-      "Keep the hearing calendar, internal follow-ups, and client-ready updates attached to the matter instead of scattered across tools.",
+      "Tasks, documents, billing, and client updates stay anchored to the matter — so your team moves without losing context across tools.",
+    featured: true,
   },
   {
     eyebrow: "Review-first AI",
-    title: "Suggestions stay suggestions until a lawyer approves them.",
+    title: "Suggestions wait for your team.",
     copy:
-      "Extracted deadlines, draft narratives, and next-step prompts are visible, traceable, and clearly separated from the permanent record.",
+      "Extracted deadlines, draft narratives, and next-step prompts appear as pending — clearly separated from the permanent record.",
   },
   {
     eyebrow: "Collections",
-    title: "Revenue workflows move with the matter, not after it.",
+    title: "Revenue moves with the matter.",
     copy:
-      "Time entries, invoice drafts, payment follow-up, and client context share the same workspace so billing does not stall at the end.",
-  },
-];
-
-const practiceVisibilityCards = [
-  {
-    title: "Entire team aligned",
-    copy: "Keep case tasks, shared goals, and live updates visible in the same operating layer.",
-  },
-  {
-    title: "5 hours/week saved",
-    copy: "Reduce routine follow-up by keeping deadlines, review points, and billing cues in view.",
-  },
-  {
-    title: "10% lower churn",
-    copy: "Smoother handoffs and clearer client visibility help the practice feel more dependable.",
-  },
-  {
-    title: "200+ review signals",
-    copy: "Track approvals, upload requests, and invoice touchpoints without losing the matter context.",
+      "Time entries, invoice drafts, and payment follow-up share the same workspace so billing never stalls at the end.",
   },
 ];
 
@@ -63,21 +49,33 @@ const performanceTiles = [
     copy: "Updates, evidence, and assignees stay anchored to the underlying record.",
   },
   {
-    value: "24h",
+    value: "24 h",
     title: "Faster invoice turnaround",
     copy: "Drafts, narratives, and collections move without leaving the workspace.",
   },
   {
-    value: "3 rails",
-    title: "One operating rhythm",
-    copy: "Legal work, review, and client visibility stay in the same flow.",
+    value: "3×",
+    title: "Fewer dropped follow-ups",
+    copy: "Integrated task and deadline tracking cuts the gaps that cost client trust.",
   },
 ];
 
-const proofStats = [
-  { value: "126", label: "Cases under watch", meta: "Across litigation, employment, and property matters." },
-  { value: "18", label: "Deadlines this week", meta: "Assigned, surfaced, and tied to the underlying case record." },
-  { value: "GHS 184k", label: "Collected this month", meta: "Tracked alongside invoice status and payment history." },
+const workflowSteps = [
+  {
+    step: "01",
+    title: "Open the matter",
+    copy: "Create a case record and invite your team. Every document, task, and invoice attaches here from day one.",
+  },
+  {
+    step: "02",
+    title: "Work inside it",
+    copy: "Log deadlines, upload documents, review AI suggestions, and track billing — all from the matter view.",
+  },
+  {
+    step: "03",
+    title: "Bill with confidence",
+    copy: "Generate invoices anchored to case activity. Reconcile payments without rebuilding context from scratch.",
+  },
 ];
 
 const integrationCards = [
@@ -95,38 +93,26 @@ const integrationCards = [
   },
 ];
 
-const workflowSteps = [
+const practiceVisibilityCards = [
   {
-    step: "01",
-    title: "Open the matter workspace",
-    copy: "Start from the case timeline and immediately see deadlines, documents, assignees, and active billing context.",
+    title: "Entire team aligned",
+    copy: "Keep case tasks, shared goals, and live updates visible in the same operating layer.",
+    symbol: "⚖",
   },
   {
-    step: "02",
-    title: "Review the next actions",
-    copy: "Let the system surface extracted dates, missing evidence, and invoice drafts without losing human review.",
+    title: "5 hours saved per week",
+    copy: "Reduce routine follow-up by keeping deadlines, review points, and billing cues in view.",
+    symbol: "◷",
   },
   {
-    step: "03",
-    title: "Share only what belongs outside",
-    copy: "Push approved updates and invoices to the client portal while internal notes and drafts stay private.",
-  },
-];
-
-const plans = [
-  {
-    name: "Chambers",
-    price: "GHS 299 / mo",
-    detail: "For compact teams moving from spreadsheets and shared drives into a cleaner case workflow.",
-    href: "/register",
-    tone: "base",
+    title: "10% lower client churn",
+    copy: "Smoother handoffs and clearer client visibility help the practice feel more dependable.",
+    symbol: "↗",
   },
   {
-    name: "Practice Pro",
-    price: "GHS 899 / mo",
-    detail: "For growing firms that need tighter billing visibility, portal sharing, and role-based operations.",
-    href: "/register",
-    tone: "accent",
+    title: "200+ review signals",
+    copy: "Track approvals, upload requests, and invoice touchpoints without losing the matter context.",
+    symbol: "✦",
   },
 ];
 
@@ -136,7 +122,8 @@ const footerColumns = [
     links: [
       { href: "#platform", label: "Matter workspace" },
       { href: "#proof", label: "Proof points" },
-      { href: "#workflow", label: "Workflow" },
+      { href: "#platform", label: "Billing & collections" },
+      { href: "#platform", label: "Client portal" },
     ],
   },
   {
@@ -144,15 +131,15 @@ const footerColumns = [
     links: [
       { href: "/register", label: "Create workspace" },
       { href: "/login", label: "Staff sign in" },
-      { href: "/portal", label: "Client portal" },
+      { href: "#", label: "About LegalOS" },
+      { href: "#", label: "Contact us" },
     ],
   },
   {
-    title: "Learn",
+    title: "Connect",
     links: [
-      { href: "/dashboard", label: "Dashboard preview" },
-      { href: "/cases", label: "Case workspace preview" },
-      { href: "/settings", label: "Settings preview" },
+      { href: "#", label: "LinkedIn" },
+      { href: "#", label: "X / Twitter" },
     ],
   },
 ];
@@ -164,37 +151,26 @@ export default function HomePage() {
       {/* Scales of Justice — geometric background motif */}
       <div className="landing-bg-scales" aria-hidden="true">
         <svg viewBox="0 0 640 720" fill="none" xmlns="http://www.w3.org/2000/svg">
-          {/* Top ornament ring */}
           <circle cx="320" cy="90" r="18" stroke="currentColor" strokeWidth="1.5" />
           <circle cx="320" cy="90" r="8" fill="currentColor" />
-          {/* Central pole */}
           <line x1="320" y1="108" x2="320" y2="600" stroke="currentColor" strokeWidth="2" />
-          {/* Balance arm */}
           <line x1="100" y1="210" x2="540" y2="210" stroke="currentColor" strokeWidth="1.8" />
-          {/* Pivot cap */}
           <circle cx="320" cy="210" r="7" fill="currentColor" />
-          {/* Left suspension lines */}
           <line x1="120" y1="210" x2="100" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
           <line x1="100" y1="210" x2="80" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
           <line x1="140" y1="210" x2="120" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
-          {/* Right suspension lines */}
           <line x1="500" y1="210" x2="520" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
           <line x1="520" y1="210" x2="540" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
           <line x1="480" y1="210" x2="500" y2="360" stroke="currentColor" strokeWidth="1" strokeDasharray="5 5" />
-          {/* Left pan */}
           <path d="M55 362 Q100 382 145 362" stroke="currentColor" strokeWidth="1.8" fill="none" />
           <line x1="55" y1="362" x2="145" y2="362" stroke="currentColor" strokeWidth="1" />
-          {/* Right pan */}
           <path d="M475 362 Q520 382 565 362" stroke="currentColor" strokeWidth="1.8" fill="none" />
           <line x1="475" y1="362" x2="565" y2="362" stroke="currentColor" strokeWidth="1" />
-          {/* Base plinth */}
           <line x1="220" y1="600" x2="420" y2="600" stroke="currentColor" strokeWidth="2" />
           <line x1="240" y1="620" x2="400" y2="620" stroke="currentColor" strokeWidth="1.5" />
           <line x1="260" y1="636" x2="380" y2="636" stroke="currentColor" strokeWidth="1" />
-          {/* Outer decorative rings on balance arm ends */}
           <circle cx="100" cy="210" r="6" stroke="currentColor" strokeWidth="1.2" fill="none" />
           <circle cx="540" cy="210" r="6" stroke="currentColor" strokeWidth="1.2" fill="none" />
-          {/* Radial etching on pans */}
           <circle cx="100" cy="370" r="30" stroke="currentColor" strokeWidth="0.7" fill="none" />
           <circle cx="520" cy="370" r="30" stroke="currentColor" strokeWidth="0.7" fill="none" />
         </svg>
@@ -203,143 +179,195 @@ export default function HomePage() {
       {/* Section mark — typographic legal accent */}
       <div className="landing-bg-section-mark" aria-hidden="true">§</div>
 
-      <div className="landing-frame">
-        <header className="landing-nav">
-          <Link className="landing-brand" href="/">
-            <span className="landing-brand-mark" aria-hidden="true" />
-            <span>LegalOS</span>
-          </Link>
-
-          {/* <nav className="landing-nav-links" aria-label="Landing">
-            {navItems.map((item) => (
-              <a className="landing-nav-link" href={item.href} key={item.label}>
-                {item.label}
-              </a>
-            ))}
-          </nav> */}
-
-          <div className="landing-nav-actions">
-            <Link className="btn btn-primary ui-button-md" href="/login">
-              Get Started
+      {/* Full-bleed dark hero band */}
+      <div className="landing-hero-band">
+        <div className="landing-frame">
+          <header className="landing-nav landing-nav-dark">
+            <Link className="landing-brand" href="/">
+              <span className="landing-brand-mark" aria-hidden="true" />
+              <span>LegalOS</span>
             </Link>
-            {/* <Link className="btn btn-primary ui-button-md" href="/register">
-              Create workspace
-            </Link> */}
-          </div>
-        </header>
 
-        <section className="landing-hero" id="platform">
-          <div className="landing-hero-copy">
-            {/* <Badge tone="warning">Ghana-first legal OS</Badge> */}
-            <p className="landing-eyebrow">One workspace for legal teams that need clarity.</p>
-            <h1 className="landing-title">Run your firm from one case-centric workspace.</h1>
-            <p className="landing-copy">
-              Deadlines, documents, billing, and client updates stay anchored to the matter they belong to.
-            </p>
+            <nav className="landing-nav-links" aria-label="Primary navigation">
+              {navItems.map((item) => (
+                <a className="landing-nav-link" href={item.href} key={item.label}>
+                  {item.label}
+                </a>
+              ))}
+            </nav>
 
-            {/* <div className="landing-actions">
-              <Link className="btn btn-primary ui-button-lg" href="/login">
-                Staff login
+            <div className="landing-nav-actions">
+              <Link className="btn btn-gold ui-button-md" href="/login">
+                Get started
               </Link>
-              <Link className="btn btn-ghost ui-button-lg" href="/dashboard">
-                View preview
-              </Link>
-            </div> */}
+            </div>
+          </header>
+        </div>
 
-            <div className="landing-inline-proof">
-              <div className="landing-inline-proof-item">
-                <strong>4.9 hrs</strong>
-                <span>Saved weekly</span>
+        <div className="landing-frame">
+          <section className="landing-hero" id="platform">
+            <div className="landing-hero-copy">
+              <p className="landing-eyebrow">Ghana-first legal OS</p>
+              <h1 className="landing-title">The matter is your operating system.</h1>
+              <p className="landing-copy">
+                Deadlines, documents, billing, and client updates stay anchored to the case they belong to — so your team moves without rebuilding context every morning.
+              </p>
+
+              <div className="landing-actions">
+                <Link className="btn btn-gold ui-button-lg" href="/register">
+                  Create your workspace
+                </Link>
+                <Link className="btn btn-ghost ui-button-lg" href="/login">
+                  Sign in
+                </Link>
               </div>
-              <div className="landing-inline-proof-item">
-                <strong>Audit-first</strong>
-                <span>Every update stays traceable</span>
+
+              <div className="landing-inline-proof">
+                <div className="landing-inline-proof-item">
+                  <strong>4.9 hrs</strong>
+                  <span>Saved weekly per attorney</span>
+                </div>
+                <div className="landing-inline-proof-item">
+                  <strong>Audit-first</strong>
+                  <span>Every action stays traceable</span>
+                </div>
+                <div className="landing-inline-proof-item">
+                  <strong>AI pending</strong>
+                  <span>Suggestions wait for review</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <aside className="landing-hero-stage" aria-label="Workspace preview">
-            <div className="landing-stage-card">
-              <div className="landing-stage-topbar">
-                <div>
-                  <p className="landing-stage-kicker">Matter pulse</p>
-                  <h2>Asante v. Mensah Industries</h2>
-                </div>
-                <span className="landing-stage-chip">Hearing in 2 days</span>
-              </div>
-
-              <div className="landing-stage-stack">
-                <section className="landing-stage-surface landing-stage-summary">
+            <aside className="landing-hero-stage" aria-label="Workspace preview">
+              <div className="landing-stage-card">
+                <div className="landing-stage-topbar">
                   <div>
-                    <span className="landing-stage-label">Outstanding invoices</span>
-                    <strong>GHS 18,760</strong>
-                    <p>Draft ready for review on the employment brief.</p>
+                    <p className="landing-stage-kicker">Matter pulse</p>
+                    <h2>Asante v. Mensah Industries</h2>
                   </div>
-                  <div className="landing-stage-mini-chart" aria-hidden="true">
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-                </section>
-
-                <div className="landing-stage-floating-card">
-                  <span className="landing-floating-kicker">Today</span>
-                  <strong>3 actions need partner review</strong>
-                  <p>2 extracted deadlines and 1 client summary draft.</p>
+                  <span className="landing-stage-chip">Hearing in 2 days</span>
                 </div>
 
-                <section className="landing-stage-surface landing-stage-activity">
-                  <div className="landing-stage-row">
-                    <span className="landing-stage-time">09:00</span>
+                <div className="landing-stage-stack">
+                  <section className="landing-stage-surface landing-stage-summary">
                     <div>
-                      <strong>Hearing bundle check</strong>
-                      <p>Court filing references verified and assigned to Ama Osei.</p>
+                      <span className="landing-stage-label">Outstanding invoices</span>
+                      <strong>GHS 18,760</strong>
+                      <p>Draft ready for review on the employment brief.</p>
                     </div>
-                  </div>
-                  <div className="landing-stage-row">
-                    <span className="landing-stage-time">12:30</span>
-                    <div>
-                      <strong>Invoice narrative prepared</strong>
-                      <p>Time entries grouped into a draft for internal review.</p>
+                    <div className="landing-stage-mini-chart" aria-hidden="true">
+                      <span />
+                      <span />
+                      <span />
+                      <span />
+                      <span />
                     </div>
+                  </section>
+
+                  <div className="landing-stage-floating-card">
+                    <span className="landing-floating-kicker">Today</span>
+                    <strong>3 actions need partner review</strong>
+                    <p>2 extracted deadlines and 1 client summary draft.</p>
                   </div>
-                  <div className="landing-stage-row">
-                    <span className="landing-stage-time">16:10</span>
-                    <div>
-                      <strong>Client update staged</strong>
-                      <p>Portal-ready summary linked to the latest filed document.</p>
+
+                  <section className="landing-stage-surface landing-stage-activity">
+                    <div className="landing-stage-row">
+                      <span className="landing-stage-time">09:00</span>
+                      <div>
+                        <strong>Hearing bundle check</strong>
+                        <p>Court filing references verified and assigned to Ama Osei.</p>
+                      </div>
                     </div>
-                  </div>
-                </section>
+                    <div className="landing-stage-row">
+                      <span className="landing-stage-time">12:30</span>
+                      <div>
+                        <strong>Invoice narrative prepared</strong>
+                        <p>Time entries grouped into a draft for internal review.</p>
+                      </div>
+                    </div>
+                    <div className="landing-stage-row">
+                      <span className="landing-stage-time">16:10</span>
+                      <div>
+                        <strong>Client update staged</strong>
+                        <p>Portal-ready summary linked to the latest filed document.</p>
+                      </div>
+                    </div>
+                  </section>
+                </div>
               </div>
-            </div>
-          </aside>
+            </aside>
+          </section>
+        </div>
+      </div>
+
+      {/* Body: all sections below the hero band */}
+      <div className="landing-frame landing-page-body">
+
+        {/* Trust strip */}
+        <section className="landing-trust-row" aria-label="Trusted by practice teams">
+          <span className="landing-trust-label">Trusted by practice teams across Ghana</span>
+          {trustFirms.map((firm) => (
+            <span className="landing-trust-mark" key={firm}>{firm}</span>
+          ))}
         </section>
 
-        {/* Trust Strip */}
-        {/* <section className="landing-trust-row" aria-label="Trusted by practice teams">
-          <span className="landing-trust-label">Trusted by practice teams</span>
-          {trustMarks.map((mark) => (
-            <span className="landing-trust-mark" key={mark}>
-              {mark}
-            </span>
-          ))}
-        </section> */}
-
-        {/* Performance Section */}
-        <section className="landing-performance-section" id="proof">
-          <div className="landing-section-head landing-section-head-centered">
+        {/* Capabilities — asymmetric bento */}
+        <section className="landing-capabilities-section" id="capabilities">
+          <div className="landing-section-head">
             <div>
-              <p className="landing-section-kicker">Operational calm</p>
+              <p className="landing-section-kicker">Core capabilities</p>
+              <h2 className="landing-section-title">Three foundations. One record.</h2>
+            </div>
+            <p className="landing-section-copy">
+              Built to keep the practice from fragmenting across tools and inboxes.
+            </p>
+          </div>
+
+          <div className="landing-capability-bento">
+            <article className="landing-capability-bento-main">
+              <p className="landing-feature-eyebrow">{capabilityItems[0].eyebrow}</p>
+              <h3>{capabilityItems[0].title}</h3>
+              <p>{capabilityItems[0].copy}</p>
+              <div className="landing-bento-stats" aria-label="Live practice metrics">
+                <div className="landing-bento-stat">
+                  <strong>126</strong>
+                  <span>Active matters</span>
+                </div>
+                <div className="landing-bento-stat">
+                  <strong>GHS 184k</strong>
+                  <span>Collected this month</span>
+                </div>
+                <div className="landing-bento-stat">
+                  <strong>18</strong>
+                  <span>Deadlines this week</span>
+                </div>
+              </div>
+            </article>
+
+            <div className="landing-capability-bento-stack">
+              {capabilityItems.slice(1).map((item) => (
+                <article className="landing-capability-bento-card" key={item.eyebrow}>
+                  <p className="landing-feature-eyebrow">{item.eyebrow}</p>
+                  <h3>{item.title}</h3>
+                  <p>{item.copy}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Performance section */}
+        <section className="landing-performance-section" id="proof">
+          <div className="landing-section-head">
+            <div>
+              <p className="landing-section-kicker is-inverse">Operational calm</p>
               <h2 className="landing-section-title">The team moves faster when the record stays intact.</h2>
             </div>
           </div>
 
           <div className="landing-performance-grid">
-            {performanceTiles.map((item) => (
-              <article className="landing-performance-card" key={item.title}>
+            {performanceTiles.map((item, i) => (
+              <article className={`landing-performance-card${i % 2 !== 0 ? " is-gold" : ""}`} key={item.title}>
                 <strong>{item.value}</strong>
                 <h3>{item.title}</h3>
                 <p>{item.copy}</p>
@@ -348,11 +376,33 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* How it works */}
+        <section className="landing-how-section" id="how-it-works">
+          <div className="landing-section-head">
+            <div>
+              <p className="landing-section-kicker">How it works</p>
+              <h2 className="landing-section-title">From first instruction to final payment.</h2>
+            </div>
+            <p className="landing-section-copy">
+              Three steps. One record. No context lost between them.
+            </p>
+          </div>
 
-{/* Integration Story Section */}
+          <div className="landing-how-steps">
+            {workflowSteps.map((item) => (
+              <div className="landing-how-step" key={item.step}>
+                <div className="landing-how-number" aria-hidden="true">{item.step}</div>
+                <h3 className="landing-how-title">{item.title}</h3>
+                <p className="landing-how-copy">{item.copy}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Integration story */}
         <section className="landing-story-section">
           <div className="landing-story-copy">
-            <p className="landing-section-kicker">Organized by design</p>
+            <p className="landing-section-kicker is-gold">Organized by design</p>
             <h2 className="landing-section-title">Keep the firm aligned without rebuilding context every morning.</h2>
             <p className="landing-section-copy">
               Tasks, updates, and collections feel lighter when the workspace keeps the whole practice pointed at the same record.
@@ -372,11 +422,27 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* Testimonial */}
+        <section className="landing-testimonial" id="testimonial" aria-label="Customer testimonial">
+          <div className="landing-testimonial-quote">
+            <span className="landing-testimonial-mark" aria-hidden="true">"</span>
+            <blockquote>
+              Before LegalOS, our billing always ran a week behind the work. The invoice is now ready the same day the matter closes — that alone justified the subscription.
+            </blockquote>
+            <footer className="landing-testimonial-attr">
+              <span className="landing-testimonial-name">Ama Owusu-Barimah</span>
+              <span className="landing-testimonial-role">Managing Partner, Owusu &amp; Partners Legal</span>
+            </footer>
+          </div>
+          <div className="landing-testimonial-badge" aria-hidden="true">
+            <span className="landing-testimonial-initial">A</span>
+          </div>
+        </section>
 
-        {/* Feature Showcase Section */}
+        {/* Practice visibility */}
         <section className="landing-showcase-section">
           <div className="landing-showcase-head">
-            <p className="landing-section-kicker">Practice visibility</p>
+            <p className="landing-section-kicker is-gold">Practice visibility</p>
             <h2 className="landing-section-title">Simplify practice visibility for modern legal teams.</h2>
             <p className="landing-section-copy landing-showcase-copy">
               Clear case tasks, deadlines, and shared goals make the whole practice easier to steer.
@@ -386,7 +452,7 @@ export default function HomePage() {
           <div className="landing-visibility-grid" aria-label="Practice visibility highlights">
             {practiceVisibilityCards.map((item) => (
               <article className="landing-visibility-card" key={item.title}>
-                <span className="landing-visibility-icon" aria-hidden="true" />
+                <span className="landing-visibility-icon" aria-hidden="true">{item.symbol}</span>
                 <div>
                   <h3>{item.title}</h3>
                   <p>{item.copy}</p>
@@ -396,155 +462,59 @@ export default function HomePage() {
           </div>
         </section>
 
-        
-
-        {/* Workspace Preview Section */}
-        {/* <section className="landing-workspace-section" id="workflow">
-          <div className="landing-section-head landing-section-head-centered">
-            <div>
-              <p className="landing-section-kicker">Workspace preview</p>
-              <h2 className="landing-section-title">One board for matter progress, review points, and collections.</h2>
-            </div>
+        {/* Pre-footer CTA */}
+        <div className="landing-pre-footer-cta">
+          <div className="landing-pre-footer-cta-copy">
+            <p className="landing-pre-footer-kicker">Ready to bring order to your practice?</p>
+            <h2 className="landing-pre-footer-title">Built for legal teams that need clarity, not clutter.</h2>
           </div>
-
-          <div className="landing-process-grid">
-            {workflowSteps.map((item) => (
-              <article className="landing-process-card" key={item.step}>
-                <span className="landing-process-step">{item.step}</span>
-                <h3>{item.title}</h3>
-                <p>{item.copy}</p>
-              </article>
-            ))}
+          <div className="landing-pre-footer-actions">
+            <Link className="btn btn-gold ui-button-md" href="/register">Get started</Link>
+            <Link className="btn landing-cta-ghost ui-button-md" href="/login">Sign in</Link>
           </div>
+        </div>
 
-          <div className="landing-workspace-frame" aria-label="Workspace board preview">
-            <div className="landing-workspace-toolbar">
-              <span className="landing-brand">
-                <span className="landing-brand-mark" aria-hidden="true" />
-                <span>LegalOS</span>
-              </span>
-              <span className="landing-workspace-toolbar-label">Dashboard</span>
-            </div>
-
-            <div className="landing-workspace-board">
-              <div className="landing-workspace-column">
-                <span className="landing-workspace-column-title">To review</span>
-                <article className="landing-workspace-task">
-                  <strong>Presentation bundle</strong>
-                  <p>Hearing brief needs partner sign-off.</p>
-                </article>
-                <article className="landing-workspace-task">
-                  <strong>Client summary draft</strong>
-                  <p>Portal update prepared for final approval.</p>
-                </article>
-              </div>
-
-              <div className="landing-workspace-column">
-                <span className="landing-workspace-column-title">In progress</span>
-                <article className="landing-workspace-task">
-                  <strong>Invoice narrative</strong>
-                  <p>Time entries grouped and billing notes attached.</p>
-                </article>
-                <article className="landing-workspace-task">
-                  <strong>Document request</strong>
-                  <p>Evidence upload request sent with matter context.</p>
-                </article>
-              </div>
-
-              <div className="landing-workspace-column">
-                <span className="landing-workspace-column-title">Ready to share</span>
-                <article className="landing-workspace-task">
-                  <strong>Shared update</strong>
-                  <p>Client-facing summary paired with the latest filing.</p>
-                </article>
-                <article className="landing-workspace-task">
-                  <strong>Payment follow-up</strong>
-                  <p>Collection reminder staged beside the open invoice.</p>
-                </article>
-              </div>
-            </div>
-          </div>
-
-          <div className="landing-stat-strip">
-            {proofStats.map((item) => (
-              <article className="landing-stat-item" key={item.label}>
-                <strong>{item.value}</strong>
-                <span>{item.label}</span>
-                <p>{item.meta}</p>
-              </article>
-            ))}
-          </div>
-        </section> */}
-
-        {/* Plans Section */}
-        {/* <section className="landing-plans-section" id="plans">
-          <div className="landing-section-head landing-section-head-centered">
-            <div>
-              <p className="landing-section-kicker">Choose your pace</p>
-              <h2 className="landing-section-title">Start with a tighter practice rhythm, then grow into firm-wide visibility.</h2>
-            </div>
-          </div>
-
-          <div className="landing-plan-grid">
-            {plans.map((plan) => (
-              <article className={`landing-plan-card${plan.tone === "accent" ? " is-accent" : ""}`} key={plan.name}>
-                <div>
-                  <h3>{plan.name}</h3>
-                  <strong>{plan.price}</strong>
-                  <p>{plan.detail}</p>
-                </div>
-                <Link className={`btn ${plan.tone === "accent" ? "btn-primary" : "btn-ghost"} ui-button-md`} href={plan.href}>
-                  Choose {plan.name}
-                </Link>
-              </article>
-            ))}
-          </div>
-        </section> */}
-
-        {/* Call To Action Section */}
-        {/* <section className="landing-cta-band">
-          <div>
-            <p className="landing-section-kicker">Try it now</p>
-            <h2 className="landing-process-title">Ready to give your legal operations a cleaner center of gravity?</h2>
-            <p className="landing-section-copy landing-section-copy-inverse">
-              Start with the preview flow, review the workspace, and step into a calmer operating model for the firm.
-            </p>
-          </div>
-          <div className="landing-actions">
-            <Link className="btn btn-primary ui-button-lg" href="/register">
-              Get started
-            </Link>
-            <Link className="btn btn-ghost ui-button-lg landing-cta-ghost" href="/login">
-              Staff login
-            </Link>
-          </div>
-        </section> */}
-
-        {/* Footer Section */}
+        {/* Footer */}
         <footer className="landing-footer">
           <div className="landing-footer-inner">
-            <div className="landing-footer-brand">
-              <Link className="landing-brand" href="/">
-                <span className="landing-brand-mark" aria-hidden="true" />
-                <span>LegalOS</span>
-              </Link>
-              <p>
-                A Ghana-first legal operating system for case clarity, billing visibility, and review-first team work.
-              </p>
+
+            <div className="landing-footer-top">
+              <div className="landing-footer-brand">
+                <Link className="landing-brand" href="/">
+                  <span className="landing-brand-mark" aria-hidden="true" />
+                  <span>LegalOS</span>
+                </Link>
+                <p>
+                  A Ghana-first legal operating system for case clarity, billing visibility, and review-first team work.
+                </p>
+                <p className="landing-footer-location">Accra, Ghana</p>
+              </div>
+
+              <div className="landing-footer-columns">
+                {footerColumns.map((column) => (
+                  <div className="landing-footer-column" key={column.title}>
+                    <h3>{column.title}</h3>
+                    {column.links.map((link) => (
+                      <Link href={link.href} key={link.label}>
+                        {link.label}
+                      </Link>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
 
-            <div className="landing-footer-columns">
-              {footerColumns.map((column) => (
-                <div className="landing-footer-column" key={column.title}>
-                  <h3>{column.title}</h3>
-                  {column.links.map((link) => (
-                    <Link href={link.href} key={link.label}>
-                      {link.label}
-                    </Link>
-                  ))}
-                </div>
-              ))}
+            <div className="landing-footer-bottom">
+              <span>© 2026 LegalOS · Made in Accra, Ghana</span>
+              <div className="landing-footer-legal-links">
+                <Link href="#">Terms</Link>
+                <span aria-hidden="true">·</span>
+                <Link href="#">Privacy</Link>
+                <span aria-hidden="true">·</span>
+                <Link href="#">Security</Link>
+              </div>
             </div>
+
           </div>
         </footer>
       </div>
